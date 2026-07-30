@@ -1,0 +1,331 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// User Authentication
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  password      String    // hashed
+  name          String?
+  role          String    @default("owner") // owner, admin, viewer
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@map("users")
+}
+
+// PLACES: Spaces (Rooms, Areas)
+model Space {
+  id            String    @id @default(cuid())
+  name          String    // Kitchen, Primary Bath, etc
+  building      String    @default("Main Residence")
+  floor         String?   // 1st, 2nd, Basement
+  squareFootage Float?
+  description   String?   @db.Text
+  status        String    @default("planned") // planned, in_progress, completed
+  notes         String?   @db.Text
+
+  // Relations
+  assets        Asset[]
+  systems       System[]
+  specifications Specification[]
+  tasks         Task[]
+  photos        Photo[]
+  budgetItems   BudgetItem[]
+  documents     Document[]
+
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@map("spaces")
+}
+
+// THINGS: Assets (Installed Products)
+model Asset {
+  id            String    @id @default(cuid())
+  name          String    // Kitchen Faucet, Sub Zero Fridge, etc
+  manufacturer  String?
+  model         String?
+  sku           String?
+  finish        String?   // Chrome, Polished Nickel, etc
+  
+  // Financial
+  cost          Float?
+  vendor        String?
+  purchaseDate  DateTime?
+  installDate   DateTime?
+
+  // Warranty & Maintenance
+  warrantyMonths Int?
+  warrantyExpires DateTime?
+  manualUrl     String?
+  replacementParts String? @db.Text
+
+  // Location & System
+  spaceId       String
+  space         Space     @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+  systemId      String?
+  system        System?   @relation(fields: [systemId], references: [id], onDelete: SetNull)
+
+  // Data
+  barcode       String?
+  qrCode        String?   // Will generate this
+  status        String    @default("pending") // pending, ordered, installed, operational
+  notes         String?   @db.Text
+
+  // Relations
+  specifications Specification[]
+  photos        Photo[]
+  documents     Document[]
+  maintenance   Maintenance[]
+  budgetItems   BudgetItem[]
+
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@map("assets")
+}
+
+// PLACES: Building Systems
+model System {
+  id            String    @id @default(cuid())
+  name          String    // HVAC, Electrical, Plumbing, Solar, Pool, etc
+  description   String?   @db.Text
+  systemType    String    // For categorization
+
+  // Relations
+  assets        Asset[]
+  spaces        Space[]
+  specifications Specification[]
+  photos        Photo[]
+  documents     Document[]
+  tasks         Task[]
+  maintenance   Maintenance[]
+ budgetItems   BudgetItem[]
+ 
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@map("systems")
+}
+
+// KNOWLEDGE: Specifications (CSI Construction Bible)
+model Specification {
+  id            String    @id @default(cuid())
+  csiDivision   String    // 22 = Plumbing, 26 = Electrical, etc
+  trade         String    // Mechanical, Electrical, etc
+  title         String    // "Hot Water Heater Specification"
+  text          String    @db.Text // Full specification text
+  revisionNumber Int      @default(1)
+  revisionDate  DateTime  @default(now())
+
+  // Relations
+  spaceId       String?
+  space         Space?    @relation(fields: [spaceId], references: [id], onDelete: SetNull)
+  
+  systemId      String?
+  system        System?   @relation(fields: [systemId], references: [id], onDelete: SetNull)
+
+  assets        Asset[]
+  photos        Photo[]
+  documents     Document[]
+
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@map("specifications")
+}
+
+// WORK: Tasks (Design, Construction, Maintenance)
+model Task {
+  id            String    @id @default(cuid())
+  title         String
+  description   String?   @db.Text
+  category      String    // design, construction, inspection, punchlist, warranty, maintenance
+  priority      String    @default("medium") // low, medium, high, critical
+  status        String    @default("pending") // pending, in_progress, completed, blocked
+  
+  // Dates
+  dueDate       DateTime?
+  completedDate DateTime?
+  
+  // Relations
+  spaceId       String?
+  space         Space?    @relation(fields: [spaceId], references: [id], onDelete: SetNull)
+  
+  systemId      String?
+  system        System?   @relation(fields: [systemId], references: [id], onDelete: SetNull)
+
+  photos        Photo[]
+  documents     Document[]
+  notes         String?   @db.Text
+
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@map("tasks")
+}
+
+// KNOWLEDGE: Documents (Plans, Permits, PDFs)
+model Document {
+  id            String    @id @default(cuid())
+  name          String
+  type          String    // plan, permit, submittal, report, invoice, photo, other
+  fileUrl       String
+  fileName      String
+  fileSize      Int?
+  fileType      String?   // pdf, jpg, png, etc
+  
+  // Version Control
+  versionNumber Int       @default(1)
+  revisionDate  DateTime  @default(now())
+  
+  // Relations
+  spaceId       String?
+  space         Space?    @relation(fields: [spaceId], references: [id], onDelete: SetNull)
+  
+  assetId       String?
+  asset         Asset?    @relation(fields: [assetId], references: [id], onDelete: SetNull)
+  
+  systemId      String?
+  system        System?   @relation(fields: [systemId], references: [id], onDelete: SetNull)
+  
+  taskId        String?
+  task          Task?     @relation(fields: [taskId], references: [id], onDelete: SetNull)
+
+specificationId String?
+  specification   Specification? @relation(fields: [specificationId], references: [id], onDelete: SetNull)
+
+  milestoneId   String?
+  milestone     Milestone? @relation(fields: [milestoneId], references: [id], onDelete: SetNull)
+maintenanceId String?
+  maintenance   Maintenance? @relation(fields: [maintenanceId], references: [id], onDelete: SetNull)
+  description   String?   @db.Text
+  uploadedBy    String?
+  
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@map("documents")
+}
+
+// KNOWLEDGE: Photos (Project Gallery)
+model Photo {
+  id            String    @id @default(cuid())
+  url           String
+  caption       String?
+  takeDate      DateTime  @default(now())
+  constructionPhase String? // Foundation, Framing, Roof, etc
+  
+  // Auto-tagging
+  spaceId       String?
+  space         Space?    @relation(fields: [spaceId], references: [id], onDelete: SetNull)
+  
+  assetId       String?
+  asset         Asset?    @relation(fields: [assetId], references: [id], onDelete: SetNull)
+  
+  systemId      String?
+  system        System?   @relation(fields: [systemId], references: [id], onDelete: SetNull)
+  
+  taskId        String?
+  task          Task?     @relation(fields: [taskId], references: [id], onDelete: SetNull)
+  
+  specificationId String?
+  specification Specification? @relation(fields: [specificationId], references: [id], onDelete: SetNull)
+milestoneId   String?
+  milestone     Milestone? @relation(fields: [milestoneId], references: [id], onDelete: SetNull)
+  notes         String?   @db.Text
+  
+  maintenanceId String?
+  maintenance   Maintenance? @relation(fields: [maintenanceId], references: [id], onDelete: SetNull)
+
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@map("photos")
+}
+
+// KNOWLEDGE: Budget Tracking
+model BudgetItem {
+  id            String    @id @default(cuid())
+  category      String    // allowance, po, invoice, change_order
+  description   String
+  budgetedAmount Float
+  actualAmount  Float?
+  status        String    @default("pending") // pending, ordered, invoiced, paid
+  
+  // Relations
+  spaceId       String?
+  space         Space?    @relation(fields: [spaceId], references: [id], onDelete: SetNull)
+  
+  assetId       String?
+  asset         Asset?    @relation(fields: [assetId], references: [id], onDelete: SetNull)
+  
+  systemId      String?
+  system        System?   @relation(fields: [systemId], references: [id], onDelete: SetNull)
+
+  vendor        String?
+  dueDate       DateTime?
+  paidDate      DateTime?
+  notes         String?   @db.Text
+
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@map("budget_items")
+}
+
+// KNOWLEDGE: Maintenance Schedule
+model Maintenance {
+  id            String    @id @default(cuid())
+  title         String
+  description   String?   @db.Text
+  interval      String    // monthly, quarterly, annual, etc
+  
+  // Relations
+  assetId       String
+  asset         Asset     @relation(fields: [assetId], references: [id], onDelete: Cascade)
+  
+  systemId      String?
+  system        System?   @relation(fields: [systemId], references: [id], onDelete: SetNull)
+
+  instructions  String?   @db.Text
+  lastCompleted DateTime?
+  nextDue       DateTime?
+  vendor        String?
+
+  photos        Photo[]
+  documents     Document[]
+
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@map("maintenance")
+}
+
+// Timeline / Milestones
+model Milestone {
+  id            String    @id @default(cuid())
+  name          String    // Foundation, Framing, Roof, etc
+  phase         Int       // 1, 2, 3, etc
+  status        String    @default("pending") // pending, in_progress, completed
+  startDate     DateTime?
+  completedDate DateTime?
+  description   String?   @db.Text
+  
+  photos        Photo[]
+  documents     Document[]
+  notes         String?   @db.Text
+
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@map("milestones")
+}
