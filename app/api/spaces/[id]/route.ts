@@ -161,9 +161,7 @@ export async function DELETE(
     );
   } catch (error) {
     console.error(error);
-    // Return error details to aid local debugging
-    const details = { error: (error as any)?.message || String(error), stack: (error as any)?.stack };
-    return NextResponse.json(errorResponse("Failed to delete space", details), {
+    return NextResponse.json(errorResponse("Failed to delete space"), {
       status: 500,
     });
   }
