@@ -1,4 +1,4 @@
-import { ReportBuilder } from "@/components/ReportBuilder";
+import { ReportBuilder } from "@/app/components/ReportBuilder";
 
 export default function ReportsPage() {
   return (
