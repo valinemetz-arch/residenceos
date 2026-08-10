@@ -1,4 +1,4 @@
-import { SystemListWithForms } from "@/components/SystemListWithForms";
+import { SystemListWithForms } from "@/app/components/SystemListWithForms";
 
 export default function SystemsPage() {
   return (
