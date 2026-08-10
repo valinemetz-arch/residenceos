@@ -6,10 +6,12 @@ export default function AppLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-slate-950">
+    <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-slate-950">
       <Navigation />
-      <main className="max-w-7xl mx-auto py-8 px-4">
-        {children}
+      <main className="flex-1 w-full">
+        <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+          {children}
+        </div>
       </main>
     </div>
   );

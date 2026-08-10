@@ -3,9 +3,8 @@ generator client {
 }
 
 datasource db {
-  provider  = "postgresql"
-  url       = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL")
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
 }
 
 // User Authentication
@@ -28,9 +27,9 @@ model Space {
   building      String    @default("Main Residence")
   floor         String?   // 1st, 2nd, Basement
   squareFootage Float?
-  description   String?   @db.Text
+  description   String?   
   status        String    @default("planned") // planned, in_progress, completed
-  notes         String?   @db.Text
+  notes         String?   
 
   // Relations
   assets        Asset[]
@@ -40,6 +39,7 @@ model Space {
   photos        Photo[]
   budgetItems   BudgetItem[]
   documents     Document[]
+  warranties    Warranty[] @relation("SpaceWarranties")
 
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
@@ -66,7 +66,7 @@ model Asset {
   warrantyMonths Int?
   warrantyExpires DateTime?
   manualUrl     String?
-  replacementParts String? @db.Text
+  replacementParts String? 
 
   // Location & System
   spaceId       String
@@ -78,7 +78,7 @@ model Asset {
   barcode       String?
   qrCode        String?   // Will generate this
   status        String    @default("pending") // pending, ordered, installed, operational
-  notes         String?   @db.Text
+  notes         String?   
 
   // Relations
   specifications Specification[]
@@ -86,6 +86,7 @@ model Asset {
   documents     Document[]
   maintenance   Maintenance[]
   budgetItems   BudgetItem[]
+  warranties    Warranty[] @relation("AssetWarranties")
 
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
@@ -97,7 +98,7 @@ model Asset {
 model System {
   id            String    @id @default(cuid())
   name          String    // HVAC, Electrical, Plumbing, Solar, Pool, etc
-  description   String?   @db.Text
+  description   String?   
   systemType    String    // For categorization
 
   // Relations
@@ -108,8 +109,9 @@ model System {
   documents     Document[]
   tasks         Task[]
   maintenance   Maintenance[]
- budgetItems   BudgetItem[]
- 
+  budgetItems   BudgetItem[]
+  warranties    Warranty[] @relation("SystemWarranties")
+
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
@@ -122,7 +124,7 @@ model Specification {
   csiDivision   String    // 22 = Plumbing, 26 = Electrical, etc
   trade         String    // Mechanical, Electrical, etc
   title         String    // "Hot Water Heater Specification"
-  text          String    @db.Text // Full specification text
+  text          String     // Full specification text
   revisionNumber Int      @default(1)
   revisionDate  DateTime  @default(now())
 
@@ -147,7 +149,7 @@ model Specification {
 model Task {
   id            String    @id @default(cuid())
   title         String
-  description   String?   @db.Text
+  description   String?   
   category      String    // design, construction, inspection, punchlist, warranty, maintenance
   priority      String    @default("medium") // low, medium, high, critical
   status        String    @default("pending") // pending, in_progress, completed, blocked
@@ -165,7 +167,7 @@ model Task {
 
   photos        Photo[]
   documents     Document[]
-  notes         String?   @db.Text
+  notes         String?   
 
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
@@ -207,9 +209,16 @@ specificationId String?
   milestone     Milestone? @relation(fields: [milestoneId], references: [id], onDelete: SetNull)
 maintenanceId String?
   maintenance   Maintenance? @relation(fields: [maintenanceId], references: [id], onDelete: SetNull)
-  description   String?   @db.Text
+
+  budgetItemId  String?
+  budgetItem    BudgetItem? @relation(fields: [budgetItemId], references: [id], onDelete: SetNull)
+
+  warrantyId    String?
+  warranty      Warranty? @relation(fields: [warrantyId], references: [id], onDelete: SetNull)
+
+  description   String?
   uploadedBy    String?
-  
+
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
@@ -241,10 +250,16 @@ model Photo {
   specification Specification? @relation(fields: [specificationId], references: [id], onDelete: SetNull)
 milestoneId   String?
   milestone     Milestone? @relation(fields: [milestoneId], references: [id], onDelete: SetNull)
-  notes         String?   @db.Text
+  notes         String?   
   
   maintenanceId String?
   maintenance   Maintenance? @relation(fields: [maintenanceId], references: [id], onDelete: SetNull)
+
+  budgetItemId  String?
+  budgetItem    BudgetItem? @relation(fields: [budgetItemId], references: [id], onDelete: SetNull)
+
+  warrantyId    String?
+  warranty      Warranty? @relation(fields: [warrantyId], references: [id], onDelete: SetNull)
 
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
@@ -260,21 +275,25 @@ model BudgetItem {
   budgetedAmount Float
   actualAmount  Float?
   status        String    @default("pending") // pending, ordered, invoiced, paid
-  
+
   // Relations
   spaceId       String?
   space         Space?    @relation(fields: [spaceId], references: [id], onDelete: SetNull)
-  
+
   assetId       String?
   asset         Asset?    @relation(fields: [assetId], references: [id], onDelete: SetNull)
-  
+
   systemId      String?
   system        System?   @relation(fields: [systemId], references: [id], onDelete: SetNull)
 
   vendor        String?
   dueDate       DateTime?
   paidDate      DateTime?
-  notes         String?   @db.Text
+  notes         String?
+
+  // Attachments for invoices, bids, etc
+  photos        Photo[]
+  documents     Document[]
 
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
@@ -286,7 +305,7 @@ model BudgetItem {
 model Maintenance {
   id            String    @id @default(cuid())
   title         String
-  description   String?   @db.Text
+  description   String?   
   interval      String    // monthly, quarterly, annual, etc
   
   // Relations
@@ -296,7 +315,7 @@ model Maintenance {
   systemId      String?
   system        System?   @relation(fields: [systemId], references: [id], onDelete: SetNull)
 
-  instructions  String?   @db.Text
+  instructions  String?   
   lastCompleted DateTime?
   nextDue       DateTime?
   vendor        String?
@@ -318,14 +337,61 @@ model Milestone {
   status        String    @default("pending") // pending, in_progress, completed
   startDate     DateTime?
   completedDate DateTime?
-  description   String?   @db.Text
-  
+  description   String?
+
   photos        Photo[]
   documents     Document[]
-  notes         String?   @db.Text
+  notes         String?
 
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
   @@map("milestones")
 }
+
+// WARRANTY MANAGEMENT
+model Warranty {
+  id            String    @id @default(cuid())
+  title         String    // e.g., "Kitchen Faucet - 5 Year Warranty"
+
+  // Coverage Details
+  description   String?   // What's covered
+  coverageScope String?   // Full, Limited, etc
+  startDate     DateTime  // Warranty start date
+  endDate       DateTime  // Warranty expiration date
+  months        Int?      // Duration in months
+
+  // Links to Assets/Systems
+  assetId       String?
+  asset         Asset?    @relation("AssetWarranties", fields: [assetId], references: [id], onDelete: SetNull)
+
+  systemId      String?
+  system        System?   @relation("SystemWarranties", fields: [systemId], references: [id], onDelete: SetNull)
+
+  spaceId       String?
+  space         Space?    @relation("SpaceWarranties", fields: [spaceId], references: [id], onDelete: SetNull)
+
+  // Warranty Provider Info
+  provider      String?   // Manufacturer name
+  phone         String?
+  email         String?
+  website       String?
+  claimProcess  String?   // How to file a claim
+  serialNumber  String?
+  proofOfPurchase String? // Invoice reference
+
+  // Status Tracking
+  status        String    @default("active") // active, expired, claimed, voided
+  isExpired     Boolean   @default(false)
+
+  // Documents (warranty cards, certificates, etc)
+  documents     Document[]
+  photos        Photo[]
+  notes         String?
+
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@map("warranties")
+}
+

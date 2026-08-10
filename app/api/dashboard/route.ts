@@ -1,9 +1,9 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { successResponse, errorResponse } from "@/lib/api";
 
 // GET /api/dashboard - Dashboard statistics
-export async function GET(req: NextRequest) {
+export async function GET() {
   try {
     const [
       totalSpaces,
@@ -14,8 +14,6 @@ export async function GET(req: NextRequest) {
       pendingTasks,
       totalBudget,
       spentBudget,
-      recentPhotos,
-      recentDocuments,
     ] = await Promise.all([
       prisma.space.count(),
       prisma.asset.count(),
@@ -29,14 +27,6 @@ export async function GET(req: NextRequest) {
       prisma.budgetItem.aggregate({
         _sum: { actualAmount: true },
       }),
-      prisma.photo.findMany({
-        take: 6,
-        orderBy: { takeDate: "desc" },
-      }),
-      prisma.document.findMany({
-        take: 5,
-        orderBy: { createdAt: "desc" },
-      }),
     ]);
 
     const stats = {
@@ -47,9 +37,7 @@ export async function GET(req: NextRequest) {
         total: totalTasks,
         completed: completedTasks,
         pending: pendingTasks,
-        completionRate: Math.round(
-          ((completedTasks / (totalTasks || 1)) * 100)
-        ),
+        completionRate: Math.round(((completedTasks / (totalTasks || 1)) * 100)),
       },
       budget: {
         budgeted: totalBudget._sum.budgetedAmount || 0,
@@ -58,12 +46,11 @@ export async function GET(req: NextRequest) {
           (totalBudget._sum.budgetedAmount || 0) -
           (spentBudget._sum.actualAmount || 0),
       },
-      recentPhotos,
-      recentDocuments,
     };
 
     return NextResponse.json(successResponse(stats));
   } catch (error) {
+    console.error(error);
     return NextResponse.json(
       errorResponse("Failed to fetch dashboard stats"),
       { status: 500 }

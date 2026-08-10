@@ -1,5 +1,9 @@
-import { SpaceList } from "@/components/SpaceList";
+import { SpaceListWithForms } from "../../components/SpaceListWithForms";
 
 export default function SpacesPage() {
-  return <SpaceList />;
+  return (
+    <div className="space-y-6">
+      <SpaceListWithForms />
+    </div>
+  );
 }
