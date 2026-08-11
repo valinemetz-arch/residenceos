@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { FileText, Download, CheckCircle, Clock, AlertCircle } from "lucide-react";
 import { toast } from "@/lib/toast";
-import ContractSigningModal from "@/app/components/ContractSigningModal";
+import ContractSigningModal from "../ContractSigningModal";
 
 interface ProjectDetails {
   projectName: string;
