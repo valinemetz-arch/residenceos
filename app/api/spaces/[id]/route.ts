@@ -5,10 +5,10 @@ import { successResponse, errorResponse } from "@/lib/api";
 // GET /api/spaces/[id] - Get a single space
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = await params as any;
+    const { id } = await params;
     const space = await prisma.space.findUnique({
       where: { id },
       include: {
@@ -38,18 +38,18 @@ export async function GET(
 // PUT /api/spaces/[id] - Update a space
 export async function PUT(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const body = await req.json();
-    const { id } = await params as any;
+    const { id } = await params;
 
     const space = await prisma.space.update({
       where: { id },
       data: {
         name: body.name,
         building: body.building || "Main Residence",
-        floor: body.floor || null,
+        floor: body.floor != null ? String(body.floor) : null,
         squareFootage: body.squareFootage || null,
         description: body.description || null,
         status: body.status || "planning",
@@ -74,11 +74,11 @@ export async function PUT(
 // DELETE /api/spaces/[id] - Delete a space
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // Get the space first to get all systems
-    const { id } = await params as any;
+    const { id } = await params;
     const space = await prisma.space.findUnique({
       where: { id },
       include: { systems: { select: { id: true } } },
@@ -114,7 +114,7 @@ export async function DELETE(
 
     // 3. Delete tasks
     await prisma.task.deleteMany({
-      where: { spaceId: params.id },
+      where: { spaceId: id },
     });
 
     // 4. Delete asset documents and photos

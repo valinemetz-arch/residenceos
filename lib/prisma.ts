@@ -1,4 +1,5 @@
 import { PrismaClient } from "@prisma/client";
+import { PrismaBetterSqlite3 } from "@prisma/adapter-better-sqlite3";
 import path from "node:path";
 import { existsSync } from "node:fs";
 
@@ -18,11 +19,9 @@ export const prisma =
   globalForPrisma.prisma ||
   new PrismaClient({
     log: ["error"],
-    datasources: {
-      db: {
-        url: localDbUrl,
-      },
-    },
+    adapter: new PrismaBetterSqlite3({
+      url: localDbUrl,
+    }),
   });
 
 if (process.env.NODE_ENV !== "production") {

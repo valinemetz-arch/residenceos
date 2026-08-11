@@ -1,0 +1,201 @@
+DOCUSIGN INTEGRATION - QUICK REFERENCE
+
+=== NEW FILES CREATED ===
+
+LIB:
+  lib/docusign.ts
+    - JWT auth, contract sending, status checking, signing URLs
+    - Key functions:
+      * getAccessToken() - Get DocuSign API token (cached)
+      * sendContractFromTemplate() - Send contract to contractor
+      * getEnvelopeStatus() - Check signature status
+      * getSigningUrl() - Generate embedded signing URL
+      * getSignedDocument() - Download signed PDF
+      * verifyWebhookSignature() - Validate DocuSign events
+
+API ENDPOINTS:
+  app/api/contracts/send/route.ts
+    - POST /api/contracts/send
+    - Send contract from template to contractor
+    - Creates Contract record in DB
+    - Sends signing email
+
+  app/api/contracts/[envelopeId]/status/route.ts
+    - GET /api/contracts/{envelopeId}/status
+    - Check contract status with DocuSign
+    - Sync with database
+
+  app/api/contracts/project/[projectId]/route.ts
+    - GET /api/contracts/project/{projectId}
+    - Get all contracts for a project
+
+  app/api/contracts/contractor/[contractorId]/route.ts
+    - GET /api/contracts/contractor/{contractorId}
+    - Get all contracts for a contractor
+
+  app/api/webhooks/docusign/route.ts
+    - POST /api/webhooks/docusign
+    - Receives signing events from DocuSign
+    - Updates Contract status in DB
+
+COMPONENTS:
+  app/components/ContractSigningModal.tsx
+    - Modal for contractor to sign contract
+    - Opens DocuSign signing interface
+    - Auto-refreshes when signed
+
+  app/components/contractor/ContractorsContracts.tsx
+    - Displays contractor's contracts
+    - Shows status with badges
+    - Sign button for pending, download for signed
+
+  app/components/admin/ContractManagement.tsx
+    - Admin interface for sending contracts
+    - Shows approved bids ready for contracts
+    - Tracks contract status
+
+PAGES:
+  app/admin/page.tsx
+    - Admin dashboard at /admin
+    - Tab interface with contract management
+
+DATABASE:
+  prisma/schema.prisma
+    - Updated Contract model with:
+      * envelopeId (unique, DocuSign ID)
+      * signingUrl (cached signing link)
+      * signerEmail, signerName
+      * projectDetails (JSON)
+      * status, sentAt, signedAt, completedAt
+      * documentUrl (signed PDF)
+    - Updated Project model with contracts relation
+    - Added indexes for performance
+
+=== MODIFIED FILES ===
+
+  app/components/contractor/ContractorDashboard.tsx
+    - Added Contracts tab
+    - Integrated ContractorsContracts component
+    - Added tab navigation
+
+  lib/email.ts
+    - Added sendContractSigningEmail()
+    - Added sendContractSignedEmail()
+
+  app/api/bids/route.ts
+    - Added status filter to GET endpoint
+    - Added contract info to response
+
+=== DOCUMENTATION FILES ===
+
+  DOCUSIGN_SETUP.md
+    - Detailed setup and configuration guide
+    - API documentation
+    - Troubleshooting
+
+  IMPLEMENTATION_SUMMARY.md
+    - Overview of implementation
+    - File descriptions
+    - Deployment checklist
+
+  DOCUSIGN_QUICK_REF.txt (this file)
+    - Quick reference of all changes
+
+=== KEY WORKFLOW ===
+
+ADMIN WORKFLOW:
+1. Admin approves bid
+2. Goes to /admin → Contract Management
+3. Clicks "Send Contract"
+4. Confirms project details
+5. Contract sent to contractor via DocuSign
+6. Contractor receives email with signing link
+
+CONTRACTOR WORKFLOW:
+1. Receives email "Contract Ready to Sign"
+2. Logs into /contractor
+3. Goes to Contracts tab
+4. Clicks "Sign Contract"
+5. Modal opens with instructions
+6. Clicks "Sign Now in DocuSign"
+7. Opens DocuSign in new window
+8. Reviews and signs
+9. Modal auto-updates on completion
+10. Status changes to "Signed"
+11. Can download signed PDF
+
+=== ENVIRONMENT VARIABLES ===
+
+Already set in .env.local:
+  DOCUSIGN_INTEGRATION_KEY
+  DOCUSIGN_USER_ID
+  DOCUSIGN_ACCOUNT_ID
+  DOCUSIGN_TEMPLATE_ID
+  DOCUSIGN_PRIVATE_KEY
+
+=== BEFORE DEPLOYING ===
+
+1. Run database migration:
+   npx prisma migrate dev --name add_docusign_contracts
+
+2. Configure DocuSign webhook:
+   - URL: https://[YOUR_DOMAIN]/api/webhooks/docusign
+   - Events: envelope-signed, envelope-completed
+
+3. Test contract sending:
+   - Go to /admin
+   - Find approved bid
+   - Click "Send Contract"
+
+4. Test contractor signing:
+   - Check contractor email for signing link
+   - Click signing link
+   - Sign contract in DocuSign
+   - Verify status updates in portal
+
+5. Verify email delivery:
+   - Check contractor received signing email
+   - Check admin received signed notification
+
+=== DEPENDENCIES ===
+
+Already installed, no new packages needed:
+  - jose (for JWT signing)
+  - nodemailer (for email)
+  - prisma (for database)
+
+=== API RATE LIMITS ===
+
+DocuSign limits (varies by plan):
+  - Token requests: ~50/minute
+  - API calls: Varies
+  - Token caching helps minimize requests
+
+=== SECURITY ===
+
+- Private key in environment variables only
+- Token cached for 55 minutes
+- SMTP over TLS for emails
+- Signing links expire after 90 days
+- Database audit trail maintained
+
+=== TESTING ===
+
+Send contract:
+  curl -X POST http://localhost:3000/api/contracts/send \
+    -H "Content-Type: application/json" \
+    -d '{"projectId":"pid","contractorId":"cid",...}'
+
+Check status:
+  curl http://localhost:3000/api/contracts/{envelopeId}/status
+
+=== COMMON ERRORS ===
+
+Missing credentials → Check .env.local for all 4 variables
+Token error → Verify Integration Key + Private Key match
+Template not found → Check template ID in DocuSign
+Webhook not received → Configure URL in DocuSign account settings
+
+=== SUPPORT ===
+
+See DOCUSIGN_SETUP.md for detailed troubleshooting

@@ -34,7 +34,7 @@ export async function POST(req: NextRequest) {
       data: {
         name: body.name,
         building: body.building || "Main Residence",
-        floor: body.floor || null,
+        floor: body.floor != null ? String(body.floor) : null,
         squareFootage: body.squareFootage || null,
         description: body.description || null,
       },

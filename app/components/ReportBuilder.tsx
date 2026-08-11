@@ -147,7 +147,7 @@ export function ReportBuilder() {
 
   const downloadCSV = (data: any[], filename: string) => {
     if (data.length === 0) {
-      toast.info("No data", "Nothing to export");
+      toast.error("No data", "Nothing to export");
       return;
     }
 
@@ -171,6 +171,22 @@ export function ReportBuilder() {
     const a = document.createElement("a");
     a.href = url;
     a.download = `${filename}-${new Date().toISOString().split("T")[0]}.csv`;
+    a.click();
+    toast.success("Exported", `${filename} downloaded`);
+  };
+
+  const downloadJSON = (data: any, filename: string) => {
+    if (!data || Object.keys(data).length === 0) {
+      toast.error("No data", "Nothing to export");
+      return;
+    }
+
+    const json = JSON.stringify(data, null, 2);
+    const blob = new Blob([json], { type: "application/json" });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${filename}-${new Date().toISOString().split("T")[0]}.json`;
     a.click();
     toast.success("Exported", `${filename} downloaded`);
   };
@@ -221,6 +237,17 @@ export function ReportBuilder() {
       {/* Budget Summary Report */}
       {selectedReport === "summary" && (
         <div className="space-y-4">
+          <div className="flex justify-end gap-2 mb-4">
+            <button
+              onClick={() =>
+                downloadJSON(reportData.budgetSummary, "budget-summary")
+              }
+              className="text-sm flex items-center gap-1 text-blue-600 hover:text-blue-700 dark:text-blue-400 px-3 py-2 rounded border border-blue-300 dark:border-blue-700"
+            >
+              <Download className="h-4 w-4" />
+              Export JSON
+            </button>
+          </div>
           <div className="grid md:grid-cols-3 gap-4">
             <div className="rounded-lg border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-slate-900">
               <p className="text-sm text-gray-600 dark:text-gray-400">
@@ -293,6 +320,17 @@ export function ReportBuilder() {
       {/* By System Report */}
       {selectedReport === "systems" && (
         <div className="space-y-4">
+          <div className="flex justify-end gap-2 mb-4">
+            <button
+              onClick={() =>
+                downloadJSON(reportData.assetsBySystem, "assets-by-system")
+              }
+              className="text-sm flex items-center gap-1 text-blue-600 hover:text-blue-700 dark:text-blue-400 px-3 py-2 rounded border border-blue-300 dark:border-blue-700"
+            >
+              <Download className="h-4 w-4" />
+              Export JSON
+            </button>
+          </div>
           {Object.entries(reportData.assetsBySystem).map(([system, assets]) => (
             <div
               key={system}
@@ -374,6 +412,17 @@ export function ReportBuilder() {
       {/* By Space Report */}
       {selectedReport === "spaces" && (
         <div className="space-y-4">
+          <div className="flex justify-end gap-2 mb-4">
+            <button
+              onClick={() =>
+                downloadJSON(reportData.spaces, "assets-by-space")
+              }
+              className="text-sm flex items-center gap-1 text-blue-600 hover:text-blue-700 dark:text-blue-400 px-3 py-2 rounded border border-blue-300 dark:border-blue-700"
+            >
+              <Download className="h-4 w-4" />
+              Export JSON
+            </button>
+          </div>
           {Object.entries(reportData.spaces).map(([space, data]) => (
             <div
               key={space}
@@ -412,6 +461,17 @@ export function ReportBuilder() {
       {/* Punch List Report */}
       {selectedReport === "punchlist" && (
         <div className="space-y-4">
+          <div className="flex justify-end gap-2 mb-4">
+            <button
+              onClick={() =>
+                downloadJSON(reportData.punchListBySpace, "punch-list")
+              }
+              className="text-sm flex items-center gap-1 text-blue-600 hover:text-blue-700 dark:text-blue-400 px-3 py-2 rounded border border-blue-300 dark:border-blue-700"
+            >
+              <Download className="h-4 w-4" />
+              Export JSON
+            </button>
+          </div>
           {Object.keys(reportData.punchListBySpace).length > 0 ? (
             Object.entries(reportData.punchListBySpace).map(
               ([space, tasks]) => {
@@ -483,10 +543,22 @@ export function ReportBuilder() {
       {selectedReport === "timeline" && (
         <div className="space-y-4">
           {reportData.taskTimeline.length > 0 ? (
-            <div className="rounded-lg border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-slate-900">
-              <h3 className="font-semibold mb-4 dark:text-white">
-                Task Timeline ({reportData.taskTimeline.length})
-              </h3>
+            <>
+              <div className="flex justify-end gap-2">
+                <button
+                  onClick={() =>
+                    downloadJSON(reportData.taskTimeline, "task-timeline")
+                  }
+                  className="text-sm flex items-center gap-1 text-blue-600 hover:text-blue-700 dark:text-blue-400 px-3 py-2 rounded border border-blue-300 dark:border-blue-700"
+                >
+                  <Download className="h-4 w-4" />
+                  Export JSON
+                </button>
+              </div>
+              <div className="rounded-lg border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-slate-900">
+                <h3 className="font-semibold mb-4 dark:text-white">
+                  Task Timeline ({reportData.taskTimeline.length})
+                </h3>
               <div className="space-y-3">
                 {reportData.taskTimeline.map((task: any, idx: number) => (
                   <div
@@ -526,6 +598,7 @@ export function ReportBuilder() {
                 ))}
               </div>
             </div>
+            </>
           ) : (
             <div className="rounded-lg border border-gray-200 bg-gray-50 p-8 text-center dark:border-gray-700 dark:bg-slate-800">
               <p className="text-gray-600 dark:text-gray-300">
@@ -539,6 +612,17 @@ export function ReportBuilder() {
       {/* Material Takeoff Report */}
       {selectedReport === "takeoff" && (
         <div className="space-y-4">
+          <div className="flex justify-end gap-2 mb-4">
+            <button
+              onClick={() =>
+                downloadJSON(reportData.assetsByType, "material-takeoff")
+              }
+              className="text-sm flex items-center gap-1 text-blue-600 hover:text-blue-700 dark:text-blue-400 px-3 py-2 rounded border border-blue-300 dark:border-blue-700"
+            >
+              <Download className="h-4 w-4" />
+              Export JSON
+            </button>
+          </div>
           <div className="rounded-lg border border-blue-200 bg-blue-50 p-6 dark:border-blue-900 dark:bg-blue-900/20">
             <h3 className="font-semibold text-blue-900 dark:text-blue-200 mb-2">
               Material Takeoff

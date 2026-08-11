@@ -2,6 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { ThemeToggle } from "./ThemeToggle";
 
@@ -11,16 +12,36 @@ export function Navigation() {
   const isActive = (path: string) => pathname.startsWith(path);
 
   return (
-    <nav className="sticky top-0 z-40 border-b border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-950 shadow-sm">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
-          <div className="flex items-center space-x-8">
-            <Link href="/app" className="font-bold text-xl flex items-center gap-2 hover:opacity-80 transition-opacity">
-              <span className="text-2xl">🏠</span>
-              <span className="bg-gradient-to-r from-blue-600 to-blue-500 bg-clip-text text-transparent">ResidenceOS</span>
+    <nav className="sticky top-0 z-40 border-b border-[#D4D9CE] dark:border-[#1F1F1F] bg-[#FAFAF8] dark:bg-[#2D2D2D] shadow-sm transition-colors">
+      <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
+        <div className="flex justify-between items-center h-20">
+          <div className="flex items-center space-x-10">
+            {/* Logo and Brand */}
+            <Link
+              href="/app"
+              className="font-bold text-lg flex items-center gap-3 hover:opacity-80 transition-opacity group flex-shrink-0"
+            >
+              <div className="w-10 h-10 relative group-hover:scale-105 transition-transform">
+                <Image
+                  src="/paseo-logo.svg"
+                  alt="Paseo de Caballo"
+                  width={40}
+                  height={40}
+                  priority
+                />
+              </div>
+              <div className="hidden sm:flex flex-col gap-0.5">
+                <span className="font-[Georgia,Garamond,serif] text-base font-bold text-[#2D5016] dark:text-[#C9A876] leading-tight">
+                  Paseo
+                </span>
+                <span className="text-xs font-medium text-[#8B6F47] dark:text-[#A88860] uppercase tracking-widest letter-spacing-wide">
+                  OS
+                </span>
+              </div>
             </Link>
 
-            <div className="hidden md:flex space-x-1">
+            {/* Navigation Links */}
+            <div className="hidden lg:flex space-x-2">
               <NavLink href="/app" isActive={isActive("/app") && pathname === "/app"}>
                 Dashboard
               </NavLink>
@@ -48,9 +69,10 @@ export function Navigation() {
             </div>
           </div>
 
-          <div className="flex items-center space-x-3">
+          {/* Right Side Actions */}
+          <div className="flex items-center space-x-4">
             <ThemeToggle />
-            <button className="text-sm px-4 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors font-medium text-gray-700 dark:text-gray-300">
+            <button className="text-sm px-5 py-2 rounded-lg hover:bg-[#F5F3F0] dark:hover:bg-[#1F1F1F] transition-colors font-medium text-[#2D5016] dark:text-[#C9A876] letter-spacing-wide">
               Logout
             </button>
           </div>
@@ -70,10 +92,10 @@ function NavLink({ href, children, isActive }: NavLinkProps) {
   return (
     <Link
       href={href}
-      className={`px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+      className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 letter-spacing-wide ${
         isActive
-          ? "text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20"
-          : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-slate-800"
+          ? "text-[#2D5016] dark:text-[#C9A876] bg-[#F5F3F0] dark:bg-[#1F1F1F] border-b-2 border-[#2D5016] dark:border-[#C9A876]"
+          : "text-[#5A5A5A] dark:text-[#A8A8A8] hover:text-[#2D5016] dark:hover:text-[#C9A876] hover:bg-[#F5F3F0] dark:hover:bg-[#1F1F1F]"
       }`}
     >
       {children}

@@ -31,7 +31,12 @@ test.describe('Forms E2E', () => {
       await page.locator('button:has-text("Add Space")').first().click();
       await page.waitForSelector('input[name="name"]', { timeout: 5000 });
       await page.locator('input[name="name"]').fill(`E2E Space ${ts}`);
-      await page.locator('button:has-text("Create")').first().click();
+      const createBtnHandle = await page.locator('button:has-text("Create")').first().elementHandle();
+      if (createBtnHandle) {
+        await createBtnHandle.evaluate((b: any) => (b as HTMLButtonElement).click());
+      } else {
+        await page.locator('button:has-text("Create")').first().click();
+      }
       await page.waitForSelector(`text=E2E Space ${ts}`);
     });
 
@@ -45,9 +50,12 @@ test.describe('Forms E2E', () => {
       const sel = page.locator('select[name="spaceId"]');
       if (await sel.count()) {
         await sel.selectOption({ label: `E2E Space ${ts}` });
+        // ensure any native select dropdown is closed before clicking Create
+        await page.keyboard.press('Escape');
       } else {
         const combo = page.getByRole('combobox', { name: /Space \*/i });
         await combo.selectOption({ label: `E2E Space ${ts}` });
+        await page.keyboard.press('Escape');
       }
       await page.locator('button:has-text("Create")').first().click();
       // reload the assets list and wait for the created asset to appear

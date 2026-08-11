@@ -5,11 +5,12 @@ import { successResponse, errorResponse } from "@/lib/api";
 // GET /api/budget-items/[id] - Get a single budget item
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const budgetItem = await prisma.budgetItem.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: {
         space: { select: { id: true, name: true } },
         asset: { select: { id: true, name: true } },
@@ -38,13 +39,14 @@ export async function GET(
 // PUT /api/budget-items/[id] - Update a budget item
 export async function PUT(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const body = await req.json();
 
     const budgetItem = await prisma.budgetItem.update({
-      where: { id: params.id },
+      where: { id },
       data: {
         category: body.category,
         description: body.description,
@@ -81,22 +83,16 @@ export async function PUT(
 // DELETE /api/budget-items/[id] - Delete a budget item
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     // Delete related photos and documents
-    await prisma.photo.deleteMany({
-      where: { budgetItemId: params.id },
-    });
-
-    await prisma.document.deleteMany({
-      where: { budgetItemId: params.id },
-    });
+    await prisma.photo.deleteMany({ where: { budgetItemId: id } });
+    await prisma.document.deleteMany({ where: { budgetItemId: id } });
 
     // Delete the budget item
-    await prisma.budgetItem.delete({
-      where: { id: params.id },
-    });
+    await prisma.budgetItem.delete({ where: { id } });
 
     return NextResponse.json(
       successResponse(null, "Budget item deleted successfully")

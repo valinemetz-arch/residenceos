@@ -1,9 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Plus, Edit2, Trash2, Loader2, FileText } from "lucide-react";
+import { Plus, Edit2, Trash2, Loader2, FileText, Zap } from "lucide-react";
 import { AssetForm } from "./AssetForm";
 import { AssetDetail } from "./AssetDetail";
+import { BulkAssetUploader } from "./BulkAssetUploader";
 import { toast } from "@/lib/toast";
 import { formatCurrency } from "@/lib/utils";
 
@@ -28,6 +29,7 @@ export function AssetListWithForms() {
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [showDetail, setShowDetail] = useState(false);
+  const [showBulkUploader, setShowBulkUploader] = useState(false);
   const [selectedAsset, setSelectedAsset] = useState<Asset | undefined>();
   const [detailAssetId, setDetailAssetId] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
@@ -120,13 +122,23 @@ export function AssetListWithForms() {
       {/* Header with Add Button */}
       <div className="mb-6 flex items-center justify-between">
         <h1 className="text-3xl font-bold dark:text-white">Assets</h1>
-        <button
-          onClick={handleAddClick}
-          className="flex items-center gap-2 rounded bg-blue-500 px-4 py-2 font-medium text-white hover:bg-blue-600"
-        >
-          <Plus className="h-5 w-5" />
-          Add Asset
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={() => setShowBulkUploader(true)}
+            className="flex items-center gap-2 rounded bg-amber-500 px-4 py-2 font-medium text-white hover:bg-amber-600"
+            title="Upload and analyze images/PDFs with AI"
+          >
+            <Zap className="h-5 w-5" />
+            Add via AI
+          </button>
+          <button
+            onClick={handleAddClick}
+            className="flex items-center gap-2 rounded bg-blue-500 px-4 py-2 font-medium text-white hover:bg-blue-600"
+          >
+            <Plus className="h-5 w-5" />
+            Add Asset
+          </button>
+        </div>
       </div>
 
       {/* Assets Table */}
@@ -258,6 +270,19 @@ export function AssetListWithForms() {
           onClose={() => {
             setShowDetail(false);
             setDetailAssetId(null);
+          }}
+        />
+      )}
+
+      {/* Bulk Uploader Modal */}
+      {showBulkUploader && (
+        <BulkAssetUploader
+          spaceId={spaces[0]?.id || ""}
+          spaces={spaces}
+          onClose={() => setShowBulkUploader(false)}
+          onSuccess={() => {
+            setShowBulkUploader(false);
+            loadData();
           }}
         />
       )}

@@ -26,7 +26,7 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className="bg-white dark:bg-slate-950 text-gray-900 dark:text-gray-50 transition-colors">
+      <body className="bg-[#FAFAF8] dark:bg-[#2D2D2D] text-[#1F1F1F] dark:text-[#FAFAF8] transition-colors">
         {children}
       </body>
     </html>

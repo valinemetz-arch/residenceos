@@ -4,7 +4,6 @@ generator client {
 
 datasource db {
   provider = "sqlite"
-  url      = env("DATABASE_URL")
 }
 
 // User Authentication
@@ -27,9 +26,13 @@ model Space {
   building      String    @default("Main Residence")
   floor         String?   // 1st, 2nd, Basement
   squareFootage Float?
-  description   String?   
+  description   String?
   status        String    @default("planned") // planned, in_progress, completed
-  notes         String?   
+  notes         String?
+
+  // Project (for contractor portal)
+  projectId     String?
+  project       Project?  @relation(fields: [projectId], references: [id], onDelete: SetNull)
 
   // Relations
   assets        Asset[]
@@ -184,10 +187,13 @@ model Document {
   fileName      String
   fileSize      Int?
   fileType      String?   // pdf, jpg, png, etc
-  
+
   // Version Control
   versionNumber Int       @default(1)
   revisionDate  DateTime  @default(now())
+  uploadedAt    DateTime  @default(now())
+  uploadedBy    String?
+  changeNotes   String?   // What changed in this version
   
   // Relations
   spaceId       String?
@@ -202,12 +208,13 @@ model Document {
   taskId        String?
   task          Task?     @relation(fields: [taskId], references: [id], onDelete: SetNull)
 
-specificationId String?
+  specificationId String?
   specification   Specification? @relation(fields: [specificationId], references: [id], onDelete: SetNull)
 
   milestoneId   String?
   milestone     Milestone? @relation(fields: [milestoneId], references: [id], onDelete: SetNull)
-maintenanceId String?
+
+  maintenanceId String?
   maintenance   Maintenance? @relation(fields: [maintenanceId], references: [id], onDelete: SetNull)
 
   budgetItemId  String?
@@ -216,8 +223,23 @@ maintenanceId String?
   warrantyId    String?
   warranty      Warranty? @relation(fields: [warrantyId], references: [id], onDelete: SetNull)
 
+  // Contractor Portal
+  projectId     String?
+  project       Project?  @relation(fields: [projectId], references: [id], onDelete: SetNull)
+
+  bidId         String?
+  bid           Bid?      @relation(fields: [bidId], references: [id], onDelete: SetNull)
+
+  contractId    String?
+  contract      Contract? @relation(fields: [contractId], references: [id], onDelete: SetNull)
+
+  contractorId  String?
+  contractor    Contractor? @relation(fields: [contractorId], references: [id], onDelete: SetNull)
+
+  changeOrderId String?
+  changeOrder   ChangeOrder? @relation(fields: [changeOrderId], references: [id], onDelete: SetNull)
+
   description   String?
-  uploadedBy    String?
 
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
@@ -248,8 +270,10 @@ model Photo {
   
   specificationId String?
   specification Specification? @relation(fields: [specificationId], references: [id], onDelete: SetNull)
-milestoneId   String?
+
+  milestoneId   String?
   milestone     Milestone? @relation(fields: [milestoneId], references: [id], onDelete: SetNull)
+
   notes         String?   
   
   maintenanceId String?
@@ -393,5 +417,200 @@ model Warranty {
   updatedAt     DateTime  @updatedAt
 
   @@map("warranties")
+}
+
+// CONTRACTOR PORTAL: Projects
+model Project {
+  id            String    @id @default(cuid())
+  name          String    // "123 Main St Renovation"
+  address       String?
+  description   String?
+  budget        Float?
+  startDate     DateTime?
+  endDate       DateTime?
+  status        String    @default("active") // active, closed, archived
+
+  // Project Contents
+  spaces        Space[]
+
+  // Contractor Management
+  documents     Document[]  // Plans, specs, schedules
+  bids          Bid[]
+  contracts     Contract[]  // Contracts for this project
+  messages      Message[]   // Q&A messages
+
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@map("projects")
+}
+
+// CONTRACTOR PORTAL: Contractors
+model Contractor {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  password      String    // hashed
+  companyName   String
+  contactName   String?
+  phone         String?
+  address       String?
+
+  // Contact Info
+  website       String?
+  logo          String?   // URL to logo image
+
+  // Credentials
+  licenseNumber String?
+  licenseExpiry DateTime?
+  licenseDocument String? // URL to uploaded license document
+  insuranceExpiry DateTime?
+  insuranceDocument String? // URL to uploaded insurance certificate
+
+  // Bids & Contracts
+  bids          Bid[]
+  contracts     Contract[]
+  documents     Document[]
+  messages      Message[]
+
+  // Tracking
+  lastAccessedAt DateTime?
+  lastReminderSentAt DateTime?
+
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@map("contractors")
+}
+
+// CONTRACTOR PORTAL: Bids
+model Bid {
+  id            String    @id @default(cuid())
+  projectId     String
+  project       Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  contractorId  String
+  contractor    Contractor @relation(fields: [contractorId], references: [id], onDelete: Cascade)
+
+  // Bid Details
+  amount        Float
+  notes         String?
+  status        String    @default("pending") // pending, approved, rejected, withdrawn
+  submittedAt   DateTime?
+
+  // Document Versions at Time of Bid
+  documentSnapshot String?  // JSON snapshot of document versions when bid was submitted
+  // Example: [{ documentId, versionNumber, revisionDate, name }]
+
+  // Related Documents
+  documents     Document[]
+
+  // Contract (if approved)
+  contract      Contract?
+
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@map("bids")
+}
+
+// CONTRACTOR PORTAL: Contracts
+model Contract {
+  id            String    @id @default(cuid())
+
+  // Relationships
+  projectId     String?
+  project       Project?  @relation(fields: [projectId], references: [id], onDelete: SetNull)
+
+  bidId         String?   @unique
+  bid           Bid?      @relation(fields: [bidId], references: [id], onDelete: SetNull)
+
+  contractorId  String
+  contractor    Contractor @relation(fields: [contractorId], references: [id], onDelete: Cascade)
+
+  // DocuSign Integration
+  envelopeId    String?   @unique  // DocuSign envelope ID
+  signingUrl    String?   // Cached signing URL
+
+  // Contract Details
+  signerEmail   String
+  signerName    String
+  projectDetails Json?    // Store project info as JSON
+
+  // Status tracking
+  status        String    @default("sent") // sent, viewed, signed, completed, voided
+  sentAt        DateTime  @default(now())
+  signedAt      DateTime?
+  completedAt   DateTime?
+
+  // Document storage
+  documentUrl   String?   // URL to signed PDF
+
+  // Documents
+  documents     Document[]
+  changeOrders  ChangeOrder[]
+
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@map("contracts")
+  @@index([contractorId])
+  @@index([envelopeId])
+  @@index([status])
+}
+
+// MESSAGING: Q&A between contractors and project owners
+model Message {
+  id            String    @id @default(cuid())
+  projectId     String
+  project       Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  contractorId  String?
+  contractor    Contractor? @relation(fields: [contractorId], references: [id], onDelete: SetNull)
+
+  senderType    String    // "contractor" or "owner"
+  senderName    String?   // Name of sender
+  message       String    // Message content
+
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@map("messages")
+}
+
+// CHANGE ORDERS: Track scope & cost changes during construction
+model ChangeOrder {
+  id            String    @id @default(cuid())
+  contractId    String
+  contract      Contract  @relation(fields: [contractId], references: [id], onDelete: Cascade)
+
+  number        Int       // CO #1, #2, #3, etc.
+  title         String    // "Upgrade electrical panel"
+  description   String?   // Detailed scope of change
+
+  // Cost & Schedule Impact
+  originalCost  Float?    // Original line item cost
+  adjustmentAmount Float  // Increase or decrease
+  newCost       Float?    // New total cost
+  scheduleImpact Int?     // Days added/reduced
+
+  // Reason for Change
+  reason        String?   // Design change, site condition, upgrade, etc.
+  requestedBy   String?   // Owner, contractor, architect
+
+  // Status & Approval
+  status        String    @default("pending") // pending, approved, rejected, completed
+  requestedAt   DateTime  @default(now())
+  approvedAt    DateTime?
+  approvedBy    String?
+  completedAt   DateTime?
+
+  // Documentation
+  documents     Document[]
+  notes         String?
+
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@map("change_orders")
 }
 

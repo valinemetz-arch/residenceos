@@ -4,26 +4,15 @@ import { useState } from "react";
 import { X, Loader2 } from "lucide-react";
 import { validationSchemas } from "@/lib/validation";
 import { toast } from "@/lib/toast";
+import type { BudgetItemBase } from "@/lib/types";
 
 interface Space {
   id: string;
   name: string;
 }
 
-interface BudgetItem {
-  [key: string]: unknown;
-  id?: string;
-  description: string;
-  category: string;
-  spaceId: string | null;
-  budgetedAmount: number | null;
-  actualAmount: number | null;
-  status: string;
-  notes: string | null;
-}
-
 interface BudgetFormProps {
-  item?: BudgetItem;
+  item?: BudgetItemBase;
   spaces: Space[];
   onClose: () => void;
   onSuccess: () => void;
@@ -46,8 +35,9 @@ export function BudgetForm({
   onSuccess,
 }: BudgetFormProps) {
   const isEditing = !!item?.id;
-  const [formData, setFormData] = useState<BudgetItem>(
+  const [formData, setFormData] = useState<BudgetItemBase>(
     item || {
+      name: "",
       description: "",
       category: "New build",
       spaceId: spaces[0]?.id || null,
@@ -164,7 +154,7 @@ export function BudgetForm({
             <input
               type="text"
               name="description"
-              value={formData.description}
+              value={formData.description ?? ""}
               onChange={handleChange}
               placeholder="e.g., Master Bedroom Renovation"
               className="mt-1 w-full rounded border border-gray-300 px-3 py-2 dark:border-gray-600 dark:bg-slate-800 dark:text-white"
