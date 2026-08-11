@@ -419,7 +419,7 @@ model Warranty {
   @@map("warranties")
 }
 
-// CONTRACTOR PORTAL: Projects
+/// CONTRACTOR PORTAL: Projects
 model Project {
   id            String    @id @default(cuid())
   name          String    // "123 Main St Renovation"
@@ -445,7 +445,7 @@ model Project {
   @@map("projects")
 }
 
-// CONTRACTOR PORTAL: Contractors
+/// CONTRACTOR PORTAL: Contractors
 model Contractor {
   id            String    @id @default(cuid())
   email         String    @unique
@@ -513,7 +513,7 @@ model Bid {
   @@map("bids")
 }
 
-// CONTRACTOR PORTAL: Contracts
+/// CONTRACTOR PORTAL: Contracts
 model Contract {
   id            String    @id @default(cuid())
 
