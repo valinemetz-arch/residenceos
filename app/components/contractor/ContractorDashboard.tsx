@@ -396,5 +396,6 @@ export default function ContractorDashboard({ contractor }: ContractorDashboardP
         )}
       </div>
     </div>
+    </div>
   );
 }

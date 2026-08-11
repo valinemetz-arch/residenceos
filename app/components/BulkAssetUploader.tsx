@@ -44,6 +44,9 @@ export function BulkAssetUploader({
   onSuccess,
 }: BulkAssetUploaderProps) {
   const [activeTab, setActiveTab] = useState<Tab>("assets");
+  const currentTab = (activeTab as string) as Tab;
+  // tabKey is used in JSX comparisons to avoid TypeScript narrowing from early returns
+  const tabKey: string = activeTab;
   const [files, setFiles] = useState<FilePreview[]>([]);
   const [extractedAssets, setExtractedAssets] = useState<ExtractedAsset[]>([]);
   const [loading, setLoading] = useState(false);
@@ -229,48 +232,20 @@ export function BulkAssetUploader({
   };
 
   // Handle tab switching
-  if (activeTab === "spaces") {
-    return (
-      <SpaceCreationTab
-        onClose={onClose}
-        onSuccess={onSuccess}
-        onTabChange={setActiveTab}
-      />
-    );
-  }
-
-  if (activeTab === "schedules") {
-    return (
-      <ScheduleExtractionTab
-        spaceId={spaceId}
-        spaces={spaces}
-        onClose={onClose}
-        onSuccess={onSuccess}
-        onTabChange={setActiveTab}
-      />
-    );
-  }
-
-  if (activeTab === "gap-analysis") {
-    return (
-      <GapAnalysisTab
-        projectId={projectId || spaceId}
-        onClose={onClose}
-        onTabChange={setActiveTab}
-      />
-    );
-  }
-
-  if (activeTab === "bids") {
-    return (
-      <BidExtractionTab
-        spaceId={spaceId}
-        spaces={spaces}
-        onClose={onClose}
-        onSuccess={onSuccess}
-        onTabChange={setActiveTab}
-      />
-    );
+  const handleTabChange = (tab: string) => setActiveTab(tab as Tab);
+  if (currentTab !== "assets") {
+    if (tabKey === "spaces") {
+      return <SpaceCreationTab onClose={onClose} onSuccess={onSuccess} onTabChange={handleTabChange} />;
+    }
+    if (tabKey === "schedules") {
+      return <ScheduleExtractionTab spaceId={spaceId} spaces={spaces} onClose={onClose} onSuccess={onSuccess} onTabChange={handleTabChange} />;
+    }
+    if (tabKey === "gap-analysis") {
+      return <GapAnalysisTab projectId={projectId || spaceId} onClose={onClose} onTabChange={handleTabChange} />;
+    }
+    if (tabKey === "bids") {
+      return <BidExtractionTab spaceId={spaceId} spaces={spaces} onClose={onClose} onSuccess={onSuccess} onTabChange={handleTabChange} />;
+    }
   }
 
   // File upload stage - Assets tab
@@ -296,7 +271,7 @@ export function BulkAssetUploader({
             <button
               onClick={() => setActiveTab("assets")}
               className={`px-4 py-2 font-medium transition-colors ${
-                activeTab === "assets"
+                tabKey === "assets"
                   ? "border-b-2 border-blue-500 text-blue-600 dark:text-blue-400"
                   : "text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200"
               }`}
@@ -306,7 +281,7 @@ export function BulkAssetUploader({
             <button
               onClick={() => setActiveTab("spaces")}
               className={`px-4 py-2 font-medium transition-colors ${
-                activeTab === "spaces"
+                tabKey === "spaces"
                   ? "border-b-2 border-blue-500 text-blue-600 dark:text-blue-400"
                   : "text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200"
               }`}
@@ -316,7 +291,7 @@ export function BulkAssetUploader({
             <button
               onClick={() => setActiveTab("schedules")}
               className={`px-4 py-2 font-medium transition-colors ${
-                activeTab === "schedules"
+                tabKey === "schedules"
                   ? "border-b-2 border-blue-500 text-blue-600 dark:text-blue-400"
                   : "text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200"
               }`}
@@ -326,7 +301,7 @@ export function BulkAssetUploader({
             <button
               onClick={() => setActiveTab("gap-analysis")}
               className={`px-4 py-2 font-medium transition-colors ${
-                activeTab === "gap-analysis"
+                tabKey === "gap-analysis"
                   ? "border-b-2 border-blue-500 text-blue-600 dark:text-blue-400"
                   : "text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200"
               }`}
@@ -336,7 +311,7 @@ export function BulkAssetUploader({
             <button
               onClick={() => setActiveTab("bids")}
               className={`px-4 py-2 font-medium transition-colors ${
-                activeTab === "bids"
+                tabKey === "bids"
                   ? "border-b-2 border-blue-500 text-blue-600 dark:text-blue-400"
                   : "text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200"
               }`}

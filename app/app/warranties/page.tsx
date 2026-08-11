@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 import { WarrantyListWithForms } from "../../components/WarrantyListWithForms";
 
 export default function WarrantiesPage() {

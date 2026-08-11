@@ -82,7 +82,7 @@ export async function GET(request: NextRequest) {
     const doorsCreated = await prisma.asset.count({
       where: {
         spaceId: {
-          in: spaces.map((s) => s.id),
+          in: spaces.map((s: typeof spaces[0]) => s.id),
         },
         name: {
           contains: "door",
@@ -94,7 +94,7 @@ export async function GET(request: NextRequest) {
     const windowsCreated = await prisma.asset.count({
       where: {
         spaceId: {
-          in: spaces.map((s) => s.id),
+          in: spaces.map((s: typeof spaces[0]) => s.id),
         },
         name: {
           contains: "window",
@@ -107,7 +107,7 @@ export async function GET(request: NextRequest) {
     const allAssets = await prisma.asset.findMany({
       where: {
         spaceId: {
-          in: spaces.map((s) => s.id),
+          in: spaces.map((s: typeof spaces[0]) => s.id),
         },
       },
       include: {
@@ -120,10 +120,10 @@ export async function GET(request: NextRequest) {
 
     for (const space of spaces) {
       const doorsInRoom = allAssets.filter(
-        (a) => a.spaceId === space.id && a.name.toLowerCase().includes("door")
+        (a: typeof allAssets[0]) => a.spaceId === space.id && a.name.toLowerCase().includes("door")
       ).length;
       const windowsInRoom = allAssets.filter(
-        (a) => a.spaceId === space.id && a.name.toLowerCase().includes("window")
+        (a: typeof allAssets[0]) => a.spaceId === space.id && a.name.toLowerCase().includes("window")
       ).length;
 
       roomBreakdown[space.name] = {

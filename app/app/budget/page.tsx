@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 import { BudgetListWithForms } from "../../components/BudgetListWithForms";
 
 export default function BudgetPage() {

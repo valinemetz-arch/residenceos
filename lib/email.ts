@@ -202,6 +202,39 @@ export async function sendContractSignedEmail(
   }
 }
 
+export async function sendAdminInvitationEmail(
+  email: string,
+  inviteUrl: string
+) {
+  try {
+    const htmlContent = `
+      <h2>You're Invited to Join Paseo de Caballo ResidenceOS</h2>
+      <p>Hello,</p>
+      <p>You've been invited to join <strong>Paseo de Caballo ResidenceOS</strong> as an administrator.</p>
+      <p>Please click the button below to accept your invitation and create your admin account:</p>
+      <p><a href="${inviteUrl}" style="background: #0066cc; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; display: inline-block; font-weight: bold;">Accept Invitation</a></p>
+      <p style="margin-top: 20px; color: #666;">This invitation link will expire in 7 days.</p>
+      <p>If you did not expect this invitation or have any questions, please contact your system administrator.</p>
+      <hr style="margin: 20px 0;">
+      <p style="font-size: 12px; color: #666;">
+        This is an automated message from ResidenceOS. Do not reply to this email.
+      </p>
+    `;
+
+    await transporter.sendMail({
+      from: FROM_EMAIL,
+      to: email,
+      subject: "You're invited to join Paseo de Caballo ResidenceOS",
+      html: htmlContent,
+    });
+
+    console.log(`Admin invitation sent to ${email}`);
+  } catch (error) {
+    console.error("Failed to send admin invitation email:", error);
+    throw error;
+  }
+}
+
 export async function testEmailConnection() {
   try {
     await transporter.verify();

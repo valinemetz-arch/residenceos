@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import bcrypt from "bcryptjs";
+import { hashPassword } from "@/lib/auth";
 
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { email, password, companyName, contactName, phone } = body;
+    const { email, password, companyName, contactName, phone, trades = [] } = body;
 
     console.log("Signup request:", { email, companyName });
 
@@ -16,8 +16,16 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // Validate password length
+    if (password.length < 8) {
+      return NextResponse.json(
+        { success: false, message: "Password must be at least 8 characters" },
+        { status: 400 }
+      );
+    }
+
     const existingContractor = await prisma.contractor.findUnique({
-      where: { email },
+      where: { email: email.toLowerCase() },
     });
 
     if (existingContractor) {
@@ -27,19 +35,47 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const hashedPassword = await hashPassword(password);
 
     console.log("Creating contractor...");
     const contractor = await prisma.contractor.create({
       data: {
-        email,
+        email: email.toLowerCase(),
         password: hashedPassword,
         companyName,
         contactName: contactName || null,
         phone: phone || null,
+        role: "contractor"
       },
     });
     console.log("Contractor created:", contractor.id);
+
+    // Add trades if provided
+    if (Array.isArray(trades) && trades.length > 0) {
+      // Validate that trades exist
+      const validTrades = await prisma.trade.findMany({
+        where: { id: { in: trades } }
+      });
+
+      if (validTrades.length > 0) {
+        await prisma.contractorTrade.createMany({
+          data: validTrades.map((trade: typeof validTrades[0]) => ({
+            contractorId: contractor.id,
+            tradeId: trade.id
+          }))
+        });
+      }
+    }
+
+    // Get contractor with trades
+    const contractorWithTrades = await prisma.contractor.findUnique({
+      where: { id: contractor.id },
+      include: {
+        trades: {
+          include: { trade: true }
+        }
+      }
+    });
 
     return NextResponse.json(
       {
@@ -48,6 +84,10 @@ export async function POST(req: NextRequest) {
           id: contractor.id,
           email: contractor.email,
           companyName: contractor.companyName,
+          trades: contractorWithTrades?.trades.map((ct: any) => ({
+            id: ct.trade.id,
+            name: ct.trade.name
+          })) || []
         },
         message: "Contractor registered successfully",
       },

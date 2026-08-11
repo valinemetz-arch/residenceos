@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 import { ReportBuilder } from "@/app/components/ReportBuilder";
 
 export default function ReportsPage() {

@@ -4,11 +4,40 @@ import { successResponse, errorResponse } from "@/lib/api";
 
 export async function GET(req: NextRequest) {
   try {
+    const { searchParams } = new URL(req.url);
+    const contractorId = searchParams.get("contractorId");
+
+    let where: any = { status: "active" };
+
+    // If contractorId is provided, filter by matching trades
+    if (contractorId) {
+      // Get contractor's trades
+      const contractorTrades = await prisma.contractorTrade.findMany({
+        where: { contractorId },
+        select: { tradeId: true }
+      });
+
+      const tradeIds = contractorTrades.map((ct: any) => ct.tradeId);
+
+      if (tradeIds.length === 0) {
+        // Contractor has no trades, return empty list
+        return NextResponse.json(successResponse([]));
+      }
+
+      // Get projects that have any of the contractor's trades
+      where.trades = {
+        some: {
+          tradeId: { in: tradeIds }
+        }
+      };
+    }
+
     const projects = await prisma.project.findMany({
-      where: { status: "active" },
+      where,
       include: {
         spaces: { select: { id: true, name: true } },
         bids: { select: { id: true } },
+        trades: { include: { trade: true } }
       },
       orderBy: { createdAt: "desc" },
     });

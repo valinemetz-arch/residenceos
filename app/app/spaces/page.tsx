@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 import { SpaceListWithForms } from "../../components/SpaceListWithForms";
 
 export default function SpacesPage() {

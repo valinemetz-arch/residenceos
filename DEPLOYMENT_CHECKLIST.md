@@ -1,298 +1,339 @@
-# DocuSign Integration - Deployment Checklist
+# ResidenceOS Admin User Management - Deployment Checklist
 
-## Pre-Deployment (Local)
+## Pre-Deployment (Local Testing)
 
-### 1. Database Setup
-- [ ] Backup current database (if production)
-- [ ] Run migration: `npx prisma migrate dev --name add_docusign_contracts`
-- [ ] Verify new fields in contracts table:
-  - [ ] envelopeId
-  - [ ] signingUrl
-  - [ ] signerEmail
-  - [ ] signerName
-  - [ ] projectDetails
-  - [ ] status
-  - [ ] sentAt
-  - [ ] signedAt
-  - [ ] completedAt
-  - [ ] documentUrl
-- [ ] Verify indexes created on envelopeId, contractorId, status
+### Database & Schema
+- [ ] Run database migrations: `npx prisma migrate dev --name add_user_management_system`
+- [ ] Verify schema updated: `npx prisma db push`
+- [ ] Seed default trades: `npm run db:seed`
+- [ ] Verify 12 trades created in database
+- [ ] Check tables created: trades, contractor_trades, project_trades, admin_invitations
 
-### 2. Environment Verification
-- [ ] Verify `.env.local` contains all DocuSign variables:
-  - [ ] DOCUSIGN_INTEGRATION_KEY
-  - [ ] DOCUSIGN_USER_ID
-  - [ ] DOCUSIGN_ACCOUNT_ID
-  - [ ] DOCUSIGN_TEMPLATE_ID
-  - [ ] DOCUSIGN_PRIVATE_KEY (with proper formatting)
+### API Endpoints Testing
+- [ ] Test POST /api/trades (create trade)
+- [ ] Test GET /api/trades (list trades)
+- [ ] Test POST /api/admin/users (create user)
+- [ ] Test GET /api/admin/users (list users)
+- [ ] Test GET /api/admin/users/:id (get user)
+- [ ] Test PUT /api/admin/users/:id (update user)
+- [ ] Test DELETE /api/admin/users/:id (delete user)
+- [ ] Test POST /api/admin/invite (send invitation)
+- [ ] Test GET /api/admin/invitations/:code (verify invitation)
+- [ ] Test POST /api/admin/signup (create admin from invitation)
+- [ ] Test POST /api/auth/contractor/signup (contractor registration)
+- [ ] Test GET /api/contractor/trades
+- [ ] Test POST /api/contractor/trades
+- [ ] Test GET /api/projects?contractorId=X
 
-### 3. Dependencies Check
-- [ ] Confirm `jose` is installed: `npm list jose`
-- [ ] Confirm `nodemailer` is installed: `npm list nodemailer`
-- [ ] No new packages to install
+### UI Pages Testing
+- [ ] Navigate to /admin - verify dashboard loads
+- [ ] Navigate to /admin/users - verify user list loads
+  - [ ] Try "Invite Admin" button
+  - [ ] Try "Edit" on a user
+  - [ ] Try filtering by role
+- [ ] Navigate to /admin/trades - verify trades list loads
+  - [ ] Try creating a new trade
+- [ ] Navigate to /contractor/register - verify registration form
+  - [ ] Try registering with trades
+  - [ ] Verify redirect to login on success
+- [ ] Navigate to /admin/signup/INVALID_CODE - verify error message
+- [ ] Request invitation, get code, test /admin/signup/:code
+  - [ ] Verify email is pre-filled
+  - [ ] Verify can create account
+  - [ ] Verify redirect after success
 
-### 4. Code Review
-- [ ] Review `/lib/docusign.ts` for correctness
-- [ ] Review all API endpoints in `/app/api/contracts/`
-- [ ] Review webhook handler: `/app/api/webhooks/docusign/route.ts`
-- [ ] Review components (Modal, ContractorsContracts, ContractManagement)
-- [ ] Review email functions in `/lib/email.ts`
+### Authentication & Authorization
+- [ ] Test admin can access /admin/users
+- [ ] Test viewer cannot access /admin/users
+- [ ] Test owner can delete users
+- [ ] Test admin cannot delete owner accounts
+- [ ] Test jwt token generation
+- [ ] Test token expiration
 
-### 5. Local Testing
-- [ ] Start dev server: `npm run dev`
-- [ ] Navigate to `/contractor` - verify Contracts tab appears
-- [ ] Navigate to `/admin` - verify admin page loads
-- [ ] Test contract sending API:
-  ```bash
-  curl -X POST http://localhost:3000/api/contracts/send \
-    -H "Content-Type: application/json" \
-    -d '{
-      "projectId":"test","contractorId":"test",
-      "contractorEmail":"test@example.com",
-      "contractorName":"Test","projectDetails":{
-        "projectName":"Test","tradeService":"Testing","contractAmount":1000
-      }}'
-  ```
-- [ ] Verify contract created in database
-- [ ] Verify email sent (check logs)
-- [ ] Test contract status endpoint: `curl http://localhost:3000/api/contracts/{envelopeId}/status`
-- [ ] Test contractor portal - view contracts
-- [ ] Test signing modal opens
-- [ ] Verify admin page shows pending contracts
+### Email Testing
+- [ ] Configure SMTP settings in .env
+- [ ] Test email sending for invitations
+- [ ] Verify email template renders correctly
+- [ ] Verify invitation link is correct
 
-## DocuSign Account Setup
+### Functionality Testing
+- [ ] Create admin user via invitation
+- [ ] Update admin user (name, company, role)
+- [ ] Deactivate user
+- [ ] Register contractor with multiple trades
+- [ ] Update contractor trades
+- [ ] Verify contractor sees matching projects only
+- [ ] Create project with required trades
+- [ ] Verify trade-based filtering works
 
-### 1. Configure Webhook
-- [ ] Log into DocuSign account
-- [ ] Go to Account Settings → Webhooks
-- [ ] Add webhook endpoint:
-  - [ ] URL: `https://[YOUR_DOMAIN]/api/webhooks/docusign`
-  - [ ] Events: `envelope-signed`, `envelope-completed`
-  - [ ] Authentication: None (for now)
-- [ ] Test webhook connectivity
-- [ ] Save webhook configuration
-
-### 2. Verify Template
-- [ ] Confirm template ID: `b039551e-d45a-4415-b087-07aec165140a`
-- [ ] Verify template has text fields:
-  - [ ] ProjectName
-  - [ ] ContractAmount
-  - [ ] TradeService
-  - [ ] LotNumber (optional)
-  - [ ] StartDate (optional)
-  - [ ] CompletionDate (optional)
-- [ ] Verify template has signature field for "Contractor" role
-
-### 3. API Credentials
-- [ ] Verify Integration Key is correct
-- [ ] Verify User ID is correct
-- [ ] Verify Account ID is correct
-- [ ] Verify Private Key format (PKCS8, RSA 2048+)
-
-## Staging Deployment
-
-### 1. Deploy Code
-- [ ] Push code to staging branch
-- [ ] Deploy to staging environment
-- [ ] Verify all files present in deployment
-
-### 2. Staging Database
-- [ ] Backup staging database
-- [ ] Run migration on staging: `npx prisma migrate deploy`
-- [ ] Verify schema updated correctly
-
-### 3. Environment Configuration
-- [ ] Set environment variables on staging
-- [ ] Verify all DocuSign variables present
-- [ ] Verify email configuration working
-
-### 4. Integration Testing
-- [ ] Test contract sending end-to-end:
-  1. [ ] Create/approve a bid
-  2. [ ] Go to admin panel
-  3. [ ] Send contract to contractor
-  4. [ ] Verify email received
-  5. [ ] Verify contract status is "sent"
-
-- [ ] Test contractor signing:
-  1. [ ] Login as contractor
-  2. [ ] View contracts
-  3. [ ] Click sign contract
-  4. [ ] Open DocuSign
-  5. [ ] Sign contract
-  6. [ ] Verify status updates to "signed"
-
-- [ ] Test webhook:
-  1. [ ] Monitor webhook logs in DocuSign
-  2. [ ] Verify webhook received signing event
-  3. [ ] Verify contract status updated in DB
-
-- [ ] Test email notifications:
-  1. [ ] Verify signing email sent to contractor
-  2. [ ] Verify signing link works
-  3. [ ] Verify signed notification sent to admin
-
-### 5. Smoke Tests
-- [ ] Contractor portal loads
-- [ ] Admin panel loads
-- [ ] Bid approval flow works
-- [ ] Contract sending works
-- [ ] Signing works
-- [ ] Status updates work
-
-## Production Deployment
-
-### 1. Pre-Deployment Review
-- [ ] Get approval from project owner
-- [ ] Review all staging test results
-- [ ] Create rollback plan
-- [ ] Schedule deployment window
-- [ ] Notify team of maintenance window (if needed)
-
-### 2. Production Database
-- [ ] Backup production database (required!)
-- [ ] Export database schema for safety
-- [ ] Verify connection to production database
-- [ ] Run migration: `npx prisma migrate deploy`
-- [ ] Verify schema updated correctly
-- [ ] Run sanity check queries
-
-### 3. Production Deployment
-- [ ] Deploy code to production
-- [ ] Verify all files present
-- [ ] Verify no old files remain
-- [ ] Run health checks
-
-### 4. Configuration
-- [ ] Set production environment variables
-- [ ] Verify all DocuSign credentials
-- [ ] Verify email configuration
-- [ ] Verify webhook URL in DocuSign (if different from staging)
-- [ ] Update webhook URL in DocuSign account if needed
-
-### 5. Post-Deployment Tests
-- [ ] Test contract sending (start with test contractor)
-- [ ] Verify email notifications
-- [ ] Monitor logs for errors
-- [ ] Check database for new records
-- [ ] Verify webhook delivery in DocuSign
-
-### 6. Production Monitoring
-- [ ] Monitor application logs for 24 hours
-- [ ] Check DocuSign webhook delivery
-- [ ] Verify email delivery rates
-- [ ] Monitor database performance
-- [ ] Check for any error spikes
-
-## Rollback Plan
-
-If issues arise in production:
-
-### Quick Rollback
-1. [ ] Revert code to previous version
-2. [ ] Redeploy previous version
-3. [ ] Verify application stability
-4. [ ] Keep webhook disabled if needed
-
-### Database Rollback (Last Resort)
-```bash
-npx prisma migrate resolve --rolled-back add_docusign_contracts
-```
-Note: This only reverts schema changes, not code changes
-
-### If Webhook Causing Issues
-- [ ] Disable webhook in DocuSign account
-- [ ] Contracts can still be sent, just won't get auto-updates
-- [ ] Re-enable after issues resolved
-
-## Monitoring & Maintenance
-
-### Daily
-- [ ] Check error logs
-- [ ] Monitor DocuSign webhook delivery
-- [ ] Verify email delivery
-
-### Weekly
-- [ ] Review contract status reports
-- [ ] Check for failed sendings
-- [ ] Monitor token generation performance
-
-### Monthly
-- [ ] Review DocuSign API usage
-- [ ] Check rate limits
-- [ ] Review signing success rates
-- [ ] Plan enhancements
-
-## Known Issues & Workarounds
-
-### Issue: Token generation fails
-**Workaround:** Verify private key format and encoding
-- Check for extra whitespace
-- Verify PKCS8 format
-- Check for line ending issues
-
-### Issue: Webhook not received
-**Workaround:** Check DocuSign account settings
-- Verify webhook URL is correct
-- Test webhook connectivity
-- Check firewall/network access
-- Review DocuSign logs
-
-### Issue: Contract not found in template
-**Workaround:** Verify template configuration
-- Check template ID is correct
-- Verify account permissions
-- Ensure text fields match names
-
-### Issue: Email not sent
-**Workaround:** Check email configuration
-- Verify SMTP credentials
-- Check email service status
-- Verify domain reputation
-- Check spam folder
-
-## Post-Deployment Communication
-
-### Notify Users
-- [ ] Inform admins about new contract management feature
-- [ ] Explain how to send contracts
-- [ ] Inform contractors about signing process
-- [ ] Provide support contact information
-
-### Documentation
-- [ ] Update user documentation
-- [ ] Create FAQ for contractors
-- [ ] Create FAQ for admins
-- [ ] Document any customizations
-
-### Support
-- [ ] Set up support process for signing issues
-- [ ] Create escalation procedures
-- [ ] Document common issues
-- [ ] Train support team
-
-## Success Criteria
-
-- [ ] Contracts can be sent from admin panel
-- [ ] Contractors receive signing emails
-- [ ] Contractors can sign contracts
-- [ ] Signed status updates automatically
-- [ ] No errors in application logs
-- [ ] DocuSign webhook delivering events
-- [ ] Email delivery rate > 95%
-- [ ] No database issues or slowdowns
-
-## Final Sign-Off
-
-- [ ] Project Manager: _________________ Date: _______
-- [ ] QA Lead: _________________ Date: _______
-- [ ] DevOps: _________________ Date: _______
-- [ ] Business Owner: _________________ Date: _______
+### Build & Performance
+- [ ] Run `npm run build` - verify no errors
+- [ ] Check for TypeScript errors: `npx tsc --noEmit`
+- [ ] Test production build locally: `npm run build && npm start`
+- [ ] Verify all pages load in production mode
+- [ ] Check console for any errors or warnings
+- [ ] Test API response times
 
 ---
 
-**Notes:**
-- Keep this checklist for future reference
-- Document any deviations or custom configurations
-- Use this as template for future upgrades
-- Review and update after first month of production
+## Staging Deployment
+
+### Pre-Deployment
+- [ ] Create staging database
+- [ ] Set staging environment variables in .env.staging
+- [ ] Backup production database
+- [ ] Set NEXTAUTH_URL to staging domain
+
+### Deployment
+- [ ] Deploy code to staging
+- [ ] Run migrations: `npx prisma migrate deploy`
+- [ ] Seed trades (if first deployment): `npm run db:seed`
+- [ ] Verify all environment variables are set
+- [ ] Run build process
+- [ ] Start application
+
+### Post-Deployment Testing
+- [ ] Verify all pages load
+- [ ] Test admin panel (/admin)
+- [ ] Test user management (/admin/users)
+- [ ] Test trades management (/admin/trades)
+- [ ] Test contractor registration
+- [ ] Test admin invitation flow
+- [ ] Test project filtering by contractor
+- [ ] Check error logs for issues
+- [ ] Monitor database connections
+
+### Security Testing
+- [ ] Test SQL injection prevention
+- [ ] Test CSRF protection
+- [ ] Verify passwords are hashed (not plaintext)
+- [ ] Test authorization on protected endpoints
+- [ ] Verify email validation works
+- [ ] Test invitation code expiration
+- [ ] Test invitation code one-time use
+
+---
+
+## Production Deployment
+
+### Pre-Production
+- [ ] Review all code changes
+- [ ] Run security audit: `npm audit`
+- [ ] Update dependencies: `npm update`
+- [ ] Set production environment variables
+- [ ] Configure production database (PostgreSQL recommended)
+- [ ] Set up database backups
+- [ ] Configure monitoring and logging
+- [ ] Set up email service (SES, SendGrid, etc.)
+- [ ] Configure DNS for production domain
+
+### Database
+- [ ] Create production database
+- [ ] Test database connection
+- [ ] Set connection pooling limits
+- [ ] Enable SSL for database connections
+- [ ] Set up automated backups (daily minimum)
+- [ ] Test backup restoration
+- [ ] Configure retention policies
+
+### Deployment
+- [ ] Deploy code to production
+- [ ] Run migrations: `npx prisma migrate deploy`
+- [ ] Verify database schema matches expectations
+- [ ] Seed initial data if needed
+- [ ] Verify all environment variables
+- [ ] Test application startup
+- [ ] Monitor error logs
+
+### Post-Deployment
+- [ ] Test all critical user flows
+- [ ] Verify email sending works
+- [ ] Check dashboard loads correctly
+- [ ] Test admin functionality
+- [ ] Monitor application performance
+- [ ] Check database query performance
+- [ ] Verify backups are running
+
+### Monitoring & Maintenance
+- [ ] Set up error tracking (Sentry/NewRelic)
+- [ ] Monitor application logs
+- [ ] Monitor database performance
+- [ ] Set up alerting for errors
+- [ ] Monitor email delivery
+- [ ] Track user signups/invitations
+- [ ] Monitor API response times
+
+---
+
+## Production Safety Checks
+
+### Security
+- [ ] HTTPS enabled (SSL certificate valid)
+- [ ] CORS properly configured
+- [ ] CSRF protection enabled
+- [ ] Rate limiting implemented
+- [ ] Input validation on all endpoints
+- [ ] SQL injection protection verified
+- [ ] XSS protection verified
+- [ ] Password hashing verified
+- [ ] Secrets not logged
+- [ ] Environment variables not in code
+
+### Data Protection
+- [ ] Database encryption at rest
+- [ ] Database encryption in transit
+- [ ] Backups encrypted
+- [ ] Sensitive data not logged
+- [ ] PII protected
+- [ ] GDPR compliance (if applicable)
+- [ ] Data retention policies defined
+
+### Compliance
+- [ ] Terms of Service updated
+- [ ] Privacy Policy updated
+- [ ] GDPR compliance (EU users)
+- [ ] CCPA compliance (CA users)
+- [ ] Audit logging enabled
+- [ ] Audit logs stored securely
+
+---
+
+## Rollback Plan
+
+If issues occur in production:
+
+1. **Identify the issue**
+   - Check error logs
+   - Monitor application metrics
+   - Check database performance
+
+2. **Rollback steps**
+   ```bash
+   # Revert to previous version
+   git revert <commit-hash>
+   npm run build
+   npm start
+   ```
+
+3. **Database rollback**
+   ```bash
+   # Revert last migration
+   npx prisma migrate resolve --rolled-back <migration-name>
+   npx prisma migrate deploy
+   ```
+
+4. **Verification**
+   - Test all critical flows
+   - Check error logs
+   - Monitor performance metrics
+   - Verify database integrity
+
+---
+
+## Post-Deployment Tasks
+
+### Day 1
+- [ ] Monitor error logs closely
+- [ ] Track user signups
+- [ ] Test all critical paths
+- [ ] Respond to any user issues
+- [ ] Document any problems
+
+### Week 1
+- [ ] Review analytics
+- [ ] Check performance metrics
+- [ ] Plan improvements
+- [ ] Update documentation
+
+### Ongoing
+- [ ] Monitor logs daily
+- [ ] Review database backups
+- [ ] Monitor email delivery rates
+- [ ] Track system performance
+- [ ] Update documentation as needed
+- [ ] Plan feature enhancements
+
+---
+
+## Troubleshooting Guide
+
+### Common Issues
+
+**Database Migration Failed**
+```bash
+# Check migration status
+npx prisma migrate status
+
+# Reset to clean state (development only!)
+npx prisma migrate reset
+```
+
+**Email Not Sending**
+- Check SMTP credentials in .env
+- Verify email service is configured
+- Check email logs for errors
+- Test with: `npm run test:email`
+
+**Users Can't Login**
+- Verify JWT_SECRET is set
+- Check password hashing is working
+- Verify database schema includes password column
+- Check auth middleware is applied
+
+**404 on Admin Pages**
+- Verify routes are created
+- Check file paths match URL structure
+- Verify app router configuration
+- Check for typos in page filenames
+
+**Authorization Errors**
+- Verify user role is set correctly
+- Check auth middleware functions
+- Verify token is being sent in headers
+- Check permission logic
+
+---
+
+## Environment Variables Checklist
+
+Required for production:
+```
+NEXTAUTH_SECRET=<random-secret>
+NEXTAUTH_URL=https://yourdomain.com
+DATABASE_URL=postgresql://user:pass@host/db
+SMTP_HOST=smtp.sendgrid.net
+SMTP_PORT=587
+SMTP_USER=apikey
+SMTP_PASS=<sendgrid-api-key>
+FROM_EMAIL=noreply@yourdomain.com
+NEXT_PUBLIC_APP_URL=https://yourdomain.com
+NODE_ENV=production
+```
+
+---
+
+## Performance Targets
+
+- [ ] Page load time < 2 seconds
+- [ ] API response time < 500ms
+- [ ] Database query time < 100ms
+- [ ] Email delivery < 5 seconds
+- [ ] 99.9% uptime
+- [ ] Zero data loss (backups)
+
+---
+
+## Support & Documentation
+
+- [ ] README.md updated
+- [ ] API documentation completed
+- [ ] Admin guide written
+- [ ] Contractor guide written
+- [ ] Troubleshooting guide published
+- [ ] Video tutorials recorded (optional)
+
+---
+
+**Last Updated:** 2026-08-11  
+**Version:** 1.0  
+**Status:** Ready for Production

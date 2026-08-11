@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 import { AssetListWithForms } from "../../components/AssetListWithForms";
 
 export default function AssetsPage() {

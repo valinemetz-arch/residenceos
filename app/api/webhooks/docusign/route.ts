@@ -57,8 +57,8 @@ export async function POST(req: NextRequest) {
         await sendContractSignedEmail(
           ownerEmail,
           contract.signerName,
-          (contract.projectDetails as Record<string, string | number>)?.projectName ||
-            "Project",
+          String((contract.projectDetails as Record<string, string | number>)?.projectName ||
+            "Project"),
           contract.projectId || ""
         );
       } catch (emailError) {

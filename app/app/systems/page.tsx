@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 import { SystemListWithForms } from "@/app/components/SystemListWithForms";
 
 export default function SystemsPage() {

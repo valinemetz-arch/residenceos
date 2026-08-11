@@ -247,14 +247,14 @@ export function ScheduleExtractionTab({
   const updateDoor = (index: number, field: keyof ExtractedDoor, value: unknown) => {
     if (!extractedSchedule) return;
     const updated = { ...extractedSchedule };
-    (updated.doors[index] as Record<string, unknown>)[field] = value;
+    (updated.doors[index] as unknown as Record<string, unknown>)[field] = value;
     setExtractedSchedule(updated);
   };
 
   const updateWindow = (index: number, field: keyof ExtractedWindow, value: unknown) => {
     if (!extractedSchedule) return;
     const updated = { ...extractedSchedule };
-    (updated.windows[index] as Record<string, unknown>)[field] = value;
+    (updated.windows[index] as unknown as Record<string, unknown>)[field] = value;
     setExtractedSchedule(updated);
   };
 

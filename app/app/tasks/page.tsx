@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 import { TaskListWithForms } from "../../components/TaskListWithForms";
 
 export default function TasksPage() {

@@ -8,13 +8,20 @@ datasource db {
 
 // User Authentication
 model User {
-  id            String    @id @default(cuid())
-  email         String    @unique
-  password      String    // hashed
-  name          String?
-  role          String    @default("owner") // owner, admin, viewer
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  id                      String    @id @default(cuid())
+  email                   String    @unique
+  password                String    // hashed
+  name                    String?
+  role                    String    @default("viewer") // owner, admin, viewer
+  company                 String?
+  isActive                Boolean   @default(true)
+  lastLoginAt             DateTime?
+  createdAt               DateTime  @default(now())
+  updatedAt               DateTime  @updatedAt
+  createdBy               String?
+
+  // Relations
+  invitationsCreated      AdminInvitation[] @relation("InvitedBy")
 
   @@map("users")
 }
@@ -438,6 +445,7 @@ model Project {
   bids          Bid[]
   contracts     Contract[]  // Contracts for this project
   messages      Message[]   // Q&A messages
+  trades        ProjectTrade[] // Required trades for this project
 
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
@@ -445,39 +453,104 @@ model Project {
   @@map("projects")
 }
 
+// TRADES: Trade specialties
+model Trade {
+  id            String    @id @default(cuid())
+  name          String    @unique // Plumbing, Electrical, HVAC, etc.
+  description   String?
+
+  // Relations
+  contractors   ContractorTrade[]
+  projects      ProjectTrade[]
+
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@map("trades")
+}
+
+// CONTRACTOR TRADES: Junction table for contractor specialties
+model ContractorTrade {
+  id              String    @id @default(cuid())
+  contractorId    String
+  contractor      Contractor @relation(fields: [contractorId], references: [id], onDelete: Cascade)
+
+  tradeId         String
+  trade           Trade     @relation(fields: [tradeId], references: [id], onDelete: Cascade)
+
+  createdAt       DateTime  @default(now())
+
+  @@unique([contractorId, tradeId])
+  @@map("contractor_trades")
+}
+
+// PROJECT TRADES: Junction table for project requirements
+model ProjectTrade {
+  id              String    @id @default(cuid())
+  projectId       String
+  project         Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  tradeId         String
+  trade           Trade     @relation(fields: [tradeId], references: [id], onDelete: Cascade)
+
+  createdAt       DateTime  @default(now())
+
+  @@unique([projectId, tradeId])
+  @@map("project_trades")
+}
+
+// ADMIN INVITATIONS: Invite links for new admins
+model AdminInvitation {
+  id              String    @id @default(cuid())
+  email           String    @unique
+  code            String    @unique
+  invitedBy       String
+  invitedByUser   User      @relation("InvitedBy", fields: [invitedBy], references: [id], onDelete: Cascade)
+
+  expiresAt       DateTime
+  usedAt          DateTime?
+  createdAt       DateTime  @default(now())
+
+  @@map("admin_invitations")
+}
+
 /// CONTRACTOR PORTAL: Contractors
 model Contractor {
-  id            String    @id @default(cuid())
-  email         String    @unique
-  password      String    // hashed
-  companyName   String
-  contactName   String?
-  phone         String?
-  address       String?
+  id              String    @id @default(cuid())
+  email           String    @unique
+  password        String    // hashed
+  companyName     String
+  contactName     String?
+  phone           String?
+  address         String?
+  role            String    @default("contractor") // contractor role
 
   // Contact Info
-  website       String?
-  logo          String?   // URL to logo image
+  website         String?
+  logo            String?   // URL to logo image
 
   // Credentials
-  licenseNumber String?
-  licenseExpiry DateTime?
+  licenseNumber   String?
+  licenseExpiry   DateTime?
   licenseDocument String? // URL to uploaded license document
   insuranceExpiry DateTime?
   insuranceDocument String? // URL to uploaded insurance certificate
 
   // Bids & Contracts
-  bids          Bid[]
-  contracts     Contract[]
-  documents     Document[]
-  messages      Message[]
+  bids            Bid[]
+  contracts       Contract[]
+  documents       Document[]
+  messages        Message[]
+
+  // Trades
+  trades          ContractorTrade[]
 
   // Tracking
-  lastAccessedAt DateTime?
+  lastAccessedAt  DateTime?
   lastReminderSentAt DateTime?
 
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
 
   @@map("contractors")
 }

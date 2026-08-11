@@ -1,14 +1,40 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
-import ContractManagement from "@/app/components/admin/ContractManagement";
-
-type AdminTab = "contracts" | "bids" | "projects";
+import { ArrowLeft, Users, Wrench, FileText, BarChart3 } from "lucide-react";
 
 export default function AdminPage() {
-  const [activeTab, setActiveTab] = useState<AdminTab>("contracts");
+  const adminTools = [
+    {
+      icon: Users,
+      title: "User Management",
+      description: "Manage administrators and viewers",
+      href: "/admin/users",
+      color: "bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400",
+    },
+    {
+      icon: Wrench,
+      title: "Trades Management",
+      description: "Manage contractor specialties",
+      href: "/admin/trades",
+      color:
+        "bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400",
+    },
+    {
+      icon: FileText,
+      title: "Contract Management",
+      description: "Manage contracts and bids",
+      href: "/admin/contracts",
+      color: "bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400",
+    },
+    {
+      icon: BarChart3,
+      title: "Analytics",
+      description: "View system analytics and reports",
+      href: "/admin/analytics",
+      color: "bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400",
+    },
+  ];
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-slate-950">
@@ -24,60 +50,48 @@ export default function AdminPage() {
           </Link>
           <h1 className="text-3xl font-bold dark:text-white">Admin Center</h1>
           <p className="text-gray-600 dark:text-gray-400 mt-2">
-            Manage contracts, bids, and projects
+            System administration and management
           </p>
         </div>
 
-        {/* Tabs */}
-        <div className="bg-white dark:bg-slate-900 rounded-lg border border-gray-200 dark:border-gray-700 mb-6">
-          <div className="flex border-b border-gray-200 dark:border-gray-700">
-            <button
-              onClick={() => setActiveTab("contracts")}
-              className={`flex-1 px-6 py-4 text-center font-medium transition ${
-                activeTab === "contracts"
-                  ? "text-blue-600 border-b-2 border-blue-600 dark:text-blue-400"
-                  : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-300"
-              }`}
-            >
-              Contract Management
-            </button>
-            <button
-              onClick={() => setActiveTab("bids")}
-              className={`flex-1 px-6 py-4 text-center font-medium transition ${
-                activeTab === "bids"
-                  ? "text-blue-600 border-b-2 border-blue-600 dark:text-blue-400"
-                  : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-300"
-              }`}
-            >
-              Bids
-            </button>
-            <button
-              onClick={() => setActiveTab("projects")}
-              className={`flex-1 px-6 py-4 text-center font-medium transition ${
-                activeTab === "projects"
-                  ? "text-blue-600 border-b-2 border-blue-600 dark:text-blue-400"
-                  : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-300"
-              }`}
-            >
-              Projects
-            </button>
-          </div>
+        {/* Admin Tools Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+          {adminTools.map((tool) => {
+            const IconComponent = tool.icon;
+            return (
+              <Link
+                key={tool.href}
+                href={tool.href}
+                className="bg-white dark:bg-slate-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6 hover:shadow-lg dark:hover:shadow-lg/20 transition"
+              >
+                <div className="flex items-start gap-4">
+                  <div className={`p-3 rounded-lg ${tool.color}`}>
+                    <IconComponent className="h-6 w-6" />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                      {tool.title}
+                    </h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                      {tool.description}
+                    </p>
+                  </div>
+                </div>
+              </Link>
+            );
+          })}
+        </div>
 
-          <div className="p-6">
-            {activeTab === "contracts" && <ContractManagement />}
-
-            {activeTab === "bids" && (
-              <div className="text-center py-12 text-gray-600 dark:text-gray-400">
-                <p>Bid management coming soon</p>
-              </div>
-            )}
-
-            {activeTab === "projects" && (
-              <div className="text-center py-12 text-gray-600 dark:text-gray-400">
-                <p>Project management coming soon</p>
-              </div>
-            )}
-          </div>
+        {/* System Info */}
+        <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-6">
+          <h3 className="font-semibold text-blue-900 dark:text-blue-300 mb-2">
+            Administrator Tools
+          </h3>
+          <p className="text-sm text-blue-800 dark:text-blue-400">
+            Use these tools to manage users, configure contractors, and monitor
+            system activity. All actions are logged for security and compliance
+            purposes.
+          </p>
         </div>
       </div>
     </div>
