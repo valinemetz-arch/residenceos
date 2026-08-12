@@ -13,23 +13,14 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-10 mb-10">
           {/* Brand Section */}
           <div className="space-y-5">
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 relative">
-                <Image
-                  src="/paseo-logo.svg"
-                  alt="Paseo de Caballo"
-                  width={32}
-                  height={32}
-                />
-              </div>
-              <div>
-                <div className="font-[Georgia,Garamond,serif] text-sm font-bold text-[#2D5016] dark:text-[#C9A876]">
-                  Paseo
-                </div>
-                <div className="text-xs font-medium text-[#8B6F47] dark:text-[#A88860] uppercase letter-spacing-wide">
-                  de Caballo
-                </div>
-              </div>
+            <div className="h-12 relative">
+              <Image
+                src="/nemetz-residence-logo.png"
+                alt="Nemetz Residence - Paseo de Caballo"
+                height={48}
+                width={180}
+                style={{ objectFit: "contain" }}
+              />
             </div>
             <p className="text-sm text-[#5A5A5A] dark:text-[#A8A8A8] leading-relaxed letter-spacing-wide">
               Professional property management and digital twin technology for residential estates.

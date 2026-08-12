@@ -12,27 +12,18 @@ export function Header() {
           {/* Logo and Brand */}
           <Link
             href="/"
-            className="flex items-center gap-4 hover:opacity-80 transition-opacity group"
+            className="flex items-center hover:opacity-80 transition-opacity group"
           >
             {/* Logo Image */}
-            <div className="w-12 h-12 flex-shrink-0 relative group-hover:scale-105 transition-transform">
+            <div className="h-16 flex-shrink-0 relative group-hover:scale-105 transition-transform">
               <Image
-                src="/paseo-logo.svg"
-                alt="Paseo de Caballo"
-                width={48}
-                height={48}
+                src="/nemetz-residence-logo.png"
+                alt="Nemetz Residence - Paseo de Caballo"
+                height={64}
+                width={280}
                 priority
+                style={{ objectFit: "contain" }}
               />
-            </div>
-
-            {/* Brand Text */}
-            <div className="flex flex-col gap-0.5">
-              <span className="font-[Georgia,Garamond,serif] text-lg font-bold text-[#2D5016] dark:text-[#C9A876] tracking-tight">
-                Paseo
-              </span>
-              <span className="text-xs font-medium text-[#8B6F47] dark:text-[#A88860] uppercase tracking-widest letter-spacing-wide">
-                de Caballo
-              </span>
             </div>
           </Link>
 

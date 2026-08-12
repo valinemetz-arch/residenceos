@@ -19,24 +19,17 @@ export function Navigation() {
             {/* Logo and Brand */}
             <Link
               href="/app"
-              className="font-bold text-lg flex items-center gap-3 hover:opacity-80 transition-opacity group flex-shrink-0"
+              className="font-bold text-lg flex items-center hover:opacity-80 transition-opacity group flex-shrink-0"
             >
-              <div className="w-10 h-10 relative group-hover:scale-105 transition-transform">
+              <div className="h-14 relative group-hover:scale-105 transition-transform">
                 <Image
-                  src="/paseo-logo.svg"
-                  alt="Paseo de Caballo"
-                  width={40}
-                  height={40}
+                  src="/nemetz-residence-logo.png"
+                  alt="Nemetz Residence - Paseo de Caballo"
+                  height={56}
+                  width={220}
                   priority
+                  style={{ objectFit: "contain" }}
                 />
-              </div>
-              <div className="hidden sm:flex flex-col gap-0.5">
-                <span className="font-[Georgia,Garamond,serif] text-base font-bold text-[#2D5016] dark:text-[#C9A876] leading-tight">
-                  Paseo
-                </span>
-                <span className="text-xs font-medium text-[#8B6F47] dark:text-[#A88860] uppercase tracking-widest letter-spacing-wide">
-                  OS
-                </span>
               </div>
             </Link>
 
