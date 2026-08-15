@@ -30,7 +30,7 @@ export default function LoginPage() {
       } else {
         setError("Invalid credentials");
       }
-    } catch (err) {
+    } catch {
       setError("Failed to login");
     } finally {
       setLoading(false);
@@ -153,7 +153,7 @@ export default function LoginPage() {
               Demo credentials pre-filled
             </p>
             <p className="text-xs text-center text-[#8A8A8A] dark:text-[#5A5A5A] mt-2 letter-spacing-wide">
-              Click "Sign In" to continue
+              Click &quot;Sign In&quot; to continue
             </p>
           </div>
         </div>
