@@ -3,7 +3,12 @@ import Anthropic from "@anthropic-ai/sdk";
 import * as fs from "fs";
 import * as path from "path";
 import * as os from "os";
-import * as pdfjs from "pdfjs-dist";
+// pdfjs-dist's default build assumes a browser Worker and, when it can't
+// spawn one in a Node serverless function, falls back to a "fake worker"
+// that tries to require pdf.worker.mjs as a module — a file Vercel's build
+// doesn't bundle, causing a crash. The "legacy" Node build runs PDF parsing
+// entirely on the main thread instead, so no worker file is ever needed.
+import * as pdfjs from "pdfjs-dist/legacy/build/pdf.mjs";
 
 interface PDFTextItem {
   str: string;
