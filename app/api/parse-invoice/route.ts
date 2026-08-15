@@ -15,7 +15,10 @@ interface ParseResult {
 }
 
 async function extractTextFromPDF(fileBuffer: Buffer): Promise<string> {
-  const pdf = await pdfjs.getDocument({ data: fileBuffer }).promise;
+  // pdfjs-dist rejects Node's Buffer even though it's a Uint8Array subclass;
+  // convert explicitly to a plain Uint8Array.
+  const pdf = await pdfjs.getDocument({ data: new Uint8Array(fileBuffer) })
+    .promise;
   let text = "";
 
   for (let i = 1; i <= pdf.numPages; i++) {
