@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
 import * as fs from "fs";
 import * as path from "path";
+import * as os from "os";
 import * as pdfjs from "pdfjs-dist";
 
 interface PDFTextItem {
@@ -40,7 +41,10 @@ interface ExtractedSpace {
 }
 
 export async function POST(request: NextRequest) {
-  const uploadDir = path.join(process.cwd(), "public", "uploads");
+  // Vercel's serverless filesystem is read-only except for os.tmpdir();
+  // these files are only needed for the duration of this request (analyzed
+  // then deleted below), so they never need to live under public/.
+  const uploadDir = os.tmpdir();
 
   try {
     const formData = await request.formData();

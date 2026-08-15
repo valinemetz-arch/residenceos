@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ArrowLeft, Users, Plus, AlertCircle } from "lucide-react";
 import UserListTable from "@/app/components/admin/UserListTable";
 import InviteAdminModal from "@/app/components/admin/InviteAdminModal";
+import { authFetch } from "@/lib/authFetch";
 
 interface User {
   id: string;
@@ -55,7 +56,7 @@ export default function AdminUsersPage() {
         params.append("role", roleFilter);
       }
 
-      const response = await fetch(`/api/admin/users?${params}`);
+      const response = await authFetch(`/api/admin/users?${params}`);
 
       if (!response.ok) {
         if (response.status === 401) {
@@ -76,7 +77,7 @@ export default function AdminUsersPage() {
 
   async function handleInviteAdmin(email: string) {
     try {
-      const response = await fetch("/api/admin/invite", {
+      const response = await authFetch("/api/admin/invite", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email }),
@@ -95,7 +96,7 @@ export default function AdminUsersPage() {
 
   async function handleDeleteUser(userId: string) {
     try {
-      const response = await fetch(`/api/admin/users/${userId}`, {
+      const response = await authFetch(`/api/admin/users/${userId}`, {
         method: "DELETE",
       });
 
@@ -110,7 +111,7 @@ export default function AdminUsersPage() {
 
   async function handleUpdateUser(userId: string, data: any) {
     try {
-      const response = await fetch(`/api/admin/users/${userId}`, {
+      const response = await authFetch(`/api/admin/users/${userId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),

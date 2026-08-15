@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { ArrowLeft, Wrench, Plus, AlertCircle } from "lucide-react";
+import { authFetch } from "@/lib/authFetch";
 
 interface Trade {
   id: string;
