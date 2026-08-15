@@ -15,14 +15,14 @@ export function Header() {
             className="flex items-center hover:opacity-80 transition-opacity group"
           >
             {/* Logo Image */}
-            <div className="h-16 flex-shrink-0 relative group-hover:scale-105 transition-transform">
+            <div className="h-16 w-[280px] max-w-[40vw] flex-shrink-0 relative group-hover:scale-105 transition-transform">
               <Image
                 src="/nemetz-residence-logo.png"
                 alt="Nemetz Residence - Paseo de Caballo"
-                height={64}
-                width={280}
+                fill
+                sizes="280px"
                 priority
-                style={{ objectFit: "contain" }}
+                style={{ objectFit: "contain", objectPosition: "left" }}
               />
             </div>
           </Link>

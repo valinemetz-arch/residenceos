@@ -27,14 +27,14 @@ export function Navigation() {
               href="/app"
               className="font-bold text-lg flex items-center hover:opacity-80 transition-opacity group flex-shrink-0"
             >
-              <div className="h-14 relative group-hover:scale-105 transition-transform">
+              <div className="h-14 w-[220px] max-w-[35vw] relative group-hover:scale-105 transition-transform">
                 <Image
                   src="/nemetz-residence-logo.png"
                   alt="Nemetz Residence - Paseo de Caballo"
-                  height={56}
-                  width={220}
+                  fill
+                  sizes="220px"
                   priority
-                  style={{ objectFit: "contain" }}
+                  style={{ objectFit: "contain", objectPosition: "left" }}
                 />
               </div>
             </Link>

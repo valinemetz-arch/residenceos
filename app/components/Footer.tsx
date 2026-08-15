@@ -13,13 +13,13 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-10 mb-10">
           {/* Brand Section */}
           <div className="space-y-5">
-            <div className="h-12 relative">
+            <div className="h-12 w-[180px] relative">
               <Image
                 src="/nemetz-residence-logo.png"
                 alt="Nemetz Residence - Paseo de Caballo"
-                height={48}
-                width={180}
-                style={{ objectFit: "contain" }}
+                fill
+                sizes="180px"
+                style={{ objectFit: "contain", objectPosition: "left" }}
               />
             </div>
             <p className="text-sm text-[#5A5A5A] dark:text-[#A8A8A8] leading-relaxed letter-spacing-wide">
