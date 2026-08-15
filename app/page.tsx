@@ -51,7 +51,7 @@ export default function LoginPage() {
           <div className="flex justify-center mb-6">
             <div className="w-24 h-24 relative">
               <Image
-                src="/paseo-logo.svg"
+                src="/nemetz-residence-logo.png"
                 alt="Paseo de Caballo"
                 width={96}
                 height={96}
