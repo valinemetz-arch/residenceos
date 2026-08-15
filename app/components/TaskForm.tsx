@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { X, Loader2 } from "lucide-react";
 import { validationSchemas } from "@/lib/validation";
 import { toast } from "@/lib/toast";
@@ -15,6 +15,21 @@ interface System {
   name: string;
 }
 
+interface AssigneeUser {
+  id: string;
+  name: string | null;
+  email: string;
+  role: string;
+}
+
+interface AssigneeContractor {
+  id: string;
+  companyName: string;
+  contactName: string | null;
+  email: string;
+  trades: string[];
+}
+
 interface Task {
   [key: string]: unknown;
   id?: string;
@@ -25,7 +40,8 @@ interface Task {
   priority: string;
   status: string;
   dueDate: string | null;
-  assignedTo: string | null;
+  assignedToUserId: string | null;
+  assignedToContractorId: string | null;
   notes: string | null;
 }
 
@@ -57,12 +73,58 @@ export function TaskForm({
       priority: "medium",
       status: "pending",
       dueDate: null,
-      assignedTo: null,
+      assignedToUserId: null,
+      assignedToContractorId: null,
       notes: null,
     }
   );
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [assigneeUsers, setAssigneeUsers] = useState<AssigneeUser[]>([]);
+  const [assigneeContractors, setAssigneeContractors] = useState<
+    AssigneeContractor[]
+  >([]);
+
+  useEffect(() => {
+    fetch("/api/assignees")
+      .then((res) => res.json())
+      .then((result) => {
+        if (result.success) {
+          setAssigneeUsers(result.data.users || []);
+          setAssigneeContractors(result.data.contractors || []);
+        }
+      })
+      .catch(() => {
+        // Assignee picker just won't have options; task creation still works.
+      });
+  }, []);
+
+  // The <select> below needs a single value, so we encode which table the
+  // assignee comes from as a prefix (e.g. "user:abc123") and decode it back
+  // into the two real foreign keys on change.
+  const assigneeValue = formData.assignedToUserId
+    ? `user:${formData.assignedToUserId}`
+    : formData.assignedToContractorId
+      ? `contractor:${formData.assignedToContractorId}`
+      : "";
+
+  const handleAssigneeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const value = e.target.value;
+    if (!value) {
+      setFormData((prev) => ({
+        ...prev,
+        assignedToUserId: null,
+        assignedToContractorId: null,
+      }));
+      return;
+    }
+    const [type, id] = value.split(":");
+    setFormData((prev) => ({
+      ...prev,
+      assignedToUserId: type === "user" ? id : null,
+      assignedToContractorId: type === "contractor" ? id : null,
+    }));
+  };
 
   const handleChange = (
     e: React.ChangeEvent<
@@ -286,14 +348,33 @@ export function TaskForm({
             <label className="block text-sm font-medium dark:text-gray-200">
               Assigned To
             </label>
-            <input
-              type="text"
-              name="assignedTo"
-              value={formData.assignedTo || ""}
-              onChange={handleChange}
-              placeholder="e.g., John Smith"
+            <select
+              name="assignee"
+              value={assigneeValue}
+              onChange={handleAssigneeChange}
               className="mt-1 w-full rounded border border-gray-300 px-3 py-2 dark:border-gray-600 dark:bg-slate-800 dark:text-white"
-            />
+            >
+              <option value="">Unassigned</option>
+              {assigneeUsers.length > 0 && (
+                <optgroup label="Team">
+                  {assigneeUsers.map((u) => (
+                    <option key={u.id} value={`user:${u.id}`}>
+                      {u.name || u.email} ({u.role})
+                    </option>
+                  ))}
+                </optgroup>
+              )}
+              {assigneeContractors.length > 0 && (
+                <optgroup label="Contractors">
+                  {assigneeContractors.map((c) => (
+                    <option key={c.id} value={`contractor:${c.id}`}>
+                      {c.companyName}
+                      {c.trades.length > 0 ? ` (${c.trades.join(", ")})` : ""}
+                    </option>
+                  ))}
+                </optgroup>
+              )}
+            </select>
           </div>
 
           {/* Notes */}

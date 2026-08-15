@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { FileText, DollarSign, Loader2, LogOut, Settings, FileCheck } from "lucide-react";
+import { FileText, DollarSign, Loader2, LogOut, Settings, FileCheck, ClipboardList } from "lucide-react";
 import { toast } from "@/lib/toast";
 import Link from "next/link";
 import ContractorsContracts from "./ContractorsContracts";
@@ -22,6 +22,18 @@ interface Bid {
   project: Project;
 }
 
+interface ContractorTask {
+  id: string;
+  title: string;
+  description: string | null;
+  priority: string;
+  status: string;
+  dueDate: string | null;
+  notes: string | null;
+  space: { id: string; name: string } | null;
+  system: { id: string; name: string } | null;
+}
+
 interface ContractorDashboardProps {
   contractor: {
     id: string;
@@ -33,8 +45,10 @@ interface ContractorDashboardProps {
 export default function ContractorDashboard({ contractor }: ContractorDashboardProps) {
   const [projects, setProjects] = useState<Project[]>([]);
   const [bids, setBids] = useState<Bid[]>([]);
+  const [tasks, setTasks] = useState<ContractorTask[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<"projects" | "bids" | "contracts">("projects");
+  const [updatingTaskId, setUpdatingTaskId] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<"projects" | "bids" | "contracts" | "tasks">("projects");
 
   useEffect(() => {
     loadData();
@@ -43,9 +57,10 @@ export default function ContractorDashboard({ contractor }: ContractorDashboardP
   const loadData = async () => {
     try {
       setLoading(true);
-      const [projectsRes, bidsRes] = await Promise.all([
+      const [projectsRes, bidsRes, tasksRes] = await Promise.all([
         fetch("/api/projects"),
         fetch("/api/bids/my-bids"),
+        fetch("/api/contractor/tasks"),
       ]);
 
       if (projectsRes.ok) {
@@ -57,10 +72,41 @@ export default function ContractorDashboard({ contractor }: ContractorDashboardP
         const data = await bidsRes.json();
         setBids(data.data || []);
       }
+
+      if (tasksRes.ok) {
+        const data = await tasksRes.json();
+        setTasks(data.data || []);
+      }
     } catch (error) {
       toast.error("Error", "Failed to load data");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleTaskStatusChange = async (taskId: string, status: string) => {
+    setUpdatingTaskId(taskId);
+    try {
+      const res = await fetch(`/api/contractor/tasks/${taskId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status }),
+      });
+      const result = await res.json();
+      if (!res.ok || !result.success) {
+        throw new Error(result.message || "Failed to update task");
+      }
+      setTasks((prev) =>
+        prev.map((t) => (t.id === taskId ? { ...t, status } : t))
+      );
+      toast.success("Task updated", "Status saved");
+    } catch (error) {
+      toast.error(
+        "Error",
+        error instanceof Error ? error.message : "Failed to update task"
+      );
+    } finally {
+      setUpdatingTaskId(null);
     }
   };
 
@@ -112,7 +158,7 @@ export default function ContractorDashboard({ contractor }: ContractorDashboardP
       </div>
 
       {/* Stats */}
-      <div className="grid md:grid-cols-3 gap-4 mb-8">
+      <div className="grid md:grid-cols-4 gap-4 mb-8">
         <div className="bg-white dark:bg-slate-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
           <p className="text-sm text-gray-600 dark:text-gray-400">
             Active Projects
@@ -135,6 +181,14 @@ export default function ContractorDashboard({ contractor }: ContractorDashboardP
           </p>
           <p className="text-3xl font-bold dark:text-white mt-2">
             {bids.filter((b) => b.status === "pending").length}
+          </p>
+        </div>
+        <div className="bg-white dark:bg-slate-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
+          <p className="text-sm text-gray-600 dark:text-gray-400">
+            Assigned Tasks
+          </p>
+          <p className="text-3xl font-bold dark:text-white mt-2">
+            {tasks.filter((t) => t.status !== "completed").length}
           </p>
         </div>
       </div>
@@ -210,6 +264,16 @@ export default function ContractorDashboard({ contractor }: ContractorDashboardP
             }`}
           >
             Contracts
+          </button>
+          <button
+            onClick={() => setActiveTab("tasks")}
+            className={`flex-1 px-6 py-4 text-center font-medium transition ${
+              activeTab === "tasks"
+                ? "text-blue-600 border-b-2 border-blue-600 dark:text-blue-400"
+                : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-300"
+            }`}
+          >
+            My Tasks
           </button>
         </div>
 
@@ -323,6 +387,77 @@ export default function ContractorDashboard({ contractor }: ContractorDashboardP
           {/* Contracts Tab */}
           {activeTab === "contracts" && (
             <ContractorsContracts contractorId={contractor.id} />
+          )}
+
+          {/* Tasks Tab */}
+          {activeTab === "tasks" && (
+            <>
+              {tasks.length === 0 ? (
+                <p className="text-gray-600 dark:text-gray-400">
+                  No tasks have been assigned to you yet.
+                </p>
+              ) : (
+                <div className="space-y-3">
+                  {tasks.map((task) => (
+                    <div
+                      key={task.id}
+                      className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg"
+                    >
+                      <div className="flex justify-between items-start gap-4">
+                        <div className="min-w-0">
+                          <h3
+                            className={`font-semibold ${
+                              task.status === "completed"
+                                ? "line-through text-gray-500 dark:text-gray-400"
+                                : "dark:text-white"
+                            }`}
+                          >
+                            {task.title}
+                          </h3>
+                          {task.description && (
+                            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                              {task.description}
+                            </p>
+                          )}
+                          <div className="mt-2 flex flex-wrap gap-2 text-sm text-gray-600 dark:text-gray-300">
+                            {task.space && <span>📍 {task.space.name}</span>}
+                            {task.dueDate && (
+                              <span>
+                                📅 {new Date(task.dueDate).toLocaleDateString()}
+                              </span>
+                            )}
+                            <span
+                              className={`rounded px-2 py-0.5 text-xs font-semibold ${
+                                task.priority === "critical" || task.priority === "high"
+                                  ? "bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-300"
+                                  : task.priority === "medium"
+                                  ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-300"
+                                  : "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300"
+                              }`}
+                            >
+                              {task.priority}
+                            </span>
+                          </div>
+                        </div>
+                        <select
+                          value={task.status}
+                          disabled={updatingTaskId === task.id}
+                          onChange={(e) =>
+                            handleTaskStatusChange(task.id, e.target.value)
+                          }
+                          className="shrink-0 rounded border border-gray-300 px-3 py-2 text-sm dark:border-gray-600 dark:bg-slate-800 dark:text-white disabled:opacity-50"
+                        >
+                          <option value="pending">Pending</option>
+                          <option value="in_progress">In Progress</option>
+                          <option value="completed">Completed</option>
+                          <option value="blocked">Blocked</option>
+                        </select>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </>
           )}
         </div>
       </div>

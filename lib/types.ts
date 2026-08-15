@@ -76,7 +76,8 @@ export interface TaskBase {
   priority: string;
   status: string;
   dueDate: string | null;
-  assignedTo: string | null;
+  assignedToUserId: string | null;
+  assignedToContractorId: string | null;
   notes: string | null;
 }
 
@@ -84,4 +85,7 @@ export interface TaskWithRelations extends TaskBase {
   id: string;
   space: { id: string; name: string } | null;
   system: { id: string; name: string } | null;
+  assignedToUser: { id: string; name: string | null; email: string; role: string } | null;
+  assignedToContractor: { id: string; companyName: string; contactName: string | null; email: string } | null;
+  assignedAt?: string | null;
 }

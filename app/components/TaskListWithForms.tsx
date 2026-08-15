@@ -204,8 +204,13 @@ export function TaskListWithForms() {
                   {task.dueDate && (
                     <span>📅 {formatDate(new Date(task.dueDate))}</span>
                   )}
-                  {task.assignedTo && (
-                    <span>👤 {task.assignedTo}</span>
+                  {(task.assignedToUser || task.assignedToContractor) && (
+                    <span>
+                      👤{" "}
+                      {task.assignedToUser
+                        ? task.assignedToUser.name || task.assignedToUser.email
+                        : task.assignedToContractor?.companyName}
+                    </span>
                   )}
                   <span
                     className={`rounded px-2 py-0.5 text-xs font-semibold ${

@@ -22,6 +22,8 @@ model User {
 
   // Relations
   invitationsCreated      AdminInvitation[] @relation("InvitedBy")
+  assignedTasks           Task[]    @relation("TaskAssignedToUser")
+  tasksAssignedByMe       Task[]    @relation("TaskAssignedByUser")
 
   @@map("users")
 }
@@ -175,9 +177,21 @@ model Task {
   systemId      String?
   system        System?   @relation(fields: [systemId], references: [id], onDelete: SetNull)
 
+  // Assignment (either an internal team member OR a contractor, not both)
+  assignedToUserId        String?
+  assignedToUser          User?       @relation("TaskAssignedToUser", fields: [assignedToUserId], references: [id], onDelete: SetNull)
+
+  assignedToContractorId  String?
+  assignedToContractor    Contractor? @relation("TaskAssignedToContractor", fields: [assignedToContractorId], references: [id], onDelete: SetNull)
+
+  assignedById            String?
+  assignedByUser          User?       @relation("TaskAssignedByUser", fields: [assignedById], references: [id], onDelete: SetNull)
+
+  assignedAt              DateTime?
+
   photos        Photo[]
   documents     Document[]
-  notes         String?   
+  notes         String?
 
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
@@ -544,6 +558,9 @@ model Contractor {
 
   // Trades
   trades          ContractorTrade[]
+
+  // Task Assignment
+  assignedTasks   Task[]    @relation("TaskAssignedToContractor")
 
   // Tracking
   lastAccessedAt  DateTime?
