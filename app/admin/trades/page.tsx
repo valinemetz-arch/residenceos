@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { ArrowLeft, Wrench, Plus, AlertCircle } from "lucide-react";
 import { authFetch } from "@/lib/authFetch";
+import { RequireAdmin } from "@/app/components/admin/RequireAdmin";
 
 interface Trade {
   id: string;
@@ -54,7 +55,7 @@ export default function AdminTradesPage() {
     try {
       setSubmitting(true);
 
-      const response = await fetch("/api/trades", {
+      const response = await authFetch("/api/trades", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -79,6 +80,7 @@ export default function AdminTradesPage() {
   }
 
   return (
+    <RequireAdmin>
     <div className="min-h-screen bg-gray-50 dark:bg-slate-950">
       <div className="max-w-4xl mx-auto px-4 py-8">
         {/* Header */}
@@ -249,5 +251,6 @@ export default function AdminTradesPage() {
         </div>
       </div>
     </div>
+    </RequireAdmin>
   );
 }

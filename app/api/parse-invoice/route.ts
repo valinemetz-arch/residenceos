@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
-import * as fs from "fs";
-import * as path from "path";
 import * as pdfjs from "pdfjs-dist";
 
 interface ApiResponse<T> {
@@ -16,16 +14,7 @@ interface ParseResult {
   confidence: "high" | "medium" | "low";
 }
 
-interface PDFTextItem {
-  str: string;
-}
-
-function isPDFTextItem(item: unknown): item is PDFTextItem {
-  return typeof item === "object" && item !== null && "str" in item;
-}
-
-async function extractTextFromPDF(filePath: string): Promise<string> {
-  const fileBuffer = fs.readFileSync(filePath);
+async function extractTextFromPDF(fileBuffer: Buffer): Promise<string> {
   const pdf = await pdfjs.getDocument({ data: fileBuffer }).promise;
   let text = "";
 
@@ -42,27 +31,38 @@ async function extractTextFromPDF(filePath: string): Promise<string> {
   return text;
 }
 
+async function fetchUploadedFile(fileUrl: string): Promise<Buffer> {
+  const url = new URL(fileUrl);
+
+  if (
+    url.protocol !== "https:" ||
+    !url.hostname.endsWith(".blob.vercel-storage.com")
+  ) {
+    throw new Error("Invalid upload URL");
+  }
+
+  const response = await fetch(url);
+  if (!response.ok) {
+    throw new Error("Uploaded file could not be fetched");
+  }
+
+  const fileBuffer = Buffer.from(await response.arrayBuffer());
+  if (fileBuffer.byteLength > 10 * 1024 * 1024) {
+    throw new Error("Uploaded file exceeds 10MB limit");
+  }
+
+  return fileBuffer;
+}
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { fileUrl, fileName, fileType } = body;
+    const { fileUrl, fileName } = body;
 
     if (!fileUrl || !fileName) {
       return NextResponse.json<ApiResponse<unknown>>(
         { success: false, error: "File URL and name required" },
         { status: 400 }
-      );
-    }
-
-    // Extract the filename from the URL (e.g., "/uploads/xyz.pdf" -> "xyz.pdf")
-    const uploadedFileName = fileUrl.split("/").pop();
-    const filePath = path.join(process.cwd(), "public", "uploads", uploadedFileName || "");
-
-    // Check if file exists
-    if (!fs.existsSync(filePath)) {
-      return NextResponse.json<ApiResponse<unknown>>(
-        { success: false, error: "File not found" },
-        { status: 404 }
       );
     }
 
@@ -81,7 +81,8 @@ export async function POST(request: NextRequest) {
     // Handle PDF vs Image
     if (isPDF) {
       // Extract text from PDF
-      const pdfText = await extractTextFromPDF(filePath);
+      const fileBuffer = await fetchUploadedFile(fileUrl);
+      const pdfText = await extractTextFromPDF(fileBuffer);
 
       // Send text to Claude for parsing
       const response = await client.messages.create({
@@ -114,7 +115,7 @@ Only return the JSON object, nothing else.`,
       let parseResult: ParseResult;
       try {
         parseResult = JSON.parse(responseText);
-      } catch (e) {
+      } catch {
         return NextResponse.json<ApiResponse<unknown>>(
           { success: false, error: "Failed to parse AI response" },
           { status: 500 }
@@ -127,7 +128,7 @@ Only return the JSON object, nothing else.`,
       );
     } else {
       // Handle image files
-      const fileBuffer = fs.readFileSync(filePath);
+      const fileBuffer = await fetchUploadedFile(fileUrl);
       const base64 = fileBuffer.toString("base64");
 
       // Determine media type from file extension
@@ -193,7 +194,7 @@ Only return the JSON object, nothing else.`,
       let parseResult: ParseResult;
       try {
         parseResult = JSON.parse(responseText);
-      } catch (e) {
+      } catch {
         return NextResponse.json<ApiResponse<unknown>>(
           { success: false, error: "Failed to parse AI response" },
           { status: 500 }

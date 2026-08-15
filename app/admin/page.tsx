@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowLeft, Users, Wrench, FileText, BarChart3 } from "lucide-react";
+import { ArrowLeft, Users, Wrench } from "lucide-react";
+import { RequireAdmin } from "@/app/components/admin/RequireAdmin";
 
 export default function AdminPage() {
   const adminTools = [
@@ -20,23 +21,10 @@ export default function AdminPage() {
       color:
         "bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400",
     },
-    {
-      icon: FileText,
-      title: "Contract Management",
-      description: "Manage contracts and bids",
-      href: "/admin/contracts",
-      color: "bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400",
-    },
-    {
-      icon: BarChart3,
-      title: "Analytics",
-      description: "View system analytics and reports",
-      href: "/admin/analytics",
-      color: "bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400",
-    },
   ];
 
   return (
+    <RequireAdmin>
     <div className="min-h-screen bg-gray-50 dark:bg-slate-950">
       <div className="max-w-7xl mx-auto px-4 py-8">
         {/* Header */}
@@ -95,5 +83,6 @@ export default function AdminPage() {
         </div>
       </div>
     </div>
+    </RequireAdmin>
   );
 }

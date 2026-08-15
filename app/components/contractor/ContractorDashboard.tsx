@@ -58,7 +58,7 @@ export default function ContractorDashboard({ contractor }: ContractorDashboardP
     try {
       setLoading(true);
       const [projectsRes, bidsRes, tasksRes] = await Promise.all([
-        fetch("/api/projects"),
+        fetch(`/api/projects?contractorId=${contractor.id}`),
         fetch("/api/bids/my-bids"),
         fetch("/api/contractor/tasks"),
       ]);

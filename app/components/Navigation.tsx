@@ -1,13 +1,19 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { ThemeToggle } from "./ThemeToggle";
+import { getCurrentUser, isAdminUser } from "@/lib/currentUser";
 
 export function Navigation() {
   const pathname = usePathname();
+  const [showAdminLink, setShowAdminLink] = useState(false);
+
+  useEffect(() => {
+    setShowAdminLink(isAdminUser(getCurrentUser()));
+  }, []);
 
   const isActive = (path: string) => pathname.startsWith(path);
 
@@ -59,13 +65,25 @@ export function Navigation() {
               <NavLink href="/app/reports" isActive={isActive("/app/reports")}>
                 Reports
               </NavLink>
+              {showAdminLink && (
+                <NavLink href="/admin" isActive={isActive("/admin")}>
+                  Admin
+                </NavLink>
+              )}
             </div>
           </div>
 
           {/* Right Side Actions */}
           <div className="flex items-center space-x-4">
             <ThemeToggle />
-            <button className="text-sm px-5 py-2 rounded-lg hover:bg-[#F5F3F0] dark:hover:bg-[#1F1F1F] transition-colors font-medium text-[#2D5016] dark:text-[#C9A876] letter-spacing-wide">
+            <button
+              onClick={() => {
+                localStorage.removeItem("token");
+                localStorage.removeItem("user");
+                window.location.href = "/";
+              }}
+              className="text-sm px-5 py-2 rounded-lg hover:bg-[#F5F3F0] dark:hover:bg-[#1F1F1F] transition-colors font-medium text-[#2D5016] dark:text-[#C9A876] letter-spacing-wide"
+            >
               Logout
             </button>
           </div>

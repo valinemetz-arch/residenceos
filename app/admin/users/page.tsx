@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ArrowLeft, Users, Plus, AlertCircle } from "lucide-react";
 import UserListTable from "@/app/components/admin/UserListTable";
 import InviteAdminModal from "@/app/components/admin/InviteAdminModal";
+import { RequireAdmin } from "@/app/components/admin/RequireAdmin";
 import { authFetch } from "@/lib/authFetch";
 
 interface User {
@@ -129,6 +130,7 @@ export default function AdminUsersPage() {
   }
 
   return (
+    <RequireAdmin>
     <div className="min-h-screen bg-gray-50 dark:bg-slate-950">
       <div className="max-w-7xl mx-auto px-4 py-8">
         {/* Header */}
@@ -260,5 +262,6 @@ export default function AdminUsersPage() {
         onInvite={handleInviteAdmin}
       />
     </div>
+    </RequireAdmin>
   );
 }

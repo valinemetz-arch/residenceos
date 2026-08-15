@@ -1,8 +1,7 @@
-import { writeFile, mkdir } from "fs/promises";
-import { join, extname } from "path";
+import { put } from "@vercel/blob";
+import { extname } from "path";
 import { NextRequest, NextResponse } from "next/server";
 
-const UPLOAD_DIR = join(process.cwd(), "public", "uploads");
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 
 const ALLOWED_TYPES: Record<string, string[]> = {
@@ -30,6 +29,10 @@ function isAllowedFileType(file: File) {
   return Object.values(ALLOWED_TYPES).some((extensions) =>
     extensions.includes(fileExtension)
   );
+}
+
+function sanitizePathSegment(value: string) {
+  return value.replace(/[^a-zA-Z0-9._-]/g, "_");
 }
 
 export async function POST(request: NextRequest) {
@@ -69,28 +72,25 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Create upload directory if it doesn't exist
-    try {
-      await mkdir(UPLOAD_DIR, { recursive: true });
-    } catch (e) {
-      // Directory may already exist
-    }
+    const pathname = [
+      "uploads",
+      sanitizePathSegment(entityType),
+      sanitizePathSegment(entityId),
+      sanitizePathSegment(file.name),
+    ].join("/");
 
-    const bytes = await file.arrayBuffer();
-    const buffer = Buffer.from(bytes);
+    const blob = await put(pathname, file, {
+      access: "public",
+      addRandomSuffix: true,
+      contentType: file.type || undefined,
+    });
 
-    // Generate filename
-    const timestamp = Date.now();
-    const filename = `${entityType}_${entityId}_${timestamp}_${file.name}`;
-    const filepath = join(UPLOAD_DIR, filename);
-
-    // Write file
-    await writeFile(filepath, buffer);
+    const filename = blob.pathname.split("/").pop() || file.name;
 
     return NextResponse.json({
       success: true,
       filename,
-      fileUrl: `/uploads/${filename}`,
+      fileUrl: blob.url,
       fileSize: file.size,
       fileType: file.type,
     });
