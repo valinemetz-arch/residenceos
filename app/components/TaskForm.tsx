@@ -199,7 +199,7 @@ export function TaskForm({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-      <div className="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-lg bg-white p-6 dark:bg-slate-900">
+      <div className="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-lg bg-white p-6 dark:bg-[#2D2D2D]">
         {/* Header */}
         <div className="mb-6 flex items-center justify-between">
           <h2 className="text-xl font-bold dark:text-white">
@@ -207,7 +207,7 @@ export function TaskForm({
           </h2>
           <button
             onClick={onClose}
-            className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+            className="text-[#5A5A5A] hover:text-brand-charcoal dark:text-[#A8A8A8] dark:hover:text-white"
           >
             <X className="h-5 w-5" />
           </button>
@@ -217,7 +217,7 @@ export function TaskForm({
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Title */}
           <div>
-            <label className="block text-sm font-medium dark:text-gray-200">
+            <label className="block text-sm font-medium dark:text-[#F5F3F0]">
               Title *
             </label>
             <input
@@ -226,16 +226,16 @@ export function TaskForm({
               value={formData.title}
               onChange={handleChange}
               placeholder="e.g., Paint master bedroom"
-              className="mt-1 w-full rounded border border-gray-300 px-3 py-2 dark:border-gray-600 dark:bg-slate-800 dark:text-white"
+              className="mt-1 w-full rounded border border-[#D4D9CE] px-3 py-2 dark:border-[#1F1F1F] dark:bg-brand-charcoal dark:text-white"
             />
             {errors.title && (
-              <p className="mt-1 text-sm text-red-500">{errors.title}</p>
+              <p className="mt-1 text-sm text-brand-error">{errors.title}</p>
             )}
           </div>
 
           {/* Description */}
           <div>
-            <label className="block text-sm font-medium dark:text-gray-200">
+            <label className="block text-sm font-medium dark:text-[#F5F3F0]">
               Description
             </label>
             <textarea
@@ -244,20 +244,20 @@ export function TaskForm({
               onChange={handleChange}
               placeholder="Add task details"
               rows={3}
-              className="mt-1 w-full rounded border border-gray-300 px-3 py-2 dark:border-gray-600 dark:bg-slate-800 dark:text-white"
+              className="mt-1 w-full rounded border border-[#D4D9CE] px-3 py-2 dark:border-[#1F1F1F] dark:bg-brand-charcoal dark:text-white"
             />
           </div>
 
           {/* Space */}
           <div>
-            <label className="block text-sm font-medium dark:text-gray-200">
+            <label className="block text-sm font-medium dark:text-[#F5F3F0]">
               Space
             </label>
             <select
               name="spaceId"
               value={formData.spaceId || ""}
               onChange={handleChange}
-              className="mt-1 w-full rounded border border-gray-300 px-3 py-2 dark:border-gray-600 dark:bg-slate-800 dark:text-white"
+              className="mt-1 w-full rounded border border-[#D4D9CE] px-3 py-2 dark:border-[#1F1F1F] dark:bg-brand-charcoal dark:text-white"
             >
               <option value="">None</option>
               {spaces.map((space) => (
@@ -270,14 +270,14 @@ export function TaskForm({
 
           {/* System */}
           <div>
-            <label className="block text-sm font-medium dark:text-gray-200">
+            <label className="block text-sm font-medium dark:text-[#F5F3F0]">
               System
             </label>
             <select
               name="systemId"
               value={formData.systemId || ""}
               onChange={handleChange}
-              className="mt-1 w-full rounded border border-gray-300 px-3 py-2 dark:border-gray-600 dark:bg-slate-800 dark:text-white"
+              className="mt-1 w-full rounded border border-[#D4D9CE] px-3 py-2 dark:border-[#1F1F1F] dark:bg-brand-charcoal dark:text-white"
             >
               <option value="">None</option>
               {systems.map((system) => (
@@ -290,14 +290,14 @@ export function TaskForm({
 
           {/* Priority */}
           <div>
-            <label className="block text-sm font-medium dark:text-gray-200">
+            <label className="block text-sm font-medium dark:text-[#F5F3F0]">
               Priority
             </label>
             <select
               name="priority"
               value={formData.priority}
               onChange={handleChange}
-              className="mt-1 w-full rounded border border-gray-300 px-3 py-2 dark:border-gray-600 dark:bg-slate-800 dark:text-white"
+              className="mt-1 w-full rounded border border-[#D4D9CE] px-3 py-2 dark:border-[#1F1F1F] dark:bg-brand-charcoal dark:text-white"
             >
               {PRIORITY_OPTIONS.map((option) => (
                 <option key={option} value={option}>
@@ -309,14 +309,14 @@ export function TaskForm({
 
           {/* Status */}
           <div>
-            <label className="block text-sm font-medium dark:text-gray-200">
+            <label className="block text-sm font-medium dark:text-[#F5F3F0]">
               Status
             </label>
             <select
               name="status"
               value={formData.status}
               onChange={handleChange}
-              className="mt-1 w-full rounded border border-gray-300 px-3 py-2 dark:border-gray-600 dark:bg-slate-800 dark:text-white"
+              className="mt-1 w-full rounded border border-[#D4D9CE] px-3 py-2 dark:border-[#1F1F1F] dark:bg-brand-charcoal dark:text-white"
             >
               {STATUS_OPTIONS.map((option) => (
                 <option key={option} value={option}>
@@ -331,7 +331,7 @@ export function TaskForm({
 
           {/* Due Date */}
           <div>
-            <label className="block text-sm font-medium dark:text-gray-200">
+            <label className="block text-sm font-medium dark:text-[#F5F3F0]">
               Due Date
             </label>
             <input
@@ -339,20 +339,20 @@ export function TaskForm({
               name="dueDate"
               value={formData.dueDate || ""}
               onChange={handleChange}
-              className="mt-1 w-full rounded border border-gray-300 px-3 py-2 dark:border-gray-600 dark:bg-slate-800 dark:text-white"
+              className="mt-1 w-full rounded border border-[#D4D9CE] px-3 py-2 dark:border-[#1F1F1F] dark:bg-brand-charcoal dark:text-white"
             />
           </div>
 
           {/* Assigned To */}
           <div>
-            <label className="block text-sm font-medium dark:text-gray-200">
+            <label className="block text-sm font-medium dark:text-[#F5F3F0]">
               Assigned To
             </label>
             <select
               name="assignee"
               value={assigneeValue}
               onChange={handleAssigneeChange}
-              className="mt-1 w-full rounded border border-gray-300 px-3 py-2 dark:border-gray-600 dark:bg-slate-800 dark:text-white"
+              className="mt-1 w-full rounded border border-[#D4D9CE] px-3 py-2 dark:border-[#1F1F1F] dark:bg-brand-charcoal dark:text-white"
             >
               <option value="">Unassigned</option>
               {assigneeUsers.length > 0 && (
@@ -379,7 +379,7 @@ export function TaskForm({
 
           {/* Notes */}
           <div>
-            <label className="block text-sm font-medium dark:text-gray-200">
+            <label className="block text-sm font-medium dark:text-[#F5F3F0]">
               Notes
             </label>
             <textarea
@@ -388,7 +388,7 @@ export function TaskForm({
               onChange={handleChange}
               placeholder="Add any additional notes"
               rows={2}
-              className="mt-1 w-full rounded border border-gray-300 px-3 py-2 dark:border-gray-600 dark:bg-slate-800 dark:text-white"
+              className="mt-1 w-full rounded border border-[#D4D9CE] px-3 py-2 dark:border-[#1F1F1F] dark:bg-brand-charcoal dark:text-white"
             />
           </div>
 
@@ -397,14 +397,14 @@ export function TaskForm({
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 rounded border border-gray-300 px-4 py-2 font-medium dark:border-gray-600 dark:text-gray-200"
+              className="flex-1 rounded border border-[#D4D9CE] px-4 py-2 font-medium dark:border-[#1F1F1F] dark:text-[#A8A8A8]"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={isSubmitting}
-              className="flex flex-1 items-center justify-center gap-2 rounded bg-blue-500 px-4 py-2 font-medium text-white hover:bg-blue-600 disabled:opacity-50"
+              className="flex flex-1 items-center justify-center gap-2 rounded bg-brand-primary px-4 py-2 font-medium text-white hover:bg-brand-primary-dark disabled:opacity-50"
             >
               {isSubmitting ? (
                 <>

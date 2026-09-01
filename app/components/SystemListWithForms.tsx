@@ -91,88 +91,60 @@ export function SystemListWithForms() {
   }
 
   return (
-    <>
+    <div className="classical">
       {/* Header with Add Button */}
-      <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-3xl font-bold dark:text-white">Building Systems</h1>
-        <button
-          onClick={handleAddClick}
-          className="flex items-center gap-2 rounded bg-blue-500 px-4 py-2 font-medium text-white hover:bg-blue-600"
-        >
-          <Plus className="h-5 w-5" />
+      <div style={{ display: "flex", justifyContent: "flex-end", alignItems: "center", marginBottom: 18 }}>
+        <button className="btn btn-primary" onClick={handleAddClick}>
+          <Plus size={16} strokeWidth={1.8} />
           Add System
         </button>
       </div>
 
       {/* Systems Grid */}
       {systems.length === 0 ? (
-        <div className="rounded-lg border border-gray-200 bg-gray-50 p-8 text-center dark:border-gray-700 dark:bg-slate-800">
-          <p className="text-gray-600 dark:text-gray-300">
-            No systems yet. Create one to get started.
-          </p>
-          <button
-            onClick={handleAddClick}
-            className="mt-4 rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
-          >
+        <div className="card" style={{ textAlign: "center", padding: 32 }}>
+          <p className="card-meta">No systems yet. Create one to get started.</p>
+          <button className="btn btn-primary" style={{ marginTop: 16 }} onClick={handleAddClick}>
             Create First System
           </button>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {systems.map((system) => (
-            <div
-              key={system.id}
-              className="bg-white dark:bg-slate-900 rounded-lg p-6 shadow-sm border border-gray-200 dark:border-slate-700 hover:shadow-md transition-shadow"
-            >
-              <div className="flex items-start justify-between mb-2">
-                <div className="flex-1 min-w-0">
-                  <h3 className="text-lg font-semibold dark:text-white">
-                    {system.name}
-                  </h3>
-                  {system.systemType && (
-                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                      {system.systemType}
-                    </p>
-                  )}
+            <div key={system.id} className="card">
+              <div className="card-title">{system.name}</div>
+              {system.systemType && (
+                <div className="card-meta" style={{ marginTop: 4 }}>
+                  {system.systemType}
                 </div>
-              </div>
+              )}
 
               {system.description && (
-                <p className="text-sm text-gray-600 dark:text-gray-400 mb-4 line-clamp-2">
+                <p className="card-meta" style={{ marginTop: 12 }}>
                   {system.description}
                 </p>
               )}
 
-              <div className="space-y-2 text-sm mb-4 py-2 border-t border-gray-200 dark:border-gray-700">
-                <p className="text-gray-600 dark:text-gray-400">
-                  📦 <span className="font-medium">{system._count?.assets || 0}</span> Assets
-                </p>
-                <p className="text-gray-600 dark:text-gray-400">
-                  ✓ <span className="font-medium">{system._count?.tasks || 0}</span> Tasks
-                </p>
+              <div className="hr" style={{ margin: "14px 0" }} />
+              <div className="card-meta">
+                {system._count?.assets || 0} Assets &middot; {system._count?.tasks || 0} Tasks
               </div>
 
               {/* Actions */}
-              <div className="flex gap-2 pt-2 border-t border-gray-200 dark:border-gray-700">
-                <button
-                  onClick={() => handleEditClick(system)}
-                  className="flex-1 rounded border border-gray-300 p-2 hover:bg-gray-100 dark:border-gray-600 dark:hover:bg-slate-800 flex items-center justify-center gap-1 text-sm"
-                >
-                  <Edit2 className="h-4 w-4 text-gray-600 dark:text-gray-300" />
-                  <span className="dark:text-gray-300">Edit</span>
+              <div style={{ display: "flex", gap: 6, justifyContent: "flex-end", marginTop: 14 }}>
+                <button className="btn btn-icon" onClick={() => handleEditClick(system)} aria-label="Edit system">
+                  <Edit2 size={14} strokeWidth={1.8} />
                 </button>
                 <button
+                  className="btn btn-icon"
                   onClick={() => handleDeleteClick(system.id)}
                   disabled={deletingId === system.id}
-                  className="flex-1 rounded border border-red-300 p-2 hover:bg-red-50 disabled:opacity-50 dark:border-red-700 dark:hover:bg-red-900/20 flex items-center justify-center gap-1 text-sm"
+                  aria-label="Delete system"
                 >
                   {deletingId === system.id ? (
-                    <Loader2 className="h-4 w-4 animate-spin text-red-600" />
+                    <Loader2 size={14} className="animate-spin" />
                   ) : (
-                    <>
-                      <Trash2 className="h-4 w-4 text-red-600" />
-                      <span className="text-red-600">Delete</span>
-                    </>
+                    <Trash2 size={14} strokeWidth={1.8} />
                   )}
                 </button>
               </div>
@@ -192,6 +164,6 @@ export function SystemListWithForms() {
           onSuccess={loadData}
         />
       )}
-    </>
+    </div>
   );
 }

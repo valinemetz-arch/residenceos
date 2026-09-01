@@ -47,16 +47,16 @@ export default function TradeSelector({
   }
 
   if (loading) {
-    return <div className="text-gray-500">Loading trades...</div>;
+    return <div className="text-[#5A5A5A]">Loading trades...</div>;
   }
 
   if (error) {
-    return <div className="text-red-600">{error}</div>;
+    return <div className="text-brand-error">{error}</div>;
   }
 
   return (
     <div className="space-y-2">
-      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+      <label className="block text-sm font-medium text-[#5A5A5A] dark:text-[#A8A8A8]">
         Select Trades
       </label>
       <div className="grid grid-cols-2 gap-3">
@@ -66,14 +66,14 @@ export default function TradeSelector({
             onClick={() => toggleTrade(trade.id)}
             className={`flex items-center gap-2 p-3 rounded-lg border-2 transition ${
               selectedTradeIds.includes(trade.id)
-                ? "border-blue-600 bg-blue-50 dark:bg-blue-900/20"
-                : "border-gray-300 dark:border-gray-600 hover:border-gray-400"
+                ? "border-brand-primary bg-brand-cream dark:bg-brand-charcoal"
+                : "border-[#D4D9CE] dark:border-[#1F1F1F] hover:border-brand-primary/40"
             }`}
           >
             {selectedTradeIds.includes(trade.id) ? (
-              <CheckCircle2 className="h-5 w-5 text-blue-600" />
+              <CheckCircle2 className="h-5 w-5 text-brand-primary dark:text-brand-secondary" />
             ) : (
-              <Circle className="h-5 w-5 text-gray-400" />
+              <Circle className="h-5 w-5 text-[#5A5A5A]" />
             )}
             <span className="text-sm font-medium">{trade.name}</span>
           </button>

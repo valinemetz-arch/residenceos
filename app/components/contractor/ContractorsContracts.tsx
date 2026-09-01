@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { FileText, Download, CheckCircle, Clock, AlertCircle } from "lucide-react";
+import { FileText, Download, Loader2 } from "lucide-react";
 import { toast } from "@/lib/toast";
 import ContractSigningModal from "@/app/components/ContractSigningModal";
 
@@ -34,6 +34,22 @@ interface Contract {
 interface ContractorsContractsProps {
   contractorId: string;
 }
+
+const STATUS_LABEL: Record<string, string> = {
+  sent: "Sent",
+  viewed: "Viewed",
+  signed: "Signed",
+  completed: "Completed",
+  voided: "Voided",
+};
+
+const STATUS_CLASS: Record<string, string> = {
+  sent: "tag tag-outline",
+  viewed: "tag tag-outline",
+  signed: "tag tag-neutral",
+  completed: "tag tag-neutral",
+  voided: "tag tag-accent",
+};
 
 export default function ContractorsContracts({
   contractorId,
@@ -80,143 +96,92 @@ export default function ContractorsContracts({
     await loadContracts();
   };
 
-  const getStatusBadge = (status: string) => {
-    const statusConfig: Record<
-      string,
-      { color: string; icon: React.ReactNode; label: string }
-    > = {
-      sent: {
-        color: "bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-300",
-        icon: <FileText className="h-4 w-4" />,
-        label: "Sent",
-      },
-      viewed: {
-        color:
-          "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-300",
-        icon: <Clock className="h-4 w-4" />,
-        label: "Viewed",
-      },
-      signed: {
-        color: "bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300",
-        icon: <CheckCircle className="h-4 w-4" />,
-        label: "Signed",
-      },
-      completed: {
-        color: "bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300",
-        icon: <CheckCircle className="h-4 w-4" />,
-        label: "Completed",
-      },
-      voided: {
-        color:
-          "bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-300",
-        icon: <AlertCircle className="h-4 w-4" />,
-        label: "Voided",
-      },
-    };
-
-    const config = statusConfig[status] || statusConfig.sent;
-    return (
-      <span className={`px-3 py-1 rounded-full text-xs font-medium flex items-center gap-2 w-fit ${config.color}`}>
-        {config.icon}
-        {config.label}
-      </span>
-    );
-  };
+  const getStatusTag = (status: string) => (
+    <span className={STATUS_CLASS[status] || "tag tag-outline"}>
+      {STATUS_LABEL[status] || status}
+    </span>
+  );
 
   if (loading) {
     return (
       <div className="flex items-center justify-center py-8">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+        <Loader2 className="h-6 w-6 animate-spin" />
       </div>
     );
   }
 
   if (contracts.length === 0) {
     return (
-      <div className="text-center py-8 text-gray-600 dark:text-gray-400">
-        <FileText className="h-12 w-12 mx-auto mb-4 opacity-50" />
-        <p>No contracts at this time.</p>
+      <div className="card" style={{ textAlign: "center", padding: 32 }}>
+        <FileText className="h-12 w-12 mx-auto mb-4" style={{ opacity: 0.5 }} />
+        <p className="card-meta">No contracts at this time.</p>
       </div>
     );
   }
 
   return (
     <>
-      <div className="space-y-4">
-        {contracts.map((contract) => (
-          <div
-            key={contract.id}
-            className="bg-white dark:bg-slate-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6"
-          >
-            <div className="flex justify-between items-start mb-4">
-              <div>
-                <h3 className="text-lg font-semibold dark:text-white">
-                  {(contract.projectDetails as ProjectDetails)?.projectName ||
-                    contract.project?.name ||
-                    "Contract"}
-                </h3>
-                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                  {(contract.projectDetails as ProjectDetails)?.tradeService}
-                </p>
-              </div>
-              {getStatusBadge(contract.status)}
-            </div>
+      <table className="table">
+        <thead>
+          <tr>
+            <th>Project</th>
+            <th>Amount</th>
+            <th>Status</th>
+            <th>Sent</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {contracts.map((contract) => {
+            const details = contract.projectDetails as ProjectDetails;
+            const projectName =
+              details?.projectName || contract.project?.name || "Contract";
 
-            <div className="grid grid-cols-2 gap-4 mb-4">
-              <div>
-                <p className="text-xs text-gray-600 dark:text-gray-400">
-                  Contract Amount
-                </p>
-                <p className="text-lg font-semibold dark:text-white">
-                  ${(contract.projectDetails as ProjectDetails)?.contractAmount?.toLocaleString()}
-                </p>
-              </div>
-              <div>
-                <p className="text-xs text-gray-600 dark:text-gray-400">
-                  Sent Date
-                </p>
-                <p className="text-lg font-semibold dark:text-white">
-                  {new Date(contract.sentAt).toLocaleDateString()}
-                </p>
-              </div>
-              {contract.signedAt && (
-                <div>
-                  <p className="text-xs text-gray-600 dark:text-gray-400">
-                    Signed Date
-                  </p>
-                  <p className="text-lg font-semibold dark:text-white">
-                    {new Date(contract.signedAt).toLocaleDateString()}
-                  </p>
-                </div>
-              )}
-            </div>
+            return (
+              <tr key={contract.id}>
+                <td>
+                  <div className="card-title" style={{ fontSize: 14 }}>
+                    {projectName}
+                  </div>
+                  {details?.tradeService && (
+                    <div className="card-meta" style={{ marginTop: 2 }}>
+                      {details.tradeService}
+                    </div>
+                  )}
+                </td>
+                <td>${details?.contractAmount?.toLocaleString()}</td>
+                <td>{getStatusTag(contract.status)}</td>
+                <td>{new Date(contract.sentAt).toLocaleDateString()}</td>
+                <td onClick={(e) => e.stopPropagation()}>
+                  <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
+                    {contract.status === "sent" && (
+                      <button
+                        onClick={() => handleSignClick(contract)}
+                        className="btn btn-primary"
+                      >
+                        <FileText size={14} strokeWidth={1.8} />
+                        Sign Contract
+                      </button>
+                    )}
 
-            <div className="flex gap-3">
-              {contract.status === "sent" && (
-                <button
-                  onClick={() => handleSignClick(contract)}
-                  className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium"
-                >
-                  <FileText className="h-4 w-4" />
-                  Sign Contract
-                </button>
-              )}
-
-              {contract.status === "signed" ||
-                (contract.status === "completed" && (
-                  <button
-                    onClick={() => window.open(contract.documentUrl, "_blank")}
-                    disabled={!contract.documentUrl}
-                    className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-gray-400 transition font-medium"
-                  >
-                    <Download className="h-4 w-4" />
-                    Download Signed PDF
-                  </button>
-                ))}
-            </div>
-          </div>
-        ))}
-      </div>
+                    {contract.status === "signed" ||
+                      (contract.status === "completed" && (
+                        <button
+                          onClick={() => window.open(contract.documentUrl, "_blank")}
+                          disabled={!contract.documentUrl}
+                          className="btn"
+                        >
+                          <Download size={14} strokeWidth={1.8} />
+                          Download Signed PDF
+                        </button>
+                      ))}
+                  </div>
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
 
       {selectedContract && (
         <ContractSigningModal

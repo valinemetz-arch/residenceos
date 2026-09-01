@@ -27,6 +27,7 @@ export interface AssetBase {
   model: string | null;
   sku: string | null;
   finish: string | null;
+  size: string | null;
   cost: number | null;
   vendor: string | null;
   purchaseDate: string | null;
@@ -34,6 +35,7 @@ export interface AssetBase {
   warrantyMonths: number | null;
   spaceId: string;
   systemId: string | null;
+  tradeId: string | null;
   status: string;
   notes: string | null;
 }
@@ -42,6 +44,7 @@ export interface AssetWithRelations extends AssetBase {
   id: string;
   space: { id: string; name: string };
   system: { id: string; name: string } | null;
+  trade: { id: string; name: string } | null;
   _count?: {
     photos: number;
     documents: number;

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Loader2, Send, MessageSquare } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { toast } from "@/lib/toast";
 
 interface Message {
@@ -17,9 +17,21 @@ interface Message {
 
 interface ProjectMessagingProps {
   projectId: string;
+  /** Whose "sent" bubbles render right-aligned. Defaults to "contractor" to
+   * match the original contractor bid-page usage. */
+  viewerType?: "contractor" | "owner";
+  /** Scopes the thread to one contractor's private conversation with the GC. */
+  contractorId?: string;
+  /** Homeowners can read every thread but not post (per the design handoff). */
+  readOnly?: boolean;
 }
 
-export default function ProjectMessaging({ projectId }: ProjectMessagingProps) {
+export default function ProjectMessaging({
+  projectId,
+  viewerType = "contractor",
+  contractorId,
+  readOnly = false,
+}: ProjectMessagingProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
@@ -30,11 +42,13 @@ export default function ProjectMessaging({ projectId }: ProjectMessagingProps) {
     // Poll for new messages every 3 seconds
     const interval = setInterval(loadMessages, 3000);
     return () => clearInterval(interval);
-  }, [projectId]);
+  }, [projectId, contractorId]);
 
   const loadMessages = async () => {
     try {
-      const response = await fetch(`/api/messages?projectId=${projectId}`);
+      const params = new URLSearchParams({ projectId });
+      if (contractorId) params.set("contractorId", contractorId);
+      const response = await fetch(`/api/messages?${params}`);
       if (response.ok) {
         const data = await response.json();
         setMessages(data.data || []);
@@ -75,70 +89,64 @@ export default function ProjectMessaging({ projectId }: ProjectMessagingProps) {
   };
 
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
-      <h2 className="text-xl font-bold dark:text-white mb-4 flex items-center gap-2">
-        <MessageSquare className="h-5 w-5" />
-        Project Q&A
-      </h2>
-
-      {/* Messages Container */}
-      <div className="space-y-4 mb-6 max-h-96 overflow-y-auto">
+    <div className="classical" style={{ maxWidth: 640, display: "flex", flexDirection: "column", height: "100%" }}>
+      <div style={{ flex: 1, overflow: "auto", display: "flex", flexDirection: "column", gap: 12, marginBottom: 14 }}>
         {loading ? (
-          <div className="flex items-center justify-center py-8">
-            <Loader2 className="h-6 w-6 animate-spin text-gray-400" />
+          <div style={{ display: "flex", justifyContent: "center", padding: "32px 0" }}>
+            <Loader2 className="animate-spin" size={24} />
           </div>
         ) : messages.length === 0 ? (
-          <p className="text-gray-500 dark:text-gray-400 text-center py-8">
-            No messages yet. Start asking questions about the project!
+          <p className="card-meta" style={{ textAlign: "center", padding: "32px 0" }}>
+            No messages yet.
           </p>
         ) : (
-          messages.map((msg) => (
-            <div
-              key={msg.id}
-              className={`flex ${
-                msg.senderType === "contractor" ? "justify-end" : "justify-start"
-              }`}
-            >
-              <div
-                className={`max-w-xs px-4 py-2 rounded-lg ${
-                  msg.senderType === "contractor"
-                    ? "bg-blue-600 text-white rounded-br-none"
-                    : "bg-gray-200 dark:bg-slate-800 text-gray-900 dark:text-white rounded-bl-none"
-                }`}
-              >
-                <p className="text-xs font-semibold mb-1 opacity-75">
-                  {msg.senderName || "Unknown"}
-                </p>
-                <p className="text-sm">{msg.message}</p>
-                <p className="text-xs opacity-60 mt-1">
-                  {new Date(msg.createdAt).toLocaleTimeString([], {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
-                </p>
+          messages.map((msg) => {
+            const mine = msg.senderType === viewerType;
+            return (
+              <div key={msg.id} style={{ display: "flex", justifyContent: mine ? "flex-end" : "flex-start" }}>
+                <div
+                  style={{
+                    maxWidth: "78%",
+                    border: `1px solid ${mine ? "var(--color-accent-500)" : "var(--color-divider)"}`,
+                    borderRadius: "var(--radius-md)",
+                    padding: "10px 14px",
+                    background: mine ? "var(--color-accent-100)" : "var(--color-neutral-100)",
+                  }}
+                >
+                  <div style={{ fontSize: 12, fontWeight: 600, color: "var(--color-accent-700)", marginBottom: 3 }}>
+                    {msg.senderName || (msg.senderType === "contractor" ? msg.contractor?.companyName : "Owner") || "Unknown"}
+                  </div>
+                  <div style={{ fontSize: 14, lineHeight: 1.5 }}>{msg.message}</div>
+                  <div style={{ fontSize: 11, color: "var(--color-neutral-600)", marginTop: 4 }}>
+                    {new Date(msg.createdAt).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}
+                  </div>
+                </div>
               </div>
-            </div>
-          ))
+            );
+          })
         )}
       </div>
 
-      {/* Message Input */}
-      <form onSubmit={handleSendMessage} className="flex gap-2">
-        <input
-          type="text"
-          value={newMessage}
-          onChange={(e) => setNewMessage(e.target.value)}
-          placeholder="Ask a question or provide an update..."
-          className="flex-1 rounded border border-gray-300 dark:border-gray-600 px-3 py-2 dark:bg-slate-800 dark:text-white"
-        />
-        <button
-          type="submit"
-          disabled={sending || !newMessage.trim()}
-          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 flex items-center gap-2"
-        >
-          {sending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
-        </button>
-      </form>
+      <div style={{ borderTop: "1px solid var(--color-divider)", paddingTop: 14 }}>
+        {readOnly ? (
+          <p style={{ margin: 0, fontSize: 13, color: "var(--color-neutral-700)" }}>
+            You have view-only access to this thread.
+          </p>
+        ) : (
+          <form onSubmit={handleSendMessage} style={{ display: "flex", gap: 8 }}>
+            <input
+              type="text"
+              value={newMessage}
+              onChange={(e) => setNewMessage(e.target.value)}
+              placeholder="Message the GC…"
+              style={{ flex: 1 }}
+            />
+            <button type="submit" className="btn btn-primary" disabled={sending || !newMessage.trim()}>
+              {sending ? <Loader2 size={16} className="animate-spin" /> : "Send"}
+            </button>
+          </form>
+        )}
+      </div>
     </div>
   );
 }

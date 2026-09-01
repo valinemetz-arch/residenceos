@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Plus, Edit2, Trash2, Loader2, CheckCircle2, Circle, FileText } from "lucide-react";
+import { Plus, Edit2, Trash2, Loader2 } from "lucide-react";
 import { TaskForm } from "./TaskForm";
-import { TaskDetail } from "./TaskDetail";
+import { TaskDetailModal } from "./portal/TaskDetailModal";
 import { toast } from "@/lib/toast";
 import { formatDate } from "@/lib/utils";
 
@@ -21,16 +21,43 @@ import type { TaskWithRelations } from "@/lib/types";
 
 interface Task extends TaskWithRelations {}
 
+const PRIORITY_LABEL: Record<string, string> = {
+  low: "Low",
+  medium: "Medium",
+  high: "High",
+  critical: "Urgent",
+};
+const PRIORITY_CLASS: Record<string, string> = {
+  low: "tag tag-outline",
+  medium: "tag tag-neutral",
+  high: "tag tag-accent",
+  critical: "tag tag-accent",
+};
+const STATUS_LABEL: Record<string, string> = {
+  pending: "Pending",
+  in_progress: "In Progress",
+  blocked: "Blocked",
+  completed: "Completed",
+};
+const STATUS_CLASS: Record<string, string> = {
+  pending: "tag tag-outline",
+  in_progress: "tag tag-accent",
+  blocked: "tag tag-accent",
+  completed: "tag tag-neutral",
+};
+
+type TaskFilter = "all" | "open" | "done";
+
 export function TaskListWithForms() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [spaces, setSpaces] = useState<Space[]>([]);
   const [systems, setSystems] = useState<System[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
-  const [showDetail, setShowDetail] = useState(false);
   const [selectedTask, setSelectedTask] = useState<Task | undefined>();
   const [detailTaskId, setDetailTaskId] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [filter, setFilter] = useState<TaskFilter>("all");
 
   const loadData = async () => {
     try {
@@ -98,35 +125,11 @@ export function TaskListWithForms() {
     }
   };
 
-  const handleCompleteToggle = async (task: Task) => {
-    const newStatus = task.status === "completed" ? "pending" : "completed";
+  const filteredTasks = tasks.filter((t) =>
+    filter === "all" ? true : filter === "done" ? t.status === "completed" : t.status !== "completed"
+  );
 
-    try {
-      const response = await fetch(`/api/tasks/${task.id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...task, status: newStatus }),
-      });
-
-      if (!response.ok) throw new Error("Failed to update task");
-
-      toast.success(
-        newStatus === "completed" ? "Task completed" : "Task reopened",
-        task.title
-      );
-      await loadData();
-    } catch (error) {
-      toast.error("Error", "Failed to update task status");
-    }
-  };
-
-  const priorityColors: Record<string, string> = {
-    low: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200",
-    medium:
-      "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200",
-    high: "bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200",
-    urgent: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200",
-  };
+  const detailTask = tasks.find((t) => t.id === detailTaskId) ?? null;
 
   if (loading) {
     return (
@@ -137,126 +140,102 @@ export function TaskListWithForms() {
   }
 
   return (
-    <>
-      {/* Header with Add Button */}
-      <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-3xl font-bold dark:text-white">Tasks</h1>
-        <button
-          onClick={handleAddClick}
-          className="flex items-center gap-2 rounded bg-blue-500 px-4 py-2 font-medium text-white hover:bg-blue-600"
-        >
-          <Plus className="h-5 w-5" />
+    <div className="classical">
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 18 }}>
+        <div style={{ display: "flex", gap: 6 }}>
+          <button
+            className="btn"
+            style={filter === "all" ? { borderColor: "var(--color-accent)", color: "var(--color-accent-700)" } : undefined}
+            onClick={() => setFilter("all")}
+          >
+            All
+          </button>
+          <button
+            className="btn"
+            style={filter === "open" ? { borderColor: "var(--color-accent)", color: "var(--color-accent-700)" } : undefined}
+            onClick={() => setFilter("open")}
+          >
+            Open
+          </button>
+          <button
+            className="btn"
+            style={filter === "done" ? { borderColor: "var(--color-accent)", color: "var(--color-accent-700)" } : undefined}
+            onClick={() => setFilter("done")}
+          >
+            Done
+          </button>
+        </div>
+        <button className="btn btn-primary" onClick={handleAddClick}>
+          <Plus size={16} strokeWidth={1.8} />
           Add Task
         </button>
       </div>
 
-      {/* Tasks List */}
-      {tasks.length === 0 ? (
-        <div className="rounded-lg border border-gray-200 bg-gray-50 p-8 text-center dark:border-gray-700 dark:bg-slate-800">
-          <p className="text-gray-600 dark:text-gray-300">
-            No tasks yet. Create one to get started.
-          </p>
-          <button
-            onClick={handleAddClick}
-            className="mt-4 rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
-          >
-            Create First Task
-          </button>
+      {filteredTasks.length === 0 ? (
+        <div className="card" style={{ textAlign: "center", padding: 32 }}>
+          <p className="card-meta">No tasks yet. Create one to get started.</p>
         </div>
       ) : (
-        <div className="space-y-3">
-          {tasks.map((task) => (
-            <div
-              key={task.id}
-              className={`flex items-center gap-4 rounded-lg border p-4 ${
-                task.status === "completed"
-                  ? "border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-slate-800/50"
-                  : "border-gray-200 bg-white dark:border-gray-700 dark:bg-slate-800"
-              }`}
-            >
-              {/* Checkbox */}
-              <button
-                onClick={() => handleCompleteToggle(task)}
-                className="flex-shrink-0 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
-              >
-                {task.status === "completed" ? (
-                  <CheckCircle2 className="h-6 w-6 text-green-500" />
-                ) : (
-                  <Circle className="h-6 w-6" />
-                )}
-              </button>
-
-              {/* Task Details */}
-              <div className="flex-1 min-w-0">
-                <h3
-                  className={`font-semibold ${
+        <table className="table">
+          <thead>
+            <tr>
+              <th>Task</th>
+              <th>Space</th>
+              <th>Priority</th>
+              <th>Status</th>
+              <th>Due</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {filteredTasks.map((task) => (
+              <tr key={task.id} className="wp-row-tap" style={{ cursor: "pointer" }} onClick={() => setDetailTaskId(task.id)}>
+                <td
+                  style={
                     task.status === "completed"
-                      ? "line-through text-gray-500 dark:text-gray-400"
-                      : "dark:text-white"
-                  }`}
+                      ? { textDecoration: "line-through", color: "var(--color-neutral-600)" }
+                      : undefined
+                  }
                 >
                   {task.title}
-                </h3>
-                <div className="mt-1 flex flex-wrap gap-2 text-sm text-gray-600 dark:text-gray-300">
-                  {task.space && (
-                    <span>📍 {task.space.name}</span>
-                  )}
-                  {task.dueDate && (
-                    <span>📅 {formatDate(new Date(task.dueDate))}</span>
-                  )}
-                  {(task.assignedToUser || task.assignedToContractor) && (
-                    <span>
-                      👤{" "}
-                      {task.assignedToUser
-                        ? task.assignedToUser.name || task.assignedToUser.email
-                        : task.assignedToContractor?.companyName}
-                    </span>
-                  )}
-                  <span
-                    className={`rounded px-2 py-0.5 text-xs font-semibold ${
-                      priorityColors[task.priority] || priorityColors.medium
-                    }`}
-                  >
-                    {task.priority}
+                </td>
+                <td>{task.space?.name ?? "—"}</td>
+                <td>
+                  <span className={PRIORITY_CLASS[task.priority] || "tag tag-neutral"}>
+                    {PRIORITY_LABEL[task.priority] || task.priority}
                   </span>
-                </div>
-              </div>
-
-              {/* Actions */}
-              <div className="flex flex-shrink-0 gap-2">
-                <button
-                  onClick={() => {
-                    setDetailTaskId(task.id);
-                    setShowDetail(true);
-                  }}
-                  className="rounded border border-blue-300 p-2 hover:bg-blue-50 dark:border-blue-700 dark:hover:bg-blue-900/20"
-                >
-                  <FileText className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-                </button>
-                <button
-                  onClick={() => handleEditClick(task)}
-                  className="rounded border border-gray-300 p-2 hover:bg-gray-100 dark:border-gray-600 dark:hover:bg-slate-700"
-                >
-                  <Edit2 className="h-4 w-4 text-gray-600 dark:text-gray-300" />
-                </button>
-                <button
-                  onClick={() => handleDeleteClick(task.id)}
-                  disabled={deletingId === task.id}
-                  className="rounded border border-red-300 p-2 hover:bg-red-50 disabled:opacity-50 dark:border-red-700 dark:hover:bg-red-900/20"
-                >
-                  {deletingId === task.id ? (
-                    <Loader2 className="h-4 w-4 animate-spin text-red-600" />
-                  ) : (
-                    <Trash2 className="h-4 w-4 text-red-600" />
-                  )}
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
+                </td>
+                <td>
+                  <span className={STATUS_CLASS[task.status] || "tag tag-outline"}>
+                    {STATUS_LABEL[task.status] || task.status}
+                  </span>
+                </td>
+                <td>{task.dueDate ? formatDate(new Date(task.dueDate)) : "—"}</td>
+                <td onClick={(e) => e.stopPropagation()}>
+                  <div style={{ display: "flex", gap: 4, justifyContent: "flex-end" }}>
+                    <button className="btn btn-icon" onClick={() => handleEditClick(task)} aria-label="Edit task">
+                      <Edit2 size={14} strokeWidth={1.8} />
+                    </button>
+                    <button
+                      className="btn btn-icon"
+                      onClick={() => handleDeleteClick(task.id)}
+                      disabled={deletingId === task.id}
+                      aria-label="Delete task"
+                    >
+                      {deletingId === task.id ? (
+                        <Loader2 size={14} className="animate-spin" />
+                      ) : (
+                        <Trash2 size={14} strokeWidth={1.8} />
+                      )}
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       )}
 
-      {/* Form Modal */}
       {showForm && (
         <TaskForm
           task={selectedTask}
@@ -270,20 +249,16 @@ export function TaskListWithForms() {
         />
       )}
 
-      {/* Detail Modal */}
-      {showDetail && detailTaskId && (
-        <TaskDetail
-          taskId={detailTaskId}
-          taskTitle={
-            tasks.find((t) => t.id === detailTaskId)?.title || "Task"
+      {detailTask && (
+        <TaskDetailModal
+          task={detailTask}
+          canAct
+          onClose={() => setDetailTaskId(null)}
+          onUpdated={(updated) =>
+            setTasks((prev) => prev.map((t) => (t.id === updated.id ? updated : t)))
           }
-          onClose={() => {
-            setShowDetail(false);
-            setDetailTaskId(null);
-            loadData();
-          }}
         />
       )}
-    </>
+    </div>
   );
 }

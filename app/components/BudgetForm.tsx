@@ -28,6 +28,16 @@ const CATEGORIES = [
 ];
 const STATUS_OPTIONS = ["planning", "estimated", "in-progress", "completed"];
 
+const labelStyle: React.CSSProperties = {
+  display: "block",
+  fontSize: 12,
+  fontWeight: 600,
+  textTransform: "uppercase",
+  letterSpacing: "0.04em",
+  color: "var(--color-neutral-700)",
+  marginBottom: 6,
+};
+
 export function BudgetForm({
   item,
   spaces,
@@ -129,51 +139,70 @@ export function BudgetForm({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-      <div className="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-lg bg-white p-6 dark:bg-slate-900">
+    <div
+      className="classical"
+      style={{
+        position: "fixed",
+        inset: 0,
+        background: "rgba(32,31,29,0.32)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        zIndex: 50,
+      }}
+      onClick={onClose}
+    >
+      <div
+        style={{
+          background: "var(--color-bg)",
+          width: 480,
+          maxWidth: "calc(100vw - 32px)",
+          maxHeight: "85vh",
+          overflow: "auto",
+          borderRadius: "var(--radius-md)",
+          boxShadow: "var(--shadow-lg)",
+          padding: "28px 30px",
+        }}
+        onClick={(e) => e.stopPropagation()}
+      >
         {/* Header */}
-        <div className="mb-6 flex items-center justify-between">
-          <h2 className="text-xl font-bold dark:text-white">
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 18 }}>
+          <h2 style={{ fontSize: 22 }}>
             {isEditing ? "Edit Budget Item" : "Add Budget Item"}
           </h2>
-          <button
-            onClick={onClose}
-            className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
-          >
-            <X className="h-5 w-5" />
+          <button className="btn btn-icon" onClick={onClose} aria-label="Close">
+            <X size={16} strokeWidth={1.8} />
           </button>
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 14 }}>
           {/* Description */}
           <div>
-            <label className="block text-sm font-medium dark:text-gray-200">
-              Item Name *
-            </label>
+            <label style={labelStyle}>Item Name *</label>
             <input
               type="text"
               name="description"
               value={formData.description ?? ""}
               onChange={handleChange}
               placeholder="e.g., Master Bedroom Renovation"
-              className="mt-1 w-full rounded border border-gray-300 px-3 py-2 dark:border-gray-600 dark:bg-slate-800 dark:text-white"
+              style={{ width: "100%" }}
             />
             {errors.description && (
-              <p className="mt-1 text-sm text-red-500">{errors.description}</p>
+              <p style={{ marginTop: 4, fontSize: 12, color: "var(--color-accent-700)" }}>
+                {errors.description}
+              </p>
             )}
           </div>
 
           {/* Category */}
           <div>
-            <label className="block text-sm font-medium dark:text-gray-200">
-              Category
-            </label>
+            <label style={labelStyle}>Category</label>
             <select
               name="category"
               value={formData.category}
               onChange={handleChange}
-              className="mt-1 w-full rounded border border-gray-300 px-3 py-2 dark:border-gray-600 dark:bg-slate-800 dark:text-white"
+              style={{ width: "100%" }}
             >
               {CATEGORIES.map((cat) => (
                 <option key={cat} value={cat}>
@@ -185,14 +214,12 @@ export function BudgetForm({
 
           {/* Space */}
           <div>
-            <label className="block text-sm font-medium dark:text-gray-200">
-              Space
-            </label>
+            <label style={labelStyle}>Space</label>
             <select
               name="spaceId"
               value={formData.spaceId || ""}
               onChange={handleChange}
-              className="mt-1 w-full rounded border border-gray-300 px-3 py-2 dark:border-gray-600 dark:bg-slate-800 dark:text-white"
+              style={{ width: "100%" }}
             >
               <option value="">None</option>
               {spaces.map((space) => (
@@ -205,9 +232,7 @@ export function BudgetForm({
 
           {/* Budgeted Amount */}
           <div>
-            <label className="block text-sm font-medium dark:text-gray-200">
-              Budgeted Amount ($)
-            </label>
+            <label style={labelStyle}>Budgeted Amount ($)</label>
             <input
               type="number"
               name="budgetedAmount"
@@ -216,15 +241,13 @@ export function BudgetForm({
               placeholder="0.00"
               step="0.01"
               min="0"
-              className="mt-1 w-full rounded border border-gray-300 px-3 py-2 dark:border-gray-600 dark:bg-slate-800 dark:text-white"
+              style={{ width: "100%" }}
             />
           </div>
 
           {/* Actual Amount */}
           <div>
-            <label className="block text-sm font-medium dark:text-gray-200">
-              Actual Amount ($)
-            </label>
+            <label style={labelStyle}>Actual Amount ($)</label>
             <input
               type="number"
               name="actualAmount"
@@ -233,18 +256,20 @@ export function BudgetForm({
               placeholder="0.00"
               step="0.01"
               min="0"
-              className="mt-1 w-full rounded border border-gray-300 px-3 py-2 dark:border-gray-600 dark:bg-slate-800 dark:text-white"
+              style={{ width: "100%" }}
             />
           </div>
 
           {/* Remaining Display */}
           {remaining !== null && (
             <div
-              className={`rounded px-3 py-2 text-sm font-medium ${
-                remaining >= 0
-                  ? "bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300"
-                  : "bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-300"
-              }`}
+              className="card"
+              style={{
+                padding: "10px 14px",
+                fontSize: 13,
+                fontWeight: 600,
+                color: remaining >= 0 ? "var(--color-text)" : "var(--color-accent-700)",
+              }}
             >
               Remaining: ${remaining.toFixed(2)}
             </div>
@@ -252,14 +277,12 @@ export function BudgetForm({
 
           {/* Status */}
           <div>
-            <label className="block text-sm font-medium dark:text-gray-200">
-              Status
-            </label>
+            <label style={labelStyle}>Status</label>
             <select
               name="status"
               value={formData.status}
               onChange={handleChange}
-              className="mt-1 w-full rounded border border-gray-300 px-3 py-2 dark:border-gray-600 dark:bg-slate-800 dark:text-white"
+              style={{ width: "100%" }}
             >
               {STATUS_OPTIONS.map((option) => (
                 <option key={option} value={option}>
@@ -271,36 +294,36 @@ export function BudgetForm({
 
           {/* Notes */}
           <div>
-            <label className="block text-sm font-medium dark:text-gray-200">
-              Notes
-            </label>
+            <label style={labelStyle}>Notes</label>
             <textarea
               name="notes"
               value={formData.notes || ""}
               onChange={handleChange}
               placeholder="Add any additional notes"
               rows={2}
-              className="mt-1 w-full rounded border border-gray-300 px-3 py-2 dark:border-gray-600 dark:bg-slate-800 dark:text-white"
+              style={{ width: "100%" }}
             />
           </div>
 
           {/* Actions */}
-          <div className="mt-6 flex gap-2">
+          <div style={{ display: "flex", gap: 10, marginTop: 8 }}>
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 rounded border border-gray-300 px-4 py-2 font-medium dark:border-gray-600 dark:text-gray-200"
+              className="btn"
+              style={{ flex: 1 }}
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={isSubmitting}
-              className="flex flex-1 items-center justify-center gap-2 rounded bg-blue-500 px-4 py-2 font-medium text-white hover:bg-blue-600 disabled:opacity-50"
+              className="btn btn-primary"
+              style={{ flex: 1 }}
             >
               {isSubmitting ? (
                 <>
-                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <Loader2 size={14} className="animate-spin" />
                   {isEditing ? "Updating..." : "Creating..."}
                 </>
               ) : (

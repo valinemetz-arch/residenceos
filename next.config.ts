@@ -7,7 +7,11 @@ const nextConfig: NextConfig = {
   // Vercel's deployed output, crashing with "Cannot find module
   // .../pdf.worker.mjs". Excluding it from bundling makes Next.js load it
   // straight from node_modules instead, where the real file lives.
-  serverExternalPackages: ["pdfjs-dist"],
+  //
+  // @napi-rs/canvas ships a prebuilt native (.node) binary loaded via a
+  // plain js-binding.js require() - bundlers can't place a native asset
+  // inside an ESM chunk, so it needs the same treatment.
+  serverExternalPackages: ["pdfjs-dist", "@napi-rs/canvas"],
 };
 
 export default nextConfig;

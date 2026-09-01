@@ -7,6 +7,28 @@ interface ApiResponse<T> {
   error?: string;
 }
 
+// GET /api/photos - List all house photos (Owner Dashboard / Contractor
+// Portal "Photos" tab groups these by space).
+export async function GET() {
+  try {
+    const photos = await prisma.photo.findMany({
+      include: { space: { select: { id: true, name: true } } },
+      orderBy: { takeDate: "desc" },
+    });
+
+    return NextResponse.json<ApiResponse<typeof photos>>({
+      success: true,
+      data: photos,
+    });
+  } catch (error) {
+    console.error("Photo list error:", error);
+    return NextResponse.json<ApiResponse<unknown>>(
+      { success: false, error: "Failed to list photos" },
+      { status: 500 }
+    );
+  }
+}
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();

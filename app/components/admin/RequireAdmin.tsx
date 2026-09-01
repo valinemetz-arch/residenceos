@@ -27,7 +27,7 @@ export function RequireAdmin({ children }: { children: React.ReactNode }) {
   if (!checked || !allowed) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
+        <Loader2 className="h-8 w-8 animate-spin text-[#5A5A5A] dark:text-[#A8A8A8]" />
       </div>
     );
   }

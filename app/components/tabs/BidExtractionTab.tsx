@@ -55,16 +55,16 @@ export function BidExtractionTab({
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
-    e.currentTarget.classList.add("border-blue-500", "bg-blue-50");
+    e.currentTarget.classList.add("border-brand-primary", "bg-brand-primary/5", "dark:bg-brand-primary/10");
   };
 
   const handleDragLeave = (e: React.DragEvent) => {
-    e.currentTarget.classList.remove("border-blue-500", "bg-blue-50");
+    e.currentTarget.classList.remove("border-brand-primary", "bg-brand-primary/5", "dark:bg-brand-primary/10");
   };
 
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
-    e.currentTarget.classList.remove("border-blue-500", "bg-blue-50");
+    e.currentTarget.classList.remove("border-brand-primary", "bg-brand-primary/5", "dark:bg-brand-primary/10");
     handleFiles(e.dataTransfer.files);
   };
 
@@ -309,14 +309,14 @@ export function BidExtractionTab({
   if (extractedItems.length > 0) {
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-        <div className="max-h-[90vh] w-full max-w-5xl overflow-y-auto rounded-lg bg-white p-6 dark:bg-slate-900">
+        <div className="max-h-[90vh] w-full max-w-5xl overflow-y-auto rounded-lg bg-white p-6 dark:bg-[#2D2D2D]">
           <div className="mb-6 flex items-center justify-between">
             <h2 className="text-2xl font-bold dark:text-white">
               Review Bid Items & Warranties ({extractedItems.length} items)
             </h2>
             <button
               onClick={onClose}
-              className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+              className="text-[#5A5A5A] hover:text-[#1F1F1F] dark:text-[#A8A8A8] dark:hover:text-white"
             >
               <X className="h-5 w-5" />
             </button>
@@ -324,13 +324,13 @@ export function BidExtractionTab({
 
           {/* Space Selector */}
           <div className="mb-6">
-            <label className="block text-sm font-medium dark:text-gray-200">
+            <label className="block text-sm font-medium dark:text-white">
               Default Space for New Assets
             </label>
             <select
               value={selectedSpaceId}
               onChange={(e) => setSelectedSpaceId(e.target.value)}
-              className="mt-2 w-full rounded border border-gray-300 px-3 py-2 dark:border-gray-600 dark:bg-slate-800 dark:text-white"
+              className="mt-2 w-full rounded border border-[#D4D9CE] px-3 py-2 dark:border-[#1F1F1F] dark:bg-brand-charcoal dark:text-white"
             >
               {spaces.map((space) => (
                 <option key={space.id} value={space.id}>
@@ -341,39 +341,39 @@ export function BidExtractionTab({
           </div>
 
           {/* Items Table */}
-          <div className="mb-6 max-h-[50vh] overflow-y-auto rounded border border-gray-200 dark:border-gray-700">
+          <div className="mb-6 max-h-[50vh] overflow-y-auto rounded border border-[#D4D9CE] dark:border-[#1F1F1F]">
             <table className="w-full text-sm">
-              <thead className="sticky top-0 border-b border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-slate-800">
+              <thead className="sticky top-0 border-b border-[#D4D9CE] bg-brand-cream dark:border-[#1F1F1F] dark:bg-brand-charcoal">
                 <tr>
-                  <th className="px-4 py-3 text-left font-semibold dark:text-gray-200">
+                  <th className="px-4 py-3 text-left font-semibold dark:text-white">
                     Description
                   </th>
-                  <th className="px-4 py-3 text-left font-semibold dark:text-gray-200">
+                  <th className="px-4 py-3 text-left font-semibold dark:text-white">
                     Qty
                   </th>
-                  <th className="px-4 py-3 text-left font-semibold dark:text-gray-200">
+                  <th className="px-4 py-3 text-left font-semibold dark:text-white">
                     Unit Price
                   </th>
-                  <th className="px-4 py-3 text-left font-semibold dark:text-gray-200">
+                  <th className="px-4 py-3 text-left font-semibold dark:text-white">
                     Warranty
                   </th>
-                  <th className="px-4 py-3 text-left font-semibold dark:text-gray-200">
+                  <th className="px-4 py-3 text-left font-semibold dark:text-white">
                     Matched Asset
                   </th>
-                  <th className="px-4 py-3 text-left font-semibold dark:text-gray-200">
+                  <th className="px-4 py-3 text-left font-semibold dark:text-white">
                     Actions
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+              <tbody className="divide-y divide-[#D4D9CE] dark:divide-[#1F1F1F]">
                 {extractedItems.map((item, idx) => {
                   const itemMatch = getMatchForItem(idx);
                   return (
                     <tr
                       key={idx}
-                      className="bg-white hover:bg-gray-50 dark:bg-slate-900 dark:hover:bg-slate-800"
+                      className="bg-white hover:bg-brand-cream dark:bg-[#2D2D2D] dark:hover:bg-brand-charcoal"
                     >
-                      <td className="px-4 py-3 text-sm dark:text-gray-200">
+                      <td className="px-4 py-3 text-sm dark:text-white">
                         {editingItemIndex === idx ? (
                           <input
                             type="text"
@@ -381,13 +381,13 @@ export function BidExtractionTab({
                             onChange={(e) =>
                               updateItemField(idx, "description", e.target.value)
                             }
-                            className="w-full rounded border border-gray-300 px-2 py-1 dark:border-gray-600 dark:bg-slate-700 dark:text-white"
+                            className="w-full rounded border border-[#D4D9CE] px-2 py-1 dark:border-[#1F1F1F] dark:bg-brand-charcoal dark:text-white"
                           />
                         ) : (
                           <div className="line-clamp-2">{item.description}</div>
                         )}
                       </td>
-                      <td className="px-4 py-3 text-sm dark:text-gray-200">
+                      <td className="px-4 py-3 text-sm dark:text-white">
                         {editingItemIndex === idx ? (
                           <input
                             type="number"
@@ -399,13 +399,13 @@ export function BidExtractionTab({
                                 parseInt(e.target.value) || 0
                               )
                             }
-                            className="w-16 rounded border border-gray-300 px-2 py-1 dark:border-gray-600 dark:bg-slate-700 dark:text-white"
+                            className="w-16 rounded border border-[#D4D9CE] px-2 py-1 dark:border-[#1F1F1F] dark:bg-brand-charcoal dark:text-white"
                           />
                         ) : (
                           item.quantity
                         )}
                       </td>
-                      <td className="px-4 py-3 text-sm dark:text-gray-200">
+                      <td className="px-4 py-3 text-sm dark:text-white">
                         {editingItemIndex === idx ? (
                           <input
                             type="number"
@@ -417,7 +417,7 @@ export function BidExtractionTab({
                                 e.target.value ? parseFloat(e.target.value) : null
                               )
                             }
-                            className="w-24 rounded border border-gray-300 px-2 py-1 dark:border-gray-600 dark:bg-slate-700 dark:text-white"
+                            className="w-24 rounded border border-[#D4D9CE] px-2 py-1 dark:border-[#1F1F1F] dark:bg-brand-charcoal dark:text-white"
                           />
                         ) : item.unitPrice ? (
                           `$${item.unitPrice.toFixed(2)}`
@@ -425,7 +425,7 @@ export function BidExtractionTab({
                           "—"
                         )}
                       </td>
-                      <td className="px-4 py-3 text-sm dark:text-gray-200">
+                      <td className="px-4 py-3 text-sm dark:text-white">
                         {editingItemIndex === idx ? (
                           <input
                             type="text"
@@ -438,7 +438,7 @@ export function BidExtractionTab({
                               )
                             }
                             placeholder="e.g., 5-year limited"
-                            className="w-full rounded border border-gray-300 px-2 py-1 dark:border-gray-600 dark:bg-slate-700 dark:text-white"
+                            className="w-full rounded border border-[#D4D9CE] px-2 py-1 dark:border-[#1F1F1F] dark:bg-brand-charcoal dark:text-white"
                           />
                         ) : (
                           <div className="line-clamp-1 text-xs">
@@ -446,20 +446,20 @@ export function BidExtractionTab({
                           </div>
                         )}
                       </td>
-                      <td className="px-4 py-3 text-sm dark:text-gray-200">
+                      <td className="px-4 py-3 text-sm dark:text-white">
                         {itemMatch ? (
                           <div className="flex flex-col gap-1">
-                            <div className="rounded bg-green-50 px-2 py-1 dark:bg-green-900">
-                              <p className="font-medium text-green-900 dark:text-green-100">
+                            <div className="rounded bg-brand-success/10 px-2 py-1 dark:bg-brand-success/25">
+                              <p className="font-medium text-brand-success dark:text-brand-success">
                                 {itemMatch.assetName}
                               </p>
-                              <p className="text-xs text-green-700 dark:text-green-200">
+                              <p className="text-xs text-brand-success dark:text-brand-success">
                                 {itemMatch.confidence}% match
                               </p>
                             </div>
                           </div>
                         ) : (
-                          <div className="text-xs text-gray-500 dark:text-gray-400">
+                          <div className="text-xs text-[#5A5A5A] dark:text-[#A8A8A8]">
                             No match
                           </div>
                         )}
@@ -472,14 +472,14 @@ export function BidExtractionTab({
                                 editingItemIndex === idx ? null : idx
                               )
                             }
-                            className="text-blue-600 hover:text-blue-700 dark:text-blue-400"
+                            className="text-brand-primary hover:opacity-80 dark:text-brand-secondary"
                             title="Edit"
                           >
                             <Edit2 className="h-4 w-4" />
                           </button>
                           <button
                             onClick={() => removeItem(idx)}
-                            className="text-red-600 hover:text-red-700 dark:text-red-400"
+                            className="text-brand-error hover:opacity-80 dark:text-brand-error"
                             title="Remove"
                           >
                             <Trash2 className="h-4 w-4" />
@@ -500,20 +500,20 @@ export function BidExtractionTab({
                 setMatches([]);
                 setFiles([]);
               }}
-              className="flex-1 rounded border border-gray-300 px-4 py-2 font-medium dark:border-gray-600 dark:text-gray-200"
+              className="flex-1 rounded border border-[#D4D9CE] px-4 py-2 font-medium dark:border-[#1F1F1F] dark:text-white"
             >
               Back to Upload
             </button>
             <button
               onClick={onClose}
-              className="flex-1 rounded border border-gray-300 px-4 py-2 font-medium dark:border-gray-600 dark:text-gray-200"
+              className="flex-1 rounded border border-[#D4D9CE] px-4 py-2 font-medium dark:border-[#1F1F1F] dark:text-white"
             >
               Cancel
             </button>
             <button
               onClick={applyWarrantyUpdates}
               disabled={loading}
-              className="flex flex-1 items-center justify-center gap-2 rounded bg-green-500 px-4 py-2 font-medium text-white hover:bg-green-600 disabled:opacity-50"
+              className="flex flex-1 items-center justify-center gap-2 rounded bg-brand-success px-4 py-2 font-medium text-white hover:opacity-90 disabled:opacity-50"
             >
               {loading ? (
                 <>
@@ -536,14 +536,14 @@ export function BidExtractionTab({
   // File upload stage
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-      <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-lg bg-white p-6 dark:bg-slate-900">
+      <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-lg bg-white p-6 dark:bg-[#2D2D2D]">
         <div className="mb-6 flex items-center justify-between">
           <h2 className="text-2xl font-bold dark:text-white">
             Extract Bid & Add Warranties
           </h2>
           <button
             onClick={onClose}
-            className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+            className="text-[#5A5A5A] hover:text-[#1F1F1F] dark:text-[#A8A8A8] dark:hover:text-white"
           >
             <X className="h-5 w-5" />
           </button>
@@ -553,15 +553,15 @@ export function BidExtractionTab({
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
           onDrop={handleDrop}
-          className="mb-6 rounded-lg border-2 border-dashed border-gray-300 bg-gray-50 p-8 text-center transition-colors dark:border-gray-600 dark:bg-slate-800"
+          className="mb-6 rounded-lg border-2 border-dashed border-[#D4D9CE] bg-brand-cream p-8 text-center transition-colors dark:border-[#1F1F1F] dark:bg-brand-charcoal"
         >
-          <Upload className="mx-auto h-12 w-12 text-gray-400" />
-          <p className="mt-2 text-sm font-medium text-gray-900 dark:text-gray-100">
+          <Upload className="mx-auto h-12 w-12 text-brand-gray" />
+          <p className="mt-2 text-sm font-medium text-[#1F1F1F] dark:text-white">
             Drag and drop bid documents here
           </p>
-          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">or</p>
+          <p className="mt-1 text-sm text-[#5A5A5A] dark:text-[#A8A8A8]">or</p>
           <label className="mt-2 inline-block">
-            <span className="cursor-pointer text-blue-500 hover:text-blue-600">
+            <span className="cursor-pointer text-brand-primary hover:text-brand-primary-dark">
               click to select files
             </span>
             <input
@@ -572,21 +572,21 @@ export function BidExtractionTab({
               className="hidden"
             />
           </label>
-          <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
+          <p className="mt-2 text-xs text-[#5A5A5A] dark:text-[#A8A8A8]">
             JPG, PNG, WebP, or PDF up to 10MB
           </p>
         </div>
 
         {files.length > 0 && (
           <div className="mb-6">
-            <h3 className="mb-3 text-sm font-semibold dark:text-gray-200">
+            <h3 className="mb-3 text-sm font-semibold dark:text-white">
               Selected Files ({files.length})
             </h3>
             <div className="grid gap-2 sm:grid-cols-2">
               {files.map((f, idx) => (
                 <div
                   key={idx}
-                  className="flex items-center gap-3 rounded border border-gray-200 bg-gray-50 p-3 dark:border-gray-700 dark:bg-slate-800"
+                  className="flex items-center gap-3 rounded border border-[#D4D9CE] bg-brand-cream p-3 dark:border-[#1F1F1F] dark:bg-brand-charcoal"
                 >
                   <div className="flex-shrink-0">
                     {f.preview ? (
@@ -596,20 +596,20 @@ export function BidExtractionTab({
                         className="h-10 w-10 rounded object-cover"
                       />
                     ) : (
-                      <FileText className="h-10 w-10 text-blue-600" />
+                      <FileText className="h-10 w-10 text-brand-primary dark:text-brand-secondary" />
                     )}
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-medium dark:text-gray-200">
+                    <p className="truncate text-sm font-medium dark:text-white">
                       {f.file.name}
                     </p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                    <p className="text-xs text-[#5A5A5A] dark:text-[#A8A8A8]">
                       {(f.file.size / 1024).toFixed(0)} KB
                     </p>
                   </div>
                   <button
                     onClick={() => removeFile(idx)}
-                    className="text-gray-400 hover:text-red-600"
+                    className="text-[#5A5A5A] dark:text-[#A8A8A8] hover:text-brand-error"
                   >
                     <X className="h-4 w-4" />
                   </button>
@@ -622,14 +622,14 @@ export function BidExtractionTab({
         <div className="flex gap-2">
           <button
             onClick={onClose}
-            className="flex-1 rounded border border-gray-300 px-4 py-2 font-medium dark:border-gray-600 dark:text-gray-200"
+            className="flex-1 rounded border border-[#D4D9CE] px-4 py-2 font-medium dark:border-[#1F1F1F] dark:text-white"
           >
             Cancel
           </button>
           <button
             onClick={analyzeFiles}
             disabled={analyzing || files.length === 0}
-            className="flex flex-1 items-center justify-center gap-2 rounded bg-blue-500 px-4 py-2 font-medium text-white hover:bg-blue-600 disabled:opacity-50"
+            className="flex flex-1 items-center justify-center gap-2 rounded bg-brand-primary px-4 py-2 font-medium text-white hover:bg-brand-primary-dark disabled:opacity-50"
           >
             {analyzing ? (
               <>

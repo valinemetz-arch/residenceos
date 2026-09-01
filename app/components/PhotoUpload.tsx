@@ -100,13 +100,13 @@ export function PhotoUpload({
       {!showForm ? (
         <button
           onClick={() => fileInputRef.current?.click()}
-          className="flex items-center gap-2 rounded border border-gray-300 px-4 py-2 text-sm font-medium hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-slate-700"
+          className="flex items-center gap-2 rounded border border-[#D4D9CE] px-4 py-2 text-sm font-medium hover:bg-brand-cream dark:border-[#1F1F1F] dark:hover:bg-brand-charcoal"
         >
           <Upload className="h-4 w-4" />
           Add Photo
         </button>
       ) : (
-        <div className="rounded-lg border border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-slate-800">
+        <div className="rounded-lg border border-[#D4D9CE] bg-white p-4 dark:border-[#1F1F1F] dark:bg-[#2D2D2D]">
           <div className="mb-3 flex items-center justify-between">
             <h3 className="font-semibold dark:text-white">Upload Photo</h3>
             <button
@@ -115,20 +115,20 @@ export function PhotoUpload({
                 setCaption("");
                 if (fileInputRef.current) fileInputRef.current.value = "";
               }}
-              className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+              className="text-[#5A5A5A] hover:text-[#1F1F1F] dark:text-[#A8A8A8] dark:hover:text-white"
             >
               <X className="h-4 w-4" />
             </button>
           </div>
 
           <div className="mb-3">
-            <p className="text-sm text-gray-600 dark:text-gray-400">
+            <p className="text-sm text-[#5A5A5A] dark:text-[#A8A8A8]">
               {fileInputRef.current?.files?.[0]?.name}
             </p>
           </div>
 
           <div className="mb-4">
-            <label className="block text-sm font-medium dark:text-gray-200">
+            <label className="block text-sm font-medium dark:text-white">
               Caption (optional)
             </label>
             <textarea
@@ -136,7 +136,7 @@ export function PhotoUpload({
               onChange={(e) => setCaption(e.target.value)}
               placeholder="Add a description..."
               rows={2}
-              className="mt-1 w-full rounded border border-gray-300 px-3 py-2 dark:border-gray-600 dark:bg-slate-700 dark:text-white"
+              className="mt-1 w-full rounded border border-[#D4D9CE] px-3 py-2 dark:border-[#1F1F1F] dark:bg-brand-charcoal dark:text-white"
             />
           </div>
 
@@ -147,14 +147,14 @@ export function PhotoUpload({
                 setCaption("");
                 if (fileInputRef.current) fileInputRef.current.value = "";
               }}
-              className="flex-1 rounded border border-gray-300 px-3 py-2 text-sm font-medium dark:border-gray-600"
+              className="flex-1 rounded border border-[#D4D9CE] px-3 py-2 text-sm font-medium dark:border-[#1F1F1F]"
             >
               Cancel
             </button>
             <button
               onClick={handleUpload}
               disabled={uploading}
-              className="flex flex-1 items-center justify-center gap-2 rounded bg-blue-500 px-3 py-2 text-sm font-medium text-white hover:bg-blue-600 disabled:opacity-50"
+              className="flex flex-1 items-center justify-center gap-2 rounded bg-brand-primary px-3 py-2 text-sm font-medium text-white hover:bg-brand-primary-dark disabled:opacity-50"
             >
               {uploading ? (
                 <>

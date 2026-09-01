@@ -1,12 +1,19 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { Plus, Edit2, Trash2, Loader2, FileText, Zap } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
+import { Plus, Edit2, Trash2, Loader2, FileText, Zap, Printer } from "lucide-react";
 import { AssetForm } from "./AssetForm";
 import { AssetDetail } from "./AssetDetail";
 import { BulkAssetUploader } from "./BulkAssetUploader";
 import { toast } from "@/lib/toast";
 import { formatCurrency } from "@/lib/utils";
+
+// Preferred display order for the category filter - matches the printable
+// schedule's grouping. Any system not in this list is appended after, and
+// assets with no systemId at all fall under "Uncategorized".
+const CATEGORY_ORDER = ["Doors", "Windows", "Appliances", "Plumbing"];
+const UNCATEGORIZED = "Uncategorized";
 
 interface Space {
   id: string;
@@ -18,14 +25,41 @@ interface System {
   name: string;
 }
 
+interface Trade {
+  id: string;
+  name: string;
+}
+
 import type { AssetWithRelations } from "@/lib/types";
 
 interface Asset extends AssetWithRelations {}
+
+const UNASSIGNED_TRADE = "Unassigned";
+
+const STATUS_LABEL: Record<string, string> = {
+  pending: "Pending",
+  ordered: "Ordered",
+  "in-stock": "In Stock",
+  active: "Active",
+  archived: "Archived",
+};
+
+const STATUS_CLASS: Record<string, string> = {
+  pending: "tag tag-outline",
+  ordered: "tag tag-accent",
+  "in-stock": "tag tag-accent",
+  active: "tag tag-neutral",
+  archived: "tag tag-outline",
+};
+
+const filterBtnStyle = (active: boolean): React.CSSProperties | undefined =>
+  active ? { borderColor: "var(--color-accent)", color: "var(--color-accent-700)" } : undefined;
 
 export function AssetListWithForms() {
   const [assets, setAssets] = useState<Asset[]>([]);
   const [spaces, setSpaces] = useState<Space[]>([]);
   const [systems, setSystems] = useState<System[]>([]);
+  const [trades, setTrades] = useState<Trade[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [showDetail, setShowDetail] = useState(false);
@@ -33,23 +67,28 @@ export function AssetListWithForms() {
   const [selectedAsset, setSelectedAsset] = useState<Asset | undefined>();
   const [detailAssetId, setDetailAssetId] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [categoryFilter, setCategoryFilter] = useState<string>("All");
+  const [tradeFilter, setTradeFilter] = useState<string>("All");
 
   const loadData = async () => {
     try {
       setLoading(true);
-      const [assetsRes, spacesRes, systemsRes] = await Promise.all([
+      const [assetsRes, spacesRes, systemsRes, tradesRes] = await Promise.all([
         fetch("/api/assets"),
         fetch("/api/spaces"),
         fetch("/api/systems"),
+        fetch("/api/trades"),
       ]);
 
       const assetsData = await assetsRes.json();
       const spacesData = await spacesRes.json();
       const systemsData = await systemsRes.json();
+      const tradesData = await tradesRes.json();
 
       if (assetsData.success) setAssets(assetsData.data);
       if (spacesData.success) setSpaces(spacesData.data);
       if (systemsData.success) setSystems(systemsData.data);
+      if (tradesData.trades) setTrades(tradesData.trades);
     } catch (error) {
       toast.error("Error", "Failed to load data");
     } finally {
@@ -100,14 +139,31 @@ export function AssetListWithForms() {
     }
   };
 
-  const statusColors: Record<string, string> = {
-    pending: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200",
-    ordered: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200",
-    "in-stock":
-      "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200",
-    active: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200",
-    archived: "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200",
-  };
+  const categoryOptions = useMemo(() => {
+    const present = new Set(assets.map((a) => a.system?.name || UNCATEGORIZED));
+    const ordered = CATEGORY_ORDER.filter((c) => present.has(c));
+    const extras = [...present]
+      .filter((c) => c !== UNCATEGORIZED && !CATEGORY_ORDER.includes(c))
+      .sort();
+    const rest = present.has(UNCATEGORIZED) ? [UNCATEGORIZED] : [];
+    return ["All", ...ordered, ...extras, ...rest];
+  }, [assets]);
+
+  const tradeOptions = useMemo(() => {
+    const present = new Set(assets.map((a) => a.trade?.name || UNASSIGNED_TRADE));
+    return ["All", ...[...present].sort()];
+  }, [assets]);
+
+  const filteredAssets = useMemo(() => {
+    return assets.filter((a) => {
+      const categoryMatch =
+        categoryFilter === "All" ||
+        (a.system?.name || UNCATEGORIZED) === categoryFilter;
+      const tradeMatch =
+        tradeFilter === "All" || (a.trade?.name || UNASSIGNED_TRADE) === tradeFilter;
+      return categoryMatch && tradeMatch;
+    });
+  }, [assets, categoryFilter, tradeFilter]);
 
   if (loading) {
     return (
@@ -118,132 +174,166 @@ export function AssetListWithForms() {
   }
 
   return (
-    <>
-      {/* Header with Add Button */}
-      <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-3xl font-bold dark:text-white">Assets</h1>
-        <div className="flex gap-2">
-          <button
-            onClick={() => setShowBulkUploader(true)}
-            className="flex items-center gap-2 rounded bg-amber-500 px-4 py-2 font-medium text-white hover:bg-amber-600"
-            title="Upload and analyze images/PDFs with AI"
-          >
-            <Zap className="h-5 w-5" />
-            Add via AI
-          </button>
-          <button
-            onClick={handleAddClick}
-            className="flex items-center gap-2 rounded bg-blue-500 px-4 py-2 font-medium text-white hover:bg-blue-600"
-          >
-            <Plus className="h-5 w-5" />
-            Add Asset
-          </button>
-        </div>
+    <div className="classical">
+      {/* Actions */}
+      <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "flex-end", gap: 8, marginBottom: 18 }}>
+        <Link
+          href={
+            categoryFilter === "All"
+              ? "/app/assets/schedule"
+              : `/app/assets/schedule?category=${encodeURIComponent(categoryFilter)}`
+          }
+          className="btn"
+          title="Printable schedule grouped by category"
+        >
+          <Printer size={16} strokeWidth={1.8} />
+          Print Schedule
+        </Link>
+        <button
+          className="btn"
+          onClick={() => setShowBulkUploader(true)}
+          title="Upload and analyze images/PDFs with AI"
+        >
+          <Zap size={16} strokeWidth={1.8} />
+          Add via AI
+        </button>
+        <button className="btn btn-primary" onClick={handleAddClick}>
+          <Plus size={16} strokeWidth={1.8} />
+          Add Asset
+        </button>
       </div>
+
+      {/* Category Filter */}
+      {assets.length > 0 && (
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 8 }}>
+          {categoryOptions.map((cat) => (
+            <button
+              key={cat}
+              className="btn"
+              style={filterBtnStyle(categoryFilter === cat)}
+              onClick={() => setCategoryFilter(cat)}
+            >
+              {cat}
+              {cat !== "All" &&
+                ` (${assets.filter((a) => (a.system?.name || UNCATEGORIZED) === cat).length})`}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/* Trade Filter */}
+      {assets.length > 0 && (
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 18 }}>
+          {tradeOptions.map((trade) => (
+            <button
+              key={trade}
+              className="btn"
+              style={filterBtnStyle(tradeFilter === trade)}
+              onClick={() => setTradeFilter(trade)}
+            >
+              {trade}
+              {trade !== "All" &&
+                ` (${assets.filter((a) => (a.trade?.name || UNASSIGNED_TRADE) === trade).length})`}
+            </button>
+          ))}
+        </div>
+      )}
 
       {/* Assets Table */}
       {assets.length === 0 ? (
-        <div className="rounded-lg border border-gray-200 bg-gray-50 p-8 text-center dark:border-gray-700 dark:bg-slate-800">
-          <p className="text-gray-600 dark:text-gray-300">
-            No assets yet. Create one to get started.
-          </p>
-          <button
-            onClick={handleAddClick}
-            className="mt-4 rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
-          >
+        <div className="card" style={{ textAlign: "center", padding: 32 }}>
+          <p className="card-meta">No assets yet. Create one to get started.</p>
+          <button className="btn btn-primary" style={{ marginTop: 16 }} onClick={handleAddClick}>
             Create First Asset
           </button>
         </div>
       ) : (
-        <div className="overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-700">
-          <table className="w-full text-sm">
-            <thead className="border-b border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-slate-800">
-              <tr>
-                <th className="px-6 py-3 text-left font-semibold dark:text-gray-200">
-                  Name
-                </th>
-                <th className="px-6 py-3 text-left font-semibold dark:text-gray-200">
-                  Manufacturer
-                </th>
-                <th className="px-6 py-3 text-left font-semibold dark:text-gray-200">
-                  Location
-                </th>
-                <th className="px-6 py-3 text-left font-semibold dark:text-gray-200">
-                  Cost
-                </th>
-                <th className="px-6 py-3 text-left font-semibold dark:text-gray-200">
-                  Status
-                </th>
-                <th className="px-6 py-3 text-left font-semibold dark:text-gray-200">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-              {assets.map((asset) => (
-                <tr
-                  key={asset.id}
-                  className="bg-white hover:bg-gray-50 dark:bg-slate-900 dark:hover:bg-slate-800"
-                >
-                  <td className="px-6 py-4 font-medium dark:text-white">
-                    {asset.name}
-                  </td>
-                  <td className="px-6 py-4 text-gray-600 dark:text-gray-300">
-                    {asset.manufacturer || "—"}
-                  </td>
-                  <td className="px-6 py-4 text-gray-600 dark:text-gray-300">
-                    {asset.space.name}
-                  </td>
-                  <td className="px-6 py-4 text-gray-600 dark:text-gray-300">
-                    {asset.cost ? formatCurrency(asset.cost) : "—"}
-                  </td>
-                  <td className="px-6 py-4">
-                    <span
-                      className={`inline-block rounded px-2 py-1 text-xs font-semibold ${
-                        statusColors[asset.status] || statusColors.pending
-                      }`}
-                    >
-                      {asset.status}
+        <table className="table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Category</th>
+              <th>Manufacturer / Model</th>
+              <th>Size</th>
+              <th>Selection</th>
+              <th>Trade</th>
+              <th>Location</th>
+              <th>Cost</th>
+              <th>Status</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {filteredAssets.map((asset) => (
+              <tr key={asset.id}>
+                <td style={{ fontWeight: 600 }}>{asset.name}</td>
+                <td>
+                  {asset.system?.name || (
+                    <span style={{ fontStyle: "italic", color: "var(--color-neutral-600)" }}>
+                      {UNCATEGORIZED}
                     </span>
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => {
-                          setDetailAssetId(asset.id);
-                          setShowDetail(true);
-                        }}
-                        className="rounded border border-blue-300 p-2 hover:bg-blue-50 dark:border-blue-700 dark:hover:bg-blue-900/20"
-                        title="Documents & specs"
-                      >
-                        <FileText className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-                      </button>
-                      <button
-                        onClick={() => handleEditClick(asset)}
-                        className="rounded border border-gray-300 p-2 hover:bg-gray-100 dark:border-gray-600 dark:hover:bg-slate-800"
-                        title="Edit"
-                      >
-                        <Edit2 className="h-4 w-4 text-gray-600 dark:text-gray-300" />
-                      </button>
-                      <button
-                        onClick={() => handleDeleteClick(asset.id)}
-                        disabled={deletingId === asset.id}
-                        className="rounded border border-red-300 p-2 hover:bg-red-50 disabled:opacity-50 dark:border-red-700 dark:hover:bg-red-900/20"
-                        title="Delete"
-                      >
-                        {deletingId === asset.id ? (
-                          <Loader2 className="h-4 w-4 animate-spin text-red-600" />
-                        ) : (
-                          <Trash2 className="h-4 w-4 text-red-600" />
-                        )}
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+                  )}
+                </td>
+                <td>
+                  {asset.manufacturer || "—"}
+                  {asset.model ? ` / ${asset.model}` : ""}
+                </td>
+                <td>{asset.size || "—"}</td>
+                <td>{asset.finish || "—"}</td>
+                <td>
+                  {asset.trade?.name || (
+                    <span style={{ fontStyle: "italic", color: "var(--color-neutral-600)" }}>
+                      {UNASSIGNED_TRADE}
+                    </span>
+                  )}
+                </td>
+                <td>{asset.space.name}</td>
+                <td>{asset.cost ? formatCurrency(asset.cost) : "—"}</td>
+                <td>
+                  <span className={STATUS_CLASS[asset.status] || "tag tag-outline"}>
+                    {STATUS_LABEL[asset.status] || asset.status}
+                  </span>
+                </td>
+                <td>
+                  <div style={{ display: "flex", gap: 4, justifyContent: "flex-end" }}>
+                    <button
+                      className="btn btn-icon"
+                      onClick={() => {
+                        setDetailAssetId(asset.id);
+                        setShowDetail(true);
+                      }}
+                      aria-label="Documents & specs"
+                      title="Documents & specs"
+                    >
+                      <FileText size={14} strokeWidth={1.8} />
+                    </button>
+                    <button
+                      className="btn btn-icon"
+                      onClick={() => handleEditClick(asset)}
+                      aria-label="Edit asset"
+                      title="Edit"
+                    >
+                      <Edit2 size={14} strokeWidth={1.8} />
+                    </button>
+                    <button
+                      className="btn btn-icon"
+                      onClick={() => handleDeleteClick(asset.id)}
+                      disabled={deletingId === asset.id}
+                      aria-label="Delete asset"
+                      title="Delete"
+                    >
+                      {deletingId === asset.id ? (
+                        <Loader2 size={14} className="animate-spin" />
+                      ) : (
+                        <Trash2 size={14} strokeWidth={1.8} />
+                      )}
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       )}
 
       {/* Form Modal */}
@@ -252,6 +342,7 @@ export function AssetListWithForms() {
           asset={selectedAsset}
           spaces={spaces}
           systems={systems}
+          trades={trades}
           onClose={() => {
             setShowForm(false);
             setSelectedAsset(undefined);
@@ -286,6 +377,6 @@ export function AssetListWithForms() {
           }}
         />
       )}
-    </>
+    </div>
   );
 }

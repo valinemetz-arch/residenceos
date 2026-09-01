@@ -81,13 +81,13 @@ export default function AdminTradesPage() {
 
   return (
     <RequireAdmin>
-    <div className="min-h-screen bg-gray-50 dark:bg-slate-950">
+    <div className="min-h-screen bg-[#FAFAF8] dark:bg-[#2D2D2D]">
       <div className="max-w-4xl mx-auto px-4 py-8">
         {/* Header */}
         <div className="mb-8">
           <Link
             href="/app"
-            className="flex items-center gap-2 text-blue-600 dark:text-blue-400 hover:underline mb-4"
+            className="flex items-center gap-2 text-brand-primary dark:text-brand-secondary hover:underline mb-4"
           >
             <ArrowLeft className="h-4 w-4" />
             Back to Dashboard
@@ -98,14 +98,14 @@ export default function AdminTradesPage() {
                 <Wrench className="h-8 w-8" />
                 Trade Management
               </h1>
-              <p className="text-gray-600 dark:text-gray-400 mt-2">
+              <p className="text-[#5A5A5A] dark:text-[#A8A8A8] mt-2">
                 Manage contractor specialties and project requirements
               </p>
             </div>
             {!showForm && (
               <button
                 onClick={() => setShowForm(true)}
-                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium"
+                className="flex items-center gap-2 px-4 py-2 bg-brand-primary hover:bg-brand-primary-dark text-white rounded-lg font-medium"
               >
                 <Plus className="h-5 w-5" />
                 New Trade
@@ -116,13 +116,13 @@ export default function AdminTradesPage() {
 
         {/* Create Form */}
         {showForm && (
-          <div className="bg-white dark:bg-slate-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6 mb-6">
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+          <div className="bg-white dark:bg-[#2D2D2D] rounded-lg border border-[#D4D9CE] dark:border-[#1F1F1F] p-6 mb-6">
+            <h2 className="text-lg font-semibold text-brand-charcoal dark:text-white mb-4">
               Create New Trade
             </h2>
             <form onSubmit={handleCreateTrade} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                <label className="block text-sm font-medium text-[#5A5A5A] dark:text-[#A8A8A8] mb-1">
                   Trade Name
                 </label>
                 <input
@@ -133,12 +133,12 @@ export default function AdminTradesPage() {
                   }
                   placeholder="e.g., Plumbing, Electrical"
                   disabled={submitting}
-                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-slate-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 disabled:opacity-50"
+                  className="w-full px-4 py-2 border border-[#D4D9CE] dark:border-[#1F1F1F] rounded-lg bg-white dark:bg-[#2D2D2D] text-brand-charcoal dark:text-white placeholder-[#5A5A5A] dark:placeholder-[#A8A8A8] disabled:opacity-50"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                <label className="block text-sm font-medium text-[#5A5A5A] dark:text-[#A8A8A8] mb-1">
                   Description (Optional)
                 </label>
                 <textarea
@@ -149,14 +149,14 @@ export default function AdminTradesPage() {
                   placeholder="Describe this trade..."
                   disabled={submitting}
                   rows={3}
-                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-slate-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 disabled:opacity-50"
+                  className="w-full px-4 py-2 border border-[#D4D9CE] dark:border-[#1F1F1F] rounded-lg bg-white dark:bg-[#2D2D2D] text-brand-charcoal dark:text-white placeholder-[#5A5A5A] dark:placeholder-[#A8A8A8] disabled:opacity-50"
                 />
               </div>
 
               {error && (
-                <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4 flex gap-3">
-                  <AlertCircle className="h-5 w-5 text-red-600 dark:text-red-400 flex-shrink-0" />
-                  <p className="text-sm text-red-800 dark:text-red-300">
+                <div className="bg-brand-error/10 dark:bg-brand-error/25 border border-brand-error/30 dark:border-brand-error/40 rounded-lg p-4 flex gap-3">
+                  <AlertCircle className="h-5 w-5 text-brand-error flex-shrink-0" />
+                  <p className="text-sm text-brand-error">
                     {error}
                   </p>
                 </div>
@@ -166,7 +166,7 @@ export default function AdminTradesPage() {
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-blue-400 font-medium"
+                  className="px-4 py-2 bg-brand-primary hover:bg-brand-primary-dark disabled:bg-brand-gray text-white rounded-lg font-medium"
                 >
                   {submitting ? "Creating..." : "Create Trade"}
                 </button>
@@ -178,7 +178,7 @@ export default function AdminTradesPage() {
                     setError(null);
                   }}
                   disabled={submitting}
-                  className="px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-800 disabled:opacity-50"
+                  className="px-4 py-2 border border-[#D4D9CE] dark:border-[#1F1F1F] text-[#5A5A5A] dark:text-[#A8A8A8] rounded-lg hover:bg-brand-cream dark:hover:bg-brand-charcoal disabled:opacity-50"
                 >
                   Cancel
                 </button>
@@ -188,45 +188,45 @@ export default function AdminTradesPage() {
         )}
 
         {/* Trades List */}
-        <div className="bg-white dark:bg-slate-900 rounded-lg border border-gray-200 dark:border-gray-700">
+        <div className="bg-white dark:bg-[#2D2D2D] rounded-lg border border-[#D4D9CE] dark:border-[#1F1F1F]">
           {loading ? (
-            <div className="text-center py-12 text-gray-500 dark:text-gray-400">
+            <div className="text-center py-12 text-[#5A5A5A] dark:text-[#A8A8A8]">
               Loading trades...
             </div>
           ) : trades.length === 0 ? (
             <div className="text-center py-12">
-              <Wrench className="h-12 w-12 text-gray-300 dark:text-gray-700 mx-auto mb-4" />
-              <p className="text-gray-600 dark:text-gray-400 mb-4">
+              <Wrench className="h-12 w-12 text-[#D4D9CE] dark:text-[#1F1F1F] mx-auto mb-4" />
+              <p className="text-[#5A5A5A] dark:text-[#A8A8A8] mb-4">
                 No trades created yet
               </p>
               {!showForm && (
                 <button
                   onClick={() => setShowForm(true)}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium"
+                  className="px-4 py-2 bg-brand-primary hover:bg-brand-primary-dark text-white rounded-lg font-medium"
                 >
                   Create First Trade
                 </button>
               )}
             </div>
           ) : (
-            <div className="divide-y divide-gray-200 dark:divide-gray-700">
+            <div className="divide-y divide-[#D4D9CE] dark:divide-[#1F1F1F]">
               {trades.map((trade) => (
                 <div
                   key={trade.id}
-                  className="p-6 hover:bg-gray-50 dark:hover:bg-slate-800 transition"
+                  className="p-6 hover:bg-brand-cream dark:hover:bg-brand-charcoal transition"
                 >
                   <div className="flex items-start justify-between">
                     <div>
-                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                      <h3 className="text-lg font-semibold text-brand-charcoal dark:text-white">
                         {trade.name}
                       </h3>
                       {trade.description && (
-                        <p className="text-gray-600 dark:text-gray-400 mt-1">
+                        <p className="text-[#5A5A5A] dark:text-[#A8A8A8] mt-1">
                           {trade.description}
                         </p>
                       )}
                     </div>
-                    <span className="text-xs font-medium text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-slate-800 px-3 py-1 rounded-full">
+                    <span className="text-xs font-medium text-[#5A5A5A] dark:text-[#A8A8A8] bg-brand-cream dark:bg-brand-charcoal px-3 py-1 rounded-full">
                       ID: {trade.id.substring(0, 8)}
                     </span>
                   </div>
@@ -238,11 +238,11 @@ export default function AdminTradesPage() {
 
         {/* Stats */}
         <div className="grid grid-cols-1 gap-4 mt-8">
-          <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
-            <p className="text-sm text-blue-800 dark:text-blue-300">
+          <div className="border-brand-info/30 bg-brand-info/10 dark:bg-brand-info/15 border rounded-lg p-4">
+            <p className="text-sm text-brand-info">
               <strong>Total Trades:</strong> {trades.length}
             </p>
-            <p className="text-xs text-blue-700 dark:text-blue-400 mt-2">
+            <p className="text-xs text-brand-info mt-2">
               Contractors can select from these trades when registering. Projects
               can be tagged with required trades to automatically match with
               qualified contractors.

@@ -16,6 +16,20 @@ interface Space extends SpaceBase {
   };
 }
 
+const STATUS_LABEL: Record<string, string> = {
+  planning: "Planning",
+  pending: "Pending",
+  "in-progress": "In Progress",
+  completed: "Completed",
+};
+
+const STATUS_CLASS: Record<string, string> = {
+  planning: "tag tag-outline",
+  pending: "tag tag-outline",
+  "in-progress": "tag tag-neutral",
+  completed: "tag tag-neutral",
+};
+
 export function SpaceListWithForms() {
   const [spaces, setSpaces] = useState<Space[]>([]);
   const [loading, setLoading] = useState(true);
@@ -83,14 +97,6 @@ export function SpaceListWithForms() {
     }
   };
 
-  const statusColors: Record<string, string> = {
-    planning: "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200",
-    pending: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200",
-    "in-progress":
-      "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200",
-    completed: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200",
-  };
-
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
@@ -101,101 +107,86 @@ export function SpaceListWithForms() {
 
   return (
     <>
-      {/* Header with Add Button */}
-      <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-3xl font-bold dark:text-white">Spaces</h1>
-        <button
-          onClick={handleAddClick}
-          className="flex items-center gap-2 rounded bg-blue-500 px-4 py-2 font-medium text-white hover:bg-blue-600"
-        >
-          <Plus className="h-5 w-5" />
+      {/* Add Button */}
+      <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 18 }}>
+        <button className="btn btn-primary" onClick={handleAddClick}>
+          <Plus size={16} strokeWidth={1.8} />
           Add Space
         </button>
       </div>
 
       {/* Spaces Grid */}
       {spaces.length === 0 ? (
-        <div className="rounded-lg border border-gray-200 bg-gray-50 p-8 text-center dark:border-gray-700 dark:bg-slate-800">
-          <p className="text-gray-600 dark:text-gray-300">
-            No spaces yet. Create one to get started.
-          </p>
-          <button
-            onClick={handleAddClick}
-            className="mt-4 rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
-          >
+        <div className="card" style={{ textAlign: "center", padding: 32 }}>
+          <p className="card-meta">No spaces yet. Create one to get started.</p>
+          <button className="btn btn-primary" onClick={handleAddClick} style={{ marginTop: 16 }}>
             Create First Space
           </button>
         </div>
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {spaces.map((space) => (
-            <div
-              key={space.id}
-              className="rounded-lg border border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-slate-800"
-            >
+            <div key={space.id} className="card">
               {/* Title */}
-              <h3 className="mb-2 text-lg font-semibold dark:text-white">
+              <h3 className="card-title" style={{ marginBottom: 6 }}>
                 {space.name}
               </h3>
 
               {/* Meta */}
-              <p className="mb-3 text-sm text-gray-600 dark:text-gray-300">
+              <p className="card-meta" style={{ marginBottom: 10 }}>
                 {space.building}
               </p>
 
               {/* Stats */}
-              <div className="mb-3 space-y-1 text-sm text-gray-600 dark:text-gray-300">
-                {space.squareFootage && (
-                  <p>📐 {space.squareFootage} SF</p>
-                )}
-                <p>🏠 {space._count.assets} Assets</p>
-                <p>✓ {space._count.tasks} Tasks</p>
-                <p>📸 {space._count.photos} Photos</p>
+              <div className="card-meta" style={{ marginBottom: 12, display: "flex", flexDirection: "column", gap: 2 }}>
+                {space.squareFootage && <span>{space.squareFootage} SF</span>}
+                <span>{space._count.assets} Assets</span>
+                <span>{space._count.tasks} Tasks</span>
+                <span>{space._count.photos} Photos</span>
               </div>
 
               {/* Status Badge */}
-              <div className="mb-4">
-                <span
-                  className={`inline-block rounded px-2 py-1 text-xs font-semibold ${
-                    statusColors[space.status] || statusColors.planning
-                  }`}
-                >
-                  {space.status}
+              <div style={{ marginBottom: 14 }}>
+                <span className={STATUS_CLASS[space.status] || "tag tag-outline"}>
+                  {STATUS_LABEL[space.status] || space.status}
                 </span>
               </div>
 
               {/* Actions */}
-              <div className="flex gap-2">
+              <div style={{ display: "flex", gap: 6 }}>
                 <button
                   onClick={() => {
                     setDetailSpaceId(space.id);
                     setShowDetail(true);
                   }}
-                  className="flex flex-1 items-center justify-center gap-1 rounded border border-blue-300 px-3 py-2 text-sm font-medium text-blue-600 hover:bg-blue-50 dark:border-blue-700 dark:text-blue-400 dark:hover:bg-blue-900/20"
+                  className="btn"
+                  style={{ flex: 1 }}
                 >
-                  <FileText className="h-4 w-4" />
+                  <FileText size={14} strokeWidth={1.8} />
                   Files
                 </button>
                 <button
                   onClick={() => handleEditClick(space)}
-                  className="flex flex-1 items-center justify-center gap-1 rounded border border-gray-300 px-3 py-2 text-sm font-medium hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-slate-700"
+                  className="btn"
+                  style={{ flex: 1 }}
                 >
-                  <Edit2 className="h-4 w-4" />
+                  <Edit2 size={14} strokeWidth={1.8} />
                   Edit
                 </button>
                 <button
                   onClick={() => handleDeleteClick(space.id)}
                   disabled={deletingId === space.id}
-                  className="flex flex-1 items-center justify-center gap-1 rounded border border-red-300 px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-50 disabled:opacity-50 dark:border-red-700 dark:text-red-400 dark:hover:bg-red-900/20"
+                  className="btn"
+                  style={{ flex: 1 }}
                 >
                   {deletingId === space.id ? (
                     <>
-                      <Loader2 className="h-4 w-4 animate-spin" />
+                      <Loader2 size={14} className="animate-spin" />
                       Deleting...
                     </>
                   ) : (
                     <>
-                      <Trash2 className="h-4 w-4" />
+                      <Trash2 size={14} strokeWidth={1.8} />
                       Delete
                     </>
                   )}

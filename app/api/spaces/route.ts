@@ -37,6 +37,7 @@ export async function POST(req: NextRequest) {
         floor: body.floor != null ? String(body.floor) : null,
         squareFootage: body.squareFootage || null,
         description: body.description || null,
+        projectId: body.projectId || null,
       },
       include: {
         _count: {

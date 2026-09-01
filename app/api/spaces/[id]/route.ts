@@ -54,6 +54,10 @@ export async function PUT(
         description: body.description || null,
         status: body.status || "planning",
         notes: body.notes || null,
+        // Only touch projectId when the caller explicitly sends it - the
+        // main SpaceForm save doesn't include it, and must never wipe out
+        // the contractor-portal project link as a side effect.
+        ...(body.projectId !== undefined ? { projectId: body.projectId } : {}),
       },
       include: {
         _count: {

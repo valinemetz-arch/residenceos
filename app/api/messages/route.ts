@@ -11,6 +11,7 @@ export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
     const projectId = searchParams.get("projectId");
+    const contractorId = searchParams.get("contractorId");
 
     if (!projectId) {
       return NextResponse.json(
@@ -19,8 +20,14 @@ export async function GET(req: NextRequest) {
       );
     }
 
+    // A contractor's thread is private: their own messages plus the
+    // owner/GC's replies (contractorId null), excluding other trades'
+    // conversations. Omitting contractorId (the homeowner view) returns
+    // every thread on the project, read-only.
     const messages = await prisma.message.findMany({
-      where: { projectId },
+      where: contractorId
+        ? { projectId, OR: [{ contractorId: null }, { contractorId }] }
+        : { projectId },
       include: { contractor: { select: { companyName: true, email: true } } },
       orderBy: { createdAt: "asc" },
     });

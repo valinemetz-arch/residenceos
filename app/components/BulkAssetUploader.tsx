@@ -36,6 +36,18 @@ interface BulkAssetUploaderProps {
   onSuccess: () => void;
 }
 
+const tabButtonStyle = (active: boolean): React.CSSProperties => ({
+  padding: "8px 14px",
+  fontSize: 14,
+  fontFamily: "var(--font-body)",
+  background: "transparent",
+  border: "none",
+  borderBottom: active ? "2px solid var(--color-accent)" : "2px solid transparent",
+  color: active ? "var(--color-accent-700)" : "var(--color-neutral-700)",
+  fontWeight: active ? 600 : 400,
+  cursor: "pointer",
+});
+
 export function BulkAssetUploader({
   spaceId,
   spaces,
@@ -54,18 +66,21 @@ export function BulkAssetUploader({
   const [selectedSpaceId, setSelectedSpaceId] = useState(spaceId);
   const [editingAssetIndex, setEditingAssetIndex] = useState<number | null>(null);
 
-  const handleDragOver = (e: React.DragEvent) => {
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
-    e.currentTarget.classList.add("border-blue-500", "bg-blue-50");
+    e.currentTarget.style.borderColor = "var(--color-accent)";
+    e.currentTarget.style.background = "var(--color-accent-100)";
   };
 
-  const handleDragLeave = (e: React.DragEvent) => {
-    e.currentTarget.classList.remove("border-blue-500", "bg-blue-50");
+  const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
+    e.currentTarget.style.borderColor = "var(--color-divider)";
+    e.currentTarget.style.background = "var(--color-surface)";
   };
 
-  const handleDrop = (e: React.DragEvent) => {
+  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
-    e.currentTarget.classList.remove("border-blue-500", "bg-blue-50");
+    e.currentTarget.style.borderColor = "var(--color-divider)";
+    e.currentTarget.style.background = "var(--color-surface)";
     handleFiles(e.dataTransfer.files);
   };
 
@@ -251,84 +266,78 @@ export function BulkAssetUploader({
   // File upload stage - Assets tab
   if (extractedAssets.length === 0) {
     return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-        <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-lg bg-white p-6 dark:bg-slate-900">
+      <div
+        className="classical"
+        style={{
+          position: "fixed",
+          inset: 0,
+          background: "rgba(32,31,29,0.32)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          zIndex: 50,
+        }}
+        onClick={onClose}
+      >
+        <div
+          style={{
+            background: "var(--color-bg)",
+            width: 672,
+            maxWidth: "calc(100vw - 32px)",
+            maxHeight: "90vh",
+            overflow: "auto",
+            borderRadius: "var(--radius-md)",
+            boxShadow: "var(--shadow-lg)",
+            padding: "28px 30px",
+          }}
+          onClick={(e) => e.stopPropagation()}
+        >
           {/* Header */}
-          <div className="mb-6 flex items-center justify-between">
-            <h2 className="text-2xl font-bold dark:text-white">
-              Add Assets via AI
-            </h2>
-            <button
-              onClick={onClose}
-              className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
-            >
-              <X className="h-5 w-5" />
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 18 }}>
+            <h2 style={{ fontSize: 22 }}>Add Assets via AI</h2>
+            <button className="btn btn-icon" onClick={onClose} aria-label="Close">
+              <X size={16} strokeWidth={1.8} />
             </button>
           </div>
 
           {/* Tab Navigation */}
-          <div className="mb-6 flex gap-2 border-b border-gray-200 dark:border-gray-700">
-            <button
-              onClick={() => setActiveTab("assets")}
-              className={`px-4 py-2 font-medium transition-colors ${
-                tabKey === "assets"
-                  ? "border-b-2 border-blue-500 text-blue-600 dark:text-blue-400"
-                  : "text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200"
-              }`}
-            >
+          <div style={{ display: "flex", gap: 4, borderBottom: "1px solid var(--color-divider)", marginBottom: 18 }}>
+            <button style={tabButtonStyle(tabKey === "assets")} onClick={() => setActiveTab("assets")}>
               Add Assets
             </button>
-            <button
-              onClick={() => setActiveTab("spaces")}
-              className={`px-4 py-2 font-medium transition-colors ${
-                tabKey === "spaces"
-                  ? "border-b-2 border-blue-500 text-blue-600 dark:text-blue-400"
-                  : "text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200"
-              }`}
-            >
+            <button style={tabButtonStyle(tabKey === "spaces")} onClick={() => setActiveTab("spaces")}>
               Create Spaces
             </button>
-            <button
-              onClick={() => setActiveTab("schedules")}
-              className={`px-4 py-2 font-medium transition-colors ${
-                tabKey === "schedules"
-                  ? "border-b-2 border-blue-500 text-blue-600 dark:text-blue-400"
-                  : "text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200"
-              }`}
-            >
+            <button style={tabButtonStyle(tabKey === "schedules")} onClick={() => setActiveTab("schedules")}>
               Extract Schedules
             </button>
-            <button
-              onClick={() => setActiveTab("gap-analysis")}
-              className={`px-4 py-2 font-medium transition-colors ${
-                tabKey === "gap-analysis"
-                  ? "border-b-2 border-blue-500 text-blue-600 dark:text-blue-400"
-                  : "text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200"
-              }`}
-            >
+            <button style={tabButtonStyle(tabKey === "gap-analysis")} onClick={() => setActiveTab("gap-analysis")}>
               Gap Analysis
             </button>
-            <button
-              onClick={() => setActiveTab("bids")}
-              className={`px-4 py-2 font-medium transition-colors ${
-                tabKey === "bids"
-                  ? "border-b-2 border-blue-500 text-blue-600 dark:text-blue-400"
-                  : "text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200"
-              }`}
-            >
+            <button style={tabButtonStyle(tabKey === "bids")} onClick={() => setActiveTab("bids")}>
               Extract Bids
             </button>
           </div>
 
           {/* Space Selector */}
-          <div className="mb-6">
-            <label className="block text-sm font-medium dark:text-gray-200">
+          <div style={{ marginBottom: 18 }}>
+            <label
+              style={{
+                display: "block",
+                fontSize: 11,
+                fontWeight: 600,
+                textTransform: "uppercase",
+                letterSpacing: "0.06em",
+                color: "var(--color-neutral-700)",
+                marginBottom: 6,
+              }}
+            >
               Default Space for Assets
             </label>
             <select
               value={selectedSpaceId}
               onChange={(e) => setSelectedSpaceId(e.target.value)}
-              className="mt-2 w-full rounded border border-gray-300 px-3 py-2 dark:border-gray-600 dark:bg-slate-800 dark:text-white"
+              style={{ width: "100%" }}
             >
               {spaces.map((space) => (
                 <option key={space.id} value={space.id}>
@@ -343,17 +352,25 @@ export function BulkAssetUploader({
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
             onDrop={handleDrop}
-            className="mb-6 rounded-lg border-2 border-dashed border-gray-300 bg-gray-50 p-8 text-center transition-colors dark:border-gray-600 dark:bg-slate-800"
+            style={{
+              marginBottom: 18,
+              borderRadius: "var(--radius-lg)",
+              border: "1px dashed var(--color-divider)",
+              background: "var(--color-surface)",
+              padding: 32,
+              textAlign: "center",
+              transition: "border-color 150ms ease, background 150ms ease",
+            }}
           >
-            <Upload className="mx-auto h-12 w-12 text-gray-400" />
-            <p className="mt-2 text-sm font-medium text-gray-900 dark:text-gray-100">
+            <Upload size={40} strokeWidth={1.5} style={{ margin: "0 auto", color: "var(--color-neutral-500)" }} />
+            <p style={{ marginTop: 10, fontSize: 14, fontWeight: 600 }}>
               Drag and drop files here
             </p>
-            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+            <p style={{ marginTop: 4, fontSize: 13, color: "var(--color-neutral-600)" }}>
               or
             </p>
-            <label className="mt-2 inline-block">
-              <span className="cursor-pointer text-blue-500 hover:text-blue-600">
+            <label style={{ marginTop: 8, display: "inline-block" }}>
+              <span style={{ cursor: "pointer", color: "var(--color-accent-700)" }}>
                 click to select files
               </span>
               <input
@@ -364,47 +381,52 @@ export function BulkAssetUploader({
                 className="hidden"
               />
             </label>
-            <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
+            <p style={{ marginTop: 8, fontSize: 12, color: "var(--color-neutral-600)" }}>
               JPG, PNG, WebP, or PDF up to 10MB
             </p>
           </div>
 
           {/* File List */}
           {files.length > 0 && (
-            <div className="mb-6">
-              <h3 className="mb-3 text-sm font-semibold dark:text-gray-200">
+            <div style={{ marginBottom: 18 }}>
+              <h4 style={{ marginBottom: 10 }}>
                 Selected Files ({files.length})
-              </h3>
-              <div className="grid gap-2 sm:grid-cols-2">
+              </h4>
+              <div style={{ display: "grid", gap: 8, gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))" }}>
                 {files.map((f, idx) => (
                   <div
                     key={idx}
-                    className="flex items-center gap-3 rounded border border-gray-200 bg-gray-50 p-3 dark:border-gray-700 dark:bg-slate-800"
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 10,
+                      border: "1px solid var(--color-divider)",
+                      background: "var(--color-surface)",
+                      borderRadius: "var(--radius-md)",
+                      padding: 10,
+                    }}
                   >
-                    <div className="flex-shrink-0">
+                    <div style={{ flexShrink: 0 }}>
                       {f.preview ? (
                         <img
                           src={f.preview}
                           alt={f.file.name}
-                          className="h-10 w-10 rounded object-cover"
+                          style={{ height: 40, width: 40, borderRadius: "var(--radius-sm)", objectFit: "cover" }}
                         />
                       ) : (
-                        <FileText className="h-10 w-10 text-blue-600" />
+                        <FileText size={36} strokeWidth={1.5} style={{ color: "var(--color-accent-700)" }} />
                       )}
                     </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-medium dark:text-gray-200">
+                    <div style={{ minWidth: 0, flex: 1 }}>
+                      <p style={{ fontSize: 13, fontWeight: 600, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
                         {f.file.name}
                       </p>
-                      <p className="text-xs text-gray-500 dark:text-gray-400">
+                      <p style={{ fontSize: 12, color: "var(--color-neutral-600)" }}>
                         {(f.file.size / 1024).toFixed(0)} KB
                       </p>
                     </div>
-                    <button
-                      onClick={() => removeFile(idx)}
-                      className="text-gray-400 hover:text-red-600"
-                    >
-                      <X className="h-4 w-4" />
+                    <button className="btn btn-icon" onClick={() => removeFile(idx)} aria-label="Remove file">
+                      <X size={14} strokeWidth={1.8} />
                     </button>
                   </div>
                 ))}
@@ -413,26 +435,24 @@ export function BulkAssetUploader({
           )}
 
           {/* Actions */}
-          <div className="flex gap-2">
-            <button
-              onClick={onClose}
-              className="flex-1 rounded border border-gray-300 px-4 py-2 font-medium dark:border-gray-600 dark:text-gray-200"
-            >
+          <div style={{ display: "flex", gap: 10 }}>
+            <button className="btn" style={{ flex: 1 }} onClick={onClose}>
               Cancel
             </button>
             <button
+              className="btn btn-primary"
+              style={{ flex: 1 }}
               onClick={analyzeFiles}
               disabled={analyzing || files.length === 0}
-              className="flex flex-1 items-center justify-center gap-2 rounded bg-blue-500 px-4 py-2 font-medium text-white hover:bg-blue-600 disabled:opacity-50"
             >
               {analyzing ? (
                 <>
-                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <Loader2 size={16} className="animate-spin" />
                   Analyzing...
                 </>
               ) : (
                 <>
-                  <Upload className="h-4 w-4" />
+                  <Upload size={16} strokeWidth={1.8} />
                   Analyze Files
                 </>
               )}
@@ -445,53 +465,72 @@ export function BulkAssetUploader({
 
   // Review and Edit stage
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-      <div className="max-h-[90vh] w-full max-w-4xl overflow-y-auto rounded-lg bg-white p-6 dark:bg-slate-900">
+    <div
+      className="classical"
+      style={{
+        position: "fixed",
+        inset: 0,
+        background: "rgba(32,31,29,0.32)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        zIndex: 50,
+      }}
+      onClick={onClose}
+    >
+      <div
+        style={{
+          background: "var(--color-bg)",
+          width: 880,
+          maxWidth: "calc(100vw - 32px)",
+          maxHeight: "90vh",
+          overflow: "auto",
+          borderRadius: "var(--radius-md)",
+          boxShadow: "var(--shadow-lg)",
+          padding: "28px 30px",
+        }}
+        onClick={(e) => e.stopPropagation()}
+      >
         {/* Header */}
-        <div className="mb-6 flex items-center justify-between">
-          <h2 className="text-2xl font-bold dark:text-white">
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 18 }}>
+          <h2 style={{ fontSize: 22 }}>
             Review Extracted Assets ({extractedAssets.length})
           </h2>
-          <button
-            onClick={onClose}
-            className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
-          >
-            <X className="h-5 w-5" />
+          <button className="btn btn-icon" onClick={onClose} aria-label="Close">
+            <X size={16} strokeWidth={1.8} />
           </button>
         </div>
 
         {/* Asset List for Editing */}
-        <div className="mb-6 space-y-3 max-h-[50vh] overflow-y-auto">
+        <div style={{ marginBottom: 18, display: "flex", flexDirection: "column", gap: 10, maxHeight: "50vh", overflowY: "auto" }}>
           {extractedAssets.map((asset, idx) => (
-            <div
-              key={idx}
-              className="rounded border border-gray-200 bg-gray-50 p-4 dark:border-gray-700 dark:bg-slate-800"
-            >
-              <div className="mb-3 flex items-start justify-between">
+            <div key={idx} className="card">
+              <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 10 }}>
                 <div>
-                  <p className="font-semibold dark:text-white">
+                  <p className="card-title">
                     {asset.name || "(No name)"}
                   </p>
                   {asset.description && (
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                    <p style={{ fontSize: 13, color: "var(--color-neutral-600)", marginTop: 2 }}>
                       {asset.description}
                     </p>
                   )}
                 </div>
                 <button
+                  className="btn btn-icon"
                   onClick={() =>
                     setEditingAssetIndex(
                       editingAssetIndex === idx ? null : idx
                     )
                   }
-                  className="text-blue-600 hover:text-blue-700 dark:text-blue-400"
+                  aria-label="Edit extracted asset"
                 >
-                  <Edit2 className="h-4 w-4" />
+                  <Edit2 size={14} strokeWidth={1.8} />
                 </button>
               </div>
 
               {editingAssetIndex === idx && (
-                <div className="grid gap-2 pt-3">
+                <div style={{ display: "grid", gap: 8, paddingTop: 10 }}>
                   <input
                     type="text"
                     value={asset.name}
@@ -499,7 +538,7 @@ export function BulkAssetUploader({
                       updateAssetField(idx, "name", e.target.value)
                     }
                     placeholder="Asset name"
-                    className="rounded border border-gray-300 px-2 py-1 text-sm dark:border-gray-600 dark:bg-slate-700 dark:text-white"
+                    style={{ fontSize: 13 }}
                   />
                   <input
                     type="text"
@@ -508,7 +547,7 @@ export function BulkAssetUploader({
                       updateAssetField(idx, "manufacturer", e.target.value)
                     }
                     placeholder="Manufacturer"
-                    className="rounded border border-gray-300 px-2 py-1 text-sm dark:border-gray-600 dark:bg-slate-700 dark:text-white"
+                    style={{ fontSize: 13 }}
                   />
                   <input
                     type="text"
@@ -517,7 +556,7 @@ export function BulkAssetUploader({
                       updateAssetField(idx, "model", e.target.value)
                     }
                     placeholder="Model"
-                    className="rounded border border-gray-300 px-2 py-1 text-sm dark:border-gray-600 dark:bg-slate-700 dark:text-white"
+                    style={{ fontSize: 13 }}
                   />
                   <input
                     type="text"
@@ -526,7 +565,7 @@ export function BulkAssetUploader({
                       updateAssetField(idx, "sku", e.target.value)
                     }
                     placeholder="SKU"
-                    className="rounded border border-gray-300 px-2 py-1 text-sm dark:border-gray-600 dark:bg-slate-700 dark:text-white"
+                    style={{ fontSize: 13 }}
                   />
                   <input
                     type="text"
@@ -535,7 +574,7 @@ export function BulkAssetUploader({
                       updateAssetField(idx, "vendor", e.target.value)
                     }
                     placeholder="Vendor"
-                    className="rounded border border-gray-300 px-2 py-1 text-sm dark:border-gray-600 dark:bg-slate-700 dark:text-white"
+                    style={{ fontSize: 13 }}
                   />
                   <input
                     type="number"
@@ -549,7 +588,7 @@ export function BulkAssetUploader({
                     }
                     placeholder="Price"
                     step="0.01"
-                    className="rounded border border-gray-300 px-2 py-1 text-sm dark:border-gray-600 dark:bg-slate-700 dark:text-white"
+                    style={{ fontSize: 13 }}
                   />
                   <textarea
                     value={asset.description || ""}
@@ -558,45 +597,35 @@ export function BulkAssetUploader({
                     }
                     placeholder="Description"
                     rows={2}
-                    className="rounded border border-gray-300 px-2 py-1 text-sm dark:border-gray-600 dark:bg-slate-700 dark:text-white"
+                    style={{ fontSize: 13 }}
                   />
                 </div>
               )}
 
               {editingAssetIndex !== idx && (
-                <div className="grid grid-cols-2 gap-2 text-sm">
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, fontSize: 13 }}>
                   {asset.sku && (
                     <div>
-                      <span className="text-gray-600 dark:text-gray-400">
-                        SKU:{" "}
-                      </span>
-                      <span className="dark:text-gray-200">{asset.sku}</span>
+                      <span style={{ color: "var(--color-neutral-600)" }}>SKU: </span>
+                      <span>{asset.sku}</span>
                     </div>
                   )}
                   {asset.vendor && (
                     <div>
-                      <span className="text-gray-600 dark:text-gray-400">
-                        Vendor:{" "}
-                      </span>
-                      <span className="dark:text-gray-200">{asset.vendor}</span>
+                      <span style={{ color: "var(--color-neutral-600)" }}>Vendor: </span>
+                      <span>{asset.vendor}</span>
                     </div>
                   )}
                   {asset.unitPrice && (
                     <div>
-                      <span className="text-gray-600 dark:text-gray-400">
-                        Price:{" "}
-                      </span>
-                      <span className="dark:text-gray-200">
-                        ${asset.unitPrice.toFixed(2)}
-                      </span>
+                      <span style={{ color: "var(--color-neutral-600)" }}>Price: </span>
+                      <span>${asset.unitPrice.toFixed(2)}</span>
                     </div>
                   )}
                   {asset.quantity && (
                     <div>
-                      <span className="text-gray-600 dark:text-gray-400">
-                        Qty:{" "}
-                      </span>
-                      <span className="dark:text-gray-200">{asset.quantity}</span>
+                      <span style={{ color: "var(--color-neutral-600)" }}>Qty: </span>
+                      <span>{asset.quantity}</span>
                     </div>
                   )}
                 </div>
@@ -606,30 +635,24 @@ export function BulkAssetUploader({
         </div>
 
         {/* Actions */}
-        <div className="flex gap-2">
+        <div style={{ display: "flex", gap: 10 }}>
           <button
+            className="btn"
+            style={{ flex: 1 }}
             onClick={() => {
               setExtractedAssets([]);
               setFiles([]);
             }}
-            className="flex-1 rounded border border-gray-300 px-4 py-2 font-medium dark:border-gray-600 dark:text-gray-200"
           >
             Back to Upload
           </button>
-          <button
-            onClick={onClose}
-            className="flex-1 rounded border border-gray-300 px-4 py-2 font-medium dark:border-gray-600 dark:text-gray-200"
-          >
+          <button className="btn" style={{ flex: 1 }} onClick={onClose}>
             Cancel
           </button>
-          <button
-            onClick={createAssets}
-            disabled={loading}
-            className="flex flex-1 items-center justify-center gap-2 rounded bg-green-500 px-4 py-2 font-medium text-white hover:bg-green-600 disabled:opacity-50"
-          >
+          <button className="btn btn-primary" style={{ flex: 1 }} onClick={createAssets} disabled={loading}>
             {loading ? (
               <>
-                <Loader2 className="h-4 w-4 animate-spin" />
+                <Loader2 size={16} className="animate-spin" />
                 Creating...
               </>
             ) : (

@@ -18,7 +18,7 @@ export function Navigation() {
   const isActive = (path: string) => pathname.startsWith(path);
 
   return (
-    <nav className="sticky top-0 z-40 border-b border-[#D4D9CE] dark:border-[#1F1F1F] bg-[#FAFAF8] dark:bg-[#2D2D2D] shadow-sm transition-colors">
+    <nav className="print:hidden sticky top-0 z-40 border-b border-[#D4D9CE] dark:border-[#1F1F1F] bg-[#FAFAF8] dark:bg-[#2D2D2D] shadow-sm transition-colors">
       <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
         <div className="flex justify-between items-center h-20">
           <div className="flex items-center space-x-10">

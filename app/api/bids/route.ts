@@ -46,7 +46,7 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { projectId, contractorId, amount, notes } = body;
+    const { projectId, contractorId, amount, notes, includesInstallation, installEstimate } = body;
 
     // Get contractor ID from auth if not provided
     let finalContractorId = contractorId;
@@ -86,6 +86,8 @@ export async function POST(req: NextRequest) {
         contractorId: finalContractorId,
         amount: parseFloat(amount),
         notes: notes || null,
+        includesInstallation: includesInstallation ?? null,
+        installEstimate: installEstimate || null,
         submittedAt: new Date(),
         status: "pending",
       },

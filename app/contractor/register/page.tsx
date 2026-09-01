@@ -87,15 +87,15 @@ export default function ContractorRegisterPage() {
 
   if (success) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-slate-950 dark:to-slate-900 flex items-center justify-center p-4">
-        <div className="w-full max-w-md bg-white dark:bg-slate-900 rounded-lg shadow-lg p-8">
+      <div className="min-h-screen bg-[#FAFAF8] dark:bg-[#2D2D2D] flex items-center justify-center p-4">
+        <div className="w-full max-w-md bg-white dark:bg-[#2D2D2D] rounded-lg shadow-lg p-8">
           <div className="flex justify-center mb-4">
-            <CheckCircle2 className="h-12 w-12 text-green-600" />
+            <CheckCircle2 className="h-12 w-12 text-brand-success" />
           </div>
-          <h2 className="text-2xl font-bold text-center text-gray-900 dark:text-white mb-2">
+          <h2 className="text-2xl font-bold text-center dark:text-white mb-2">
             Registration Successful!
           </h2>
-          <p className="text-center text-gray-600 dark:text-gray-400 mb-6">
+          <p className="text-center text-[#5A5A5A] dark:text-[#A8A8A8] mb-6">
             Your contractor account has been created. Redirecting to login...
           </p>
         </div>
@@ -104,20 +104,20 @@ export default function ContractorRegisterPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-slate-950 dark:to-slate-900 py-12 px-4">
+    <div className="min-h-screen bg-[#FAFAF8] dark:bg-[#2D2D2D] py-12 px-4">
       <div className="max-w-md mx-auto">
-        <div className="bg-white dark:bg-slate-900 rounded-lg shadow-lg p-8">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2 text-center">
+        <div className="bg-white dark:bg-[#2D2D2D] rounded-lg shadow-lg p-8">
+          <h1 className="text-3xl font-bold dark:text-white mb-2 text-center">
             Contractor Registration
           </h1>
-          <p className="text-center text-gray-600 dark:text-gray-400 mb-6">
+          <p className="text-center text-[#5A5A5A] dark:text-[#A8A8A8] mb-6">
             Create your contractor account to access projects
           </p>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Email */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              <label className="block text-sm font-medium text-[#5A5A5A] dark:text-[#A8A8A8] mb-1">
                 Email Address
               </label>
               <input
@@ -129,13 +129,13 @@ export default function ContractorRegisterPage() {
                 placeholder="your@email.com"
                 required
                 disabled={loading}
-                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-slate-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 disabled:opacity-50"
+                className="w-full px-4 py-2 border border-[#D4D9CE] dark:border-[#1F1F1F] rounded-lg bg-white dark:bg-brand-charcoal text-brand-charcoal dark:text-white placeholder-[#8A8A8A] dark:placeholder-[#5A5A5A] disabled:opacity-50"
               />
             </div>
 
             {/* Company Name */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              <label className="block text-sm font-medium text-[#5A5A5A] dark:text-[#A8A8A8] mb-1">
                 Company Name
               </label>
               <input
@@ -147,13 +147,13 @@ export default function ContractorRegisterPage() {
                 placeholder="Your Company"
                 required
                 disabled={loading}
-                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-slate-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 disabled:opacity-50"
+                className="w-full px-4 py-2 border border-[#D4D9CE] dark:border-[#1F1F1F] rounded-lg bg-white dark:bg-brand-charcoal text-brand-charcoal dark:text-white placeholder-[#8A8A8A] dark:placeholder-[#5A5A5A] disabled:opacity-50"
               />
             </div>
 
             {/* Contact Name */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              <label className="block text-sm font-medium text-[#5A5A5A] dark:text-[#A8A8A8] mb-1">
                 Contact Name (Optional)
               </label>
               <input
@@ -164,13 +164,13 @@ export default function ContractorRegisterPage() {
                 }
                 placeholder="Your Name"
                 disabled={loading}
-                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-slate-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 disabled:opacity-50"
+                className="w-full px-4 py-2 border border-[#D4D9CE] dark:border-[#1F1F1F] rounded-lg bg-white dark:bg-brand-charcoal text-brand-charcoal dark:text-white placeholder-[#8A8A8A] dark:placeholder-[#5A5A5A] disabled:opacity-50"
               />
             </div>
 
             {/* Phone */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              <label className="block text-sm font-medium text-[#5A5A5A] dark:text-[#A8A8A8] mb-1">
                 Phone (Optional)
               </label>
               <input
@@ -181,7 +181,7 @@ export default function ContractorRegisterPage() {
                 }
                 placeholder="(555) 123-4567"
                 disabled={loading}
-                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-slate-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 disabled:opacity-50"
+                className="w-full px-4 py-2 border border-[#D4D9CE] dark:border-[#1F1F1F] rounded-lg bg-white dark:bg-brand-charcoal text-brand-charcoal dark:text-white placeholder-[#8A8A8A] dark:placeholder-[#5A5A5A] disabled:opacity-50"
               />
             </div>
 
@@ -195,7 +195,7 @@ export default function ContractorRegisterPage() {
 
             {/* Password */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              <label className="block text-sm font-medium text-[#5A5A5A] dark:text-[#A8A8A8] mb-1">
                 Password
               </label>
               <input
@@ -207,16 +207,16 @@ export default function ContractorRegisterPage() {
                 placeholder="••••••••"
                 required
                 disabled={loading}
-                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-slate-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 disabled:opacity-50"
+                className="w-full px-4 py-2 border border-[#D4D9CE] dark:border-[#1F1F1F] rounded-lg bg-white dark:bg-brand-charcoal text-brand-charcoal dark:text-white placeholder-[#8A8A8A] dark:placeholder-[#5A5A5A] disabled:opacity-50"
               />
-              <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+              <p className="text-xs text-[#5A5A5A] dark:text-[#A8A8A8] mt-1">
                 Must be at least 8 characters
               </p>
             </div>
 
             {/* Confirm Password */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              <label className="block text-sm font-medium text-[#5A5A5A] dark:text-[#A8A8A8] mb-1">
                 Confirm Password
               </label>
               <input
@@ -228,15 +228,15 @@ export default function ContractorRegisterPage() {
                 placeholder="••••••••"
                 required
                 disabled={loading}
-                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-slate-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 disabled:opacity-50"
+                className="w-full px-4 py-2 border border-[#D4D9CE] dark:border-[#1F1F1F] rounded-lg bg-white dark:bg-brand-charcoal text-brand-charcoal dark:text-white placeholder-[#8A8A8A] dark:placeholder-[#5A5A5A] disabled:opacity-50"
               />
             </div>
 
             {/* Error Message */}
             {error && (
-              <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4 flex gap-3">
-                <AlertCircle className="h-5 w-5 text-red-600 dark:text-red-400 flex-shrink-0" />
-                <p className="text-sm text-red-800 dark:text-red-300">{error}</p>
+              <div className="border border-brand-error/30 bg-brand-error/10 dark:bg-brand-error/15 rounded-lg p-4 flex gap-3">
+                <AlertCircle className="h-5 w-5 text-brand-error flex-shrink-0" />
+                <p className="text-sm text-brand-error">{error}</p>
               </div>
             )}
 
@@ -244,17 +244,17 @@ export default function ContractorRegisterPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-semibold py-2 rounded-lg transition"
+              className="w-full bg-brand-primary hover:bg-brand-primary-dark disabled:opacity-50 text-white font-semibold py-2 rounded-lg transition"
             >
               {loading ? "Creating Account..." : "Create Account"}
             </button>
 
             {/* Login Link */}
-            <p className="text-center text-gray-600 dark:text-gray-400 text-sm">
+            <p className="text-center text-[#5A5A5A] dark:text-[#A8A8A8] text-sm">
               Already have an account?{" "}
               <Link
                 href="/contractor/login"
-                className="text-blue-600 dark:text-blue-400 hover:underline font-medium"
+                className="text-brand-primary dark:text-brand-secondary hover:underline font-medium"
               >
                 Log in
               </Link>

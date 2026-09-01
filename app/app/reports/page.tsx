@@ -1,15 +1,14 @@
 export const dynamic = "force-dynamic";
+import { getOrCreateHouseProject } from "@/lib/houseProject";
+import { PortalHeader } from "@/app/components/portal/PortalHeader";
 import { ReportBuilder } from "@/app/components/ReportBuilder";
 
-export default function ReportsPage() {
+export default async function ReportsPage() {
+  const house = await getOrCreateHouseProject();
+
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold dark:text-white">Reports</h1>
-        <p className="mt-2 text-gray-600 dark:text-gray-400">
-          View your project budget, assets, and detailed schedules
-        </p>
-      </div>
+    <div>
+      <PortalHeader projectName={house.name} pageTitle="Reports" phase={house.phase} />
       <ReportBuilder />
     </div>
   );

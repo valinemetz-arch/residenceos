@@ -60,16 +60,16 @@ export function ScheduleExtractionTab({
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
-    e.currentTarget.classList.add("border-blue-500", "bg-blue-50");
+    e.currentTarget.classList.add("border-brand-primary", "bg-brand-primary/5", "dark:bg-brand-primary/10");
   };
 
   const handleDragLeave = (e: React.DragEvent) => {
-    e.currentTarget.classList.remove("border-blue-500", "bg-blue-50");
+    e.currentTarget.classList.remove("border-brand-primary", "bg-brand-primary/5", "dark:bg-brand-primary/10");
   };
 
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
-    e.currentTarget.classList.remove("border-blue-500", "bg-blue-50");
+    e.currentTarget.classList.remove("border-brand-primary", "bg-brand-primary/5", "dark:bg-brand-primary/10");
     handleFiles(e.dataTransfer.files);
   };
 
@@ -277,14 +277,14 @@ export function ScheduleExtractionTab({
     const totalItems = extractedSchedule.doors.length + extractedSchedule.windows.length;
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-        <div className="max-h-[90vh] w-full max-w-4xl overflow-y-auto rounded-lg bg-white p-6 dark:bg-slate-900">
+        <div className="max-h-[90vh] w-full max-w-4xl overflow-y-auto rounded-lg bg-white p-6 dark:bg-[#2D2D2D]">
           <div className="mb-6 flex items-center justify-between">
             <h2 className="text-2xl font-bold dark:text-white">
               Review Extracted Schedule ({totalItems} items)
             </h2>
             <button
               onClick={onClose}
-              className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+              className="text-[#5A5A5A] hover:text-[#1F1F1F] dark:text-[#A8A8A8] dark:hover:text-white"
             >
               <X className="h-5 w-5" />
             </button>
@@ -292,13 +292,13 @@ export function ScheduleExtractionTab({
 
           {/* Space Selector */}
           <div className="mb-6">
-            <label className="block text-sm font-medium dark:text-gray-200">
+            <label className="block text-sm font-medium dark:text-white">
               Default Space for Assets
             </label>
             <select
               value={selectedSpaceId}
               onChange={(e) => setSelectedSpaceId(e.target.value)}
-              className="mt-2 w-full rounded border border-gray-300 px-3 py-2 dark:border-gray-600 dark:bg-slate-800 dark:text-white"
+              className="mt-2 w-full rounded border border-[#D4D9CE] px-3 py-2 dark:border-[#1F1F1F] dark:bg-brand-charcoal dark:text-white"
             >
               {spaces.map((space) => (
                 <option key={space.id} value={space.id}>
@@ -319,7 +319,7 @@ export function ScheduleExtractionTab({
                   {extractedSchedule.doors.map((door, idx) => (
                     <div
                       key={idx}
-                      className="rounded border border-gray-200 bg-gray-50 p-3 dark:border-gray-700 dark:bg-slate-800"
+                      className="rounded border border-[#D4D9CE] bg-brand-cream p-3 dark:border-[#1F1F1F] dark:bg-brand-charcoal"
                     >
                       <div className="mb-2 flex items-start justify-between">
                         <div>
@@ -327,7 +327,7 @@ export function ScheduleExtractionTab({
                             {door.type} x{door.quantity}
                           </p>
                           {door.room && (
-                            <p className="text-xs text-gray-600 dark:text-gray-400">
+                            <p className="text-xs text-[#5A5A5A] dark:text-[#A8A8A8]">
                               Room: {door.room}
                             </p>
                           )}
@@ -337,13 +337,13 @@ export function ScheduleExtractionTab({
                             onClick={() =>
                               setEditingDoorIndex(editingDoorIndex === idx ? null : idx)
                             }
-                            className="text-blue-600 hover:text-blue-700 dark:text-blue-400"
+                            className="text-brand-primary hover:opacity-80 dark:text-brand-secondary"
                           >
                             <Edit2 className="h-4 w-4" />
                           </button>
                           <button
                             onClick={() => removeDoor(idx)}
-                            className="text-red-600 hover:text-red-700 dark:text-red-400"
+                            className="text-brand-error hover:opacity-80 dark:text-brand-error"
                           >
                             <Trash2 className="h-4 w-4" />
                           </button>
@@ -351,55 +351,55 @@ export function ScheduleExtractionTab({
                       </div>
 
                       {editingDoorIndex === idx && (
-                        <div className="grid gap-2 pt-2 border-t border-gray-300 dark:border-gray-600">
+                        <div className="grid gap-2 pt-2 border-t border-[#D4D9CE] dark:border-[#1F1F1F]">
                           <input
                             type="text"
                             value={door.type}
                             onChange={(e) => updateDoor(idx, "type", e.target.value)}
                             placeholder="Door type"
-                            className="rounded border border-gray-300 px-2 py-1 text-xs dark:border-gray-600 dark:bg-slate-700 dark:text-white"
+                            className="rounded border border-[#D4D9CE] px-2 py-1 text-xs dark:border-[#1F1F1F] dark:bg-brand-charcoal dark:text-white"
                           />
                           <input
                             type="number"
                             value={door.quantity}
                             onChange={(e) => updateDoor(idx, "quantity", parseInt(e.target.value) || 0)}
                             placeholder="Quantity"
-                            className="rounded border border-gray-300 px-2 py-1 text-xs dark:border-gray-600 dark:bg-slate-700 dark:text-white"
+                            className="rounded border border-[#D4D9CE] px-2 py-1 text-xs dark:border-[#1F1F1F] dark:bg-brand-charcoal dark:text-white"
                           />
                           <input
                             type="text"
                             value={door.size || ""}
                             onChange={(e) => updateDoor(idx, "size", e.target.value || null)}
                             placeholder="Size/Width"
-                            className="rounded border border-gray-300 px-2 py-1 text-xs dark:border-gray-600 dark:bg-slate-700 dark:text-white"
+                            className="rounded border border-[#D4D9CE] px-2 py-1 text-xs dark:border-[#1F1F1F] dark:bg-brand-charcoal dark:text-white"
                           />
                           <input
                             type="text"
                             value={door.material || ""}
                             onChange={(e) => updateDoor(idx, "material", e.target.value || null)}
                             placeholder="Material"
-                            className="rounded border border-gray-300 px-2 py-1 text-xs dark:border-gray-600 dark:bg-slate-700 dark:text-white"
+                            className="rounded border border-[#D4D9CE] px-2 py-1 text-xs dark:border-[#1F1F1F] dark:bg-brand-charcoal dark:text-white"
                           />
                           <input
                             type="text"
                             value={door.hardware || ""}
                             onChange={(e) => updateDoor(idx, "hardware", e.target.value || null)}
                             placeholder="Hardware"
-                            className="rounded border border-gray-300 px-2 py-1 text-xs dark:border-gray-600 dark:bg-slate-700 dark:text-white"
+                            className="rounded border border-[#D4D9CE] px-2 py-1 text-xs dark:border-[#1F1F1F] dark:bg-brand-charcoal dark:text-white"
                           />
                           <input
                             type="text"
                             value={door.room || ""}
                             onChange={(e) => updateDoor(idx, "room", e.target.value || null)}
                             placeholder="Room/Location"
-                            className="rounded border border-gray-300 px-2 py-1 text-xs dark:border-gray-600 dark:bg-slate-700 dark:text-white"
+                            className="rounded border border-[#D4D9CE] px-2 py-1 text-xs dark:border-[#1F1F1F] dark:bg-brand-charcoal dark:text-white"
                           />
                           <input
                             type="text"
                             value={door.location || ""}
                             onChange={(e) => updateDoor(idx, "location", e.target.value || null)}
                             placeholder="Door location (e.g., NW corner)"
-                            className="rounded border border-gray-300 px-2 py-1 text-xs dark:border-gray-600 dark:bg-slate-700 dark:text-white"
+                            className="rounded border border-[#D4D9CE] px-2 py-1 text-xs dark:border-[#1F1F1F] dark:bg-brand-charcoal dark:text-white"
                           />
                         </div>
                       )}
@@ -408,26 +408,26 @@ export function ScheduleExtractionTab({
                         <div className="grid grid-cols-2 gap-1 text-xs">
                           {door.size && (
                             <div>
-                              <span className="text-gray-600 dark:text-gray-400">Size: </span>
-                              <span className="dark:text-gray-200">{door.size}</span>
+                              <span className="text-[#5A5A5A] dark:text-[#A8A8A8]">Size: </span>
+                              <span className="dark:text-white">{door.size}</span>
                             </div>
                           )}
                           {door.material && (
                             <div>
-                              <span className="text-gray-600 dark:text-gray-400">Material: </span>
-                              <span className="dark:text-gray-200">{door.material}</span>
+                              <span className="text-[#5A5A5A] dark:text-[#A8A8A8]">Material: </span>
+                              <span className="dark:text-white">{door.material}</span>
                             </div>
                           )}
                           {door.hardware && (
                             <div>
-                              <span className="text-gray-600 dark:text-gray-400">Hardware: </span>
-                              <span className="dark:text-gray-200">{door.hardware}</span>
+                              <span className="text-[#5A5A5A] dark:text-[#A8A8A8]">Hardware: </span>
+                              <span className="dark:text-white">{door.hardware}</span>
                             </div>
                           )}
                           {door.location && (
                             <div>
-                              <span className="text-gray-600 dark:text-gray-400">Location: </span>
-                              <span className="dark:text-gray-200">{door.location}</span>
+                              <span className="text-[#5A5A5A] dark:text-[#A8A8A8]">Location: </span>
+                              <span className="dark:text-white">{door.location}</span>
                             </div>
                           )}
                         </div>
@@ -448,7 +448,7 @@ export function ScheduleExtractionTab({
                   {extractedSchedule.windows.map((window, idx) => (
                     <div
                       key={idx}
-                      className="rounded border border-gray-200 bg-gray-50 p-3 dark:border-gray-700 dark:bg-slate-800"
+                      className="rounded border border-[#D4D9CE] bg-brand-cream p-3 dark:border-[#1F1F1F] dark:bg-brand-charcoal"
                     >
                       <div className="mb-2 flex items-start justify-between">
                         <div>
@@ -456,7 +456,7 @@ export function ScheduleExtractionTab({
                             {window.type} x{window.quantity}
                           </p>
                           {window.room && (
-                            <p className="text-xs text-gray-600 dark:text-gray-400">
+                            <p className="text-xs text-[#5A5A5A] dark:text-[#A8A8A8]">
                               Room: {window.room}
                             </p>
                           )}
@@ -466,13 +466,13 @@ export function ScheduleExtractionTab({
                             onClick={() =>
                               setEditingWindowIndex(editingWindowIndex === idx ? null : idx)
                             }
-                            className="text-blue-600 hover:text-blue-700 dark:text-blue-400"
+                            className="text-brand-primary hover:opacity-80 dark:text-brand-secondary"
                           >
                             <Edit2 className="h-4 w-4" />
                           </button>
                           <button
                             onClick={() => removeWindow(idx)}
-                            className="text-red-600 hover:text-red-700 dark:text-red-400"
+                            className="text-brand-error hover:opacity-80 dark:text-brand-error"
                           >
                             <Trash2 className="h-4 w-4" />
                           </button>
@@ -480,55 +480,55 @@ export function ScheduleExtractionTab({
                       </div>
 
                       {editingWindowIndex === idx && (
-                        <div className="grid gap-2 pt-2 border-t border-gray-300 dark:border-gray-600">
+                        <div className="grid gap-2 pt-2 border-t border-[#D4D9CE] dark:border-[#1F1F1F]">
                           <input
                             type="text"
                             value={window.type}
                             onChange={(e) => updateWindow(idx, "type", e.target.value)}
                             placeholder="Window type"
-                            className="rounded border border-gray-300 px-2 py-1 text-xs dark:border-gray-600 dark:bg-slate-700 dark:text-white"
+                            className="rounded border border-[#D4D9CE] px-2 py-1 text-xs dark:border-[#1F1F1F] dark:bg-brand-charcoal dark:text-white"
                           />
                           <input
                             type="number"
                             value={window.quantity}
                             onChange={(e) => updateWindow(idx, "quantity", parseInt(e.target.value) || 0)}
                             placeholder="Quantity"
-                            className="rounded border border-gray-300 px-2 py-1 text-xs dark:border-gray-600 dark:bg-slate-700 dark:text-white"
+                            className="rounded border border-[#D4D9CE] px-2 py-1 text-xs dark:border-[#1F1F1F] dark:bg-brand-charcoal dark:text-white"
                           />
                           <input
                             type="text"
                             value={window.size || ""}
                             onChange={(e) => updateWindow(idx, "size", e.target.value || null)}
                             placeholder="Size (WxH)"
-                            className="rounded border border-gray-300 px-2 py-1 text-xs dark:border-gray-600 dark:bg-slate-700 dark:text-white"
+                            className="rounded border border-[#D4D9CE] px-2 py-1 text-xs dark:border-[#1F1F1F] dark:bg-brand-charcoal dark:text-white"
                           />
                           <input
                             type="text"
                             value={window.material || ""}
                             onChange={(e) => updateWindow(idx, "material", e.target.value || null)}
                             placeholder="Material"
-                            className="rounded border border-gray-300 px-2 py-1 text-xs dark:border-gray-600 dark:bg-slate-700 dark:text-white"
+                            className="rounded border border-[#D4D9CE] px-2 py-1 text-xs dark:border-[#1F1F1F] dark:bg-brand-charcoal dark:text-white"
                           />
                           <input
                             type="text"
                             value={window.glazing || ""}
                             onChange={(e) => updateWindow(idx, "glazing", e.target.value || null)}
                             placeholder="Glazing type"
-                            className="rounded border border-gray-300 px-2 py-1 text-xs dark:border-gray-600 dark:bg-slate-700 dark:text-white"
+                            className="rounded border border-[#D4D9CE] px-2 py-1 text-xs dark:border-[#1F1F1F] dark:bg-brand-charcoal dark:text-white"
                           />
                           <input
                             type="text"
                             value={window.room || ""}
                             onChange={(e) => updateWindow(idx, "room", e.target.value || null)}
                             placeholder="Room/Location"
-                            className="rounded border border-gray-300 px-2 py-1 text-xs dark:border-gray-600 dark:bg-slate-700 dark:text-white"
+                            className="rounded border border-[#D4D9CE] px-2 py-1 text-xs dark:border-[#1F1F1F] dark:bg-brand-charcoal dark:text-white"
                           />
                           <input
                             type="text"
                             value={window.location || ""}
                             onChange={(e) => updateWindow(idx, "location", e.target.value || null)}
                             placeholder="Window location (e.g., NW corner)"
-                            className="rounded border border-gray-300 px-2 py-1 text-xs dark:border-gray-600 dark:bg-slate-700 dark:text-white"
+                            className="rounded border border-[#D4D9CE] px-2 py-1 text-xs dark:border-[#1F1F1F] dark:bg-brand-charcoal dark:text-white"
                           />
                         </div>
                       )}
@@ -537,26 +537,26 @@ export function ScheduleExtractionTab({
                         <div className="grid grid-cols-2 gap-1 text-xs">
                           {window.size && (
                             <div>
-                              <span className="text-gray-600 dark:text-gray-400">Size: </span>
-                              <span className="dark:text-gray-200">{window.size}</span>
+                              <span className="text-[#5A5A5A] dark:text-[#A8A8A8]">Size: </span>
+                              <span className="dark:text-white">{window.size}</span>
                             </div>
                           )}
                           {window.material && (
                             <div>
-                              <span className="text-gray-600 dark:text-gray-400">Material: </span>
-                              <span className="dark:text-gray-200">{window.material}</span>
+                              <span className="text-[#5A5A5A] dark:text-[#A8A8A8]">Material: </span>
+                              <span className="dark:text-white">{window.material}</span>
                             </div>
                           )}
                           {window.glazing && (
                             <div>
-                              <span className="text-gray-600 dark:text-gray-400">Glazing: </span>
-                              <span className="dark:text-gray-200">{window.glazing}</span>
+                              <span className="text-[#5A5A5A] dark:text-[#A8A8A8]">Glazing: </span>
+                              <span className="dark:text-white">{window.glazing}</span>
                             </div>
                           )}
                           {window.location && (
                             <div>
-                              <span className="text-gray-600 dark:text-gray-400">Location: </span>
-                              <span className="dark:text-gray-200">{window.location}</span>
+                              <span className="text-[#5A5A5A] dark:text-[#A8A8A8]">Location: </span>
+                              <span className="dark:text-white">{window.location}</span>
                             </div>
                           )}
                         </div>
@@ -574,20 +574,20 @@ export function ScheduleExtractionTab({
                 setExtractedSchedule(null);
                 setFiles([]);
               }}
-              className="flex-1 rounded border border-gray-300 px-4 py-2 font-medium dark:border-gray-600 dark:text-gray-200"
+              className="flex-1 rounded border border-[#D4D9CE] px-4 py-2 font-medium dark:border-[#1F1F1F] dark:text-white"
             >
               Back to Upload
             </button>
             <button
               onClick={onClose}
-              className="flex-1 rounded border border-gray-300 px-4 py-2 font-medium dark:border-gray-600 dark:text-gray-200"
+              className="flex-1 rounded border border-[#D4D9CE] px-4 py-2 font-medium dark:border-[#1F1F1F] dark:text-white"
             >
               Cancel
             </button>
             <button
               onClick={createAssets}
               disabled={loading}
-              className="flex flex-1 items-center justify-center gap-2 rounded bg-green-500 px-4 py-2 font-medium text-white hover:bg-green-600 disabled:opacity-50"
+              className="flex flex-1 items-center justify-center gap-2 rounded bg-brand-success px-4 py-2 font-medium text-white hover:opacity-90 disabled:opacity-50"
             >
               {loading ? (
                 <>
@@ -607,14 +607,14 @@ export function ScheduleExtractionTab({
   // File upload stage
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-      <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-lg bg-white p-6 dark:bg-slate-900">
+      <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-lg bg-white p-6 dark:bg-[#2D2D2D]">
         <div className="mb-6 flex items-center justify-between">
           <h2 className="text-2xl font-bold dark:text-white">
             Extract Door & Window Schedules
           </h2>
           <button
             onClick={onClose}
-            className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+            className="text-[#5A5A5A] hover:text-[#1F1F1F] dark:text-[#A8A8A8] dark:hover:text-white"
           >
             <X className="h-5 w-5" />
           </button>
@@ -624,15 +624,15 @@ export function ScheduleExtractionTab({
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
           onDrop={handleDrop}
-          className="mb-6 rounded-lg border-2 border-dashed border-gray-300 bg-gray-50 p-8 text-center transition-colors dark:border-gray-600 dark:bg-slate-800"
+          className="mb-6 rounded-lg border-2 border-dashed border-[#D4D9CE] bg-brand-cream p-8 text-center transition-colors dark:border-[#1F1F1F] dark:bg-brand-charcoal"
         >
-          <Upload className="mx-auto h-12 w-12 text-gray-400" />
-          <p className="mt-2 text-sm font-medium text-gray-900 dark:text-gray-100">
+          <Upload className="mx-auto h-12 w-12 text-brand-gray" />
+          <p className="mt-2 text-sm font-medium text-[#1F1F1F] dark:text-white">
             Drag and drop architectural plans here
           </p>
-          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">or</p>
+          <p className="mt-1 text-sm text-[#5A5A5A] dark:text-[#A8A8A8]">or</p>
           <label className="mt-2 inline-block">
-            <span className="cursor-pointer text-blue-500 hover:text-blue-600">
+            <span className="cursor-pointer text-brand-primary hover:text-brand-primary-dark">
               click to select files
             </span>
             <input
@@ -643,21 +643,21 @@ export function ScheduleExtractionTab({
               className="hidden"
             />
           </label>
-          <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
+          <p className="mt-2 text-xs text-[#5A5A5A] dark:text-[#A8A8A8]">
             JPG, PNG, WebP, or PDF up to 10MB
           </p>
         </div>
 
         {files.length > 0 && (
           <div className="mb-6">
-            <h3 className="mb-3 text-sm font-semibold dark:text-gray-200">
+            <h3 className="mb-3 text-sm font-semibold dark:text-white">
               Selected Files ({files.length})
             </h3>
             <div className="grid gap-2 sm:grid-cols-2">
               {files.map((f, idx) => (
                 <div
                   key={idx}
-                  className="flex items-center gap-3 rounded border border-gray-200 bg-gray-50 p-3 dark:border-gray-700 dark:bg-slate-800"
+                  className="flex items-center gap-3 rounded border border-[#D4D9CE] bg-brand-cream p-3 dark:border-[#1F1F1F] dark:bg-brand-charcoal"
                 >
                   <div className="flex-shrink-0">
                     {f.preview ? (
@@ -667,20 +667,20 @@ export function ScheduleExtractionTab({
                         className="h-10 w-10 rounded object-cover"
                       />
                     ) : (
-                      <FileText className="h-10 w-10 text-blue-600" />
+                      <FileText className="h-10 w-10 text-brand-primary dark:text-brand-secondary" />
                     )}
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-medium dark:text-gray-200">
+                    <p className="truncate text-sm font-medium dark:text-white">
                       {f.file.name}
                     </p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                    <p className="text-xs text-[#5A5A5A] dark:text-[#A8A8A8]">
                       {(f.file.size / 1024).toFixed(0)} KB
                     </p>
                   </div>
                   <button
                     onClick={() => removeFile(idx)}
-                    className="text-gray-400 hover:text-red-600"
+                    className="text-[#5A5A5A] dark:text-[#A8A8A8] hover:text-brand-error"
                   >
                     <X className="h-4 w-4" />
                   </button>
@@ -693,14 +693,14 @@ export function ScheduleExtractionTab({
         <div className="flex gap-2">
           <button
             onClick={onClose}
-            className="flex-1 rounded border border-gray-300 px-4 py-2 font-medium dark:border-gray-600 dark:text-gray-200"
+            className="flex-1 rounded border border-[#D4D9CE] px-4 py-2 font-medium dark:border-[#1F1F1F] dark:text-white"
           >
             Cancel
           </button>
           <button
             onClick={analyzeFiles}
             disabled={analyzing || files.length === 0}
-            className="flex flex-1 items-center justify-center gap-2 rounded bg-blue-500 px-4 py-2 font-medium text-white hover:bg-blue-600 disabled:opacity-50"
+            className="flex flex-1 items-center justify-center gap-2 rounded bg-brand-primary px-4 py-2 font-medium text-white hover:bg-brand-primary-dark disabled:opacity-50"
           >
             {analyzing ? (
               <>

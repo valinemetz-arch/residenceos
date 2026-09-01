@@ -15,6 +15,11 @@ interface System {
   name: string;
 }
 
+interface Trade {
+  id: string;
+  name: string;
+}
+
 import type { AssetWithRelations } from "@/lib/types";
 
 interface Asset extends AssetWithRelations {}
@@ -26,6 +31,7 @@ type AssetFormState = {
   model: string | null;
   sku: string | null;
   finish: string | null;
+  size: string | null;
   cost: number | null;
   vendor: string | null;
   purchaseDate: string | null;
@@ -33,6 +39,7 @@ type AssetFormState = {
   warrantyMonths: number | null;
   spaceId: string;
   systemId: string | null;
+  tradeId: string | null;
   status: string;
   notes: string | null;
 };
@@ -41,16 +48,42 @@ interface AssetFormProps {
   asset?: Asset;
   spaces: Space[];
   systems: System[];
+  trades: Trade[];
   onClose: () => void;
   onSuccess: () => void;
 }
 
 const STATUS_OPTIONS = ["pending", "ordered", "in-stock", "active", "archived"];
 
+const labelStyle: React.CSSProperties = {
+  display: "block",
+  fontSize: 11,
+  fontWeight: 600,
+  textTransform: "uppercase",
+  letterSpacing: "0.06em",
+  color: "var(--color-neutral-700)",
+  marginBottom: 6,
+};
+
+const fieldWrapStyle: React.CSSProperties = { marginBottom: 14 };
+
+const errorStyle: React.CSSProperties = {
+  margin: "4px 0 0",
+  fontSize: 12,
+  color: "var(--color-accent-700)",
+};
+
+const helpStyle: React.CSSProperties = {
+  margin: "4px 0 0",
+  fontSize: 12,
+  color: "var(--color-neutral-600)",
+};
+
 export function AssetForm({
   asset,
   spaces,
   systems,
+  trades,
   onClose,
   onSuccess,
 }: AssetFormProps) {
@@ -62,6 +95,7 @@ export function AssetForm({
       model: null,
       sku: null,
       finish: null,
+      size: null,
       cost: null,
       vendor: null,
       purchaseDate: null,
@@ -69,12 +103,31 @@ export function AssetForm({
       warrantyMonths: null,
       spaceId: spaces[0]?.id || "",
       systemId: null,
+      tradeId: null,
       status: "pending",
       notes: null,
     }
   );
+  const [selectedSpaceIds, setSelectedSpaceIds] = useState<string[]>(
+    asset?.spaceId ? [asset.spaceId] : spaces[0] ? [spaces[0].id] : []
+  );
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const toggleSpace = (spaceId: string) => {
+    setSelectedSpaceIds((prev) =>
+      prev.includes(spaceId)
+        ? prev.filter((id) => id !== spaceId)
+        : [...prev, spaceId]
+    );
+    if (errors.spaceId) {
+      setErrors((prev) => {
+        const newErrors = { ...prev };
+        delete newErrors.spaceId;
+        return newErrors;
+      });
+    }
+  };
 
   const handleChange = (
     e: React.ChangeEvent<
@@ -109,35 +162,62 @@ export function AssetForm({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const validation = validationSchemas.asset(formData);
+    const validation = validationSchemas.asset({
+      ...formData,
+      spaceId: selectedSpaceIds[0] || "",
+    });
     if (!validation.isValid) {
       setErrors(validation.errors);
       toast.error("Validation failed", "Please check the form fields");
+      return;
+    }
+    if (selectedSpaceIds.length === 0) {
+      setErrors((prev) => ({ ...prev, spaceId: "Select at least one space." }));
+      toast.error("Validation failed", "Please select at least one space");
       return;
     }
 
     setIsSubmitting(true);
 
     try {
-      const url = isEditing ? `/api/assets/${asset.id}` : "/api/assets";
-      const method = isEditing ? "PUT" : "POST";
+      if (isEditing) {
+        const response = await fetch(`/api/assets/${asset.id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ...formData, spaceId: selectedSpaceIds[0] }),
+        });
 
-      const response = await fetch(url, {
-        method,
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
-      });
+        const result = await response.json();
+        if (!response.ok) {
+          throw new Error(result.error || "Failed to save asset");
+        }
 
-      const result = await response.json();
+        toast.success("Asset updated", `${formData.name} has been updated successfully`);
+      } else {
+        const responses = await Promise.all(
+          selectedSpaceIds.map((spaceId) =>
+            fetch("/api/assets", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ ...formData, spaceId }),
+            })
+          )
+        );
 
-      if (!response.ok) {
-        throw new Error(result.error || "Failed to save asset");
+        const results = await Promise.all(responses.map((r) => r.json()));
+        const failed = responses.filter((r) => !r.ok);
+        if (failed.length > 0) {
+          const firstError = results.find((r) => r?.error)?.error;
+          throw new Error(firstError || "Failed to create asset");
+        }
+
+        toast.success(
+          "Asset created",
+          selectedSpaceIds.length > 1
+            ? `${formData.name} has been added to ${selectedSpaceIds.length} spaces`
+            : `${formData.name} has been created successfully`
+        );
       }
-
-      toast.success(
-        isEditing ? "Asset updated" : "Asset created",
-        `${formData.name} has been ${isEditing ? "updated" : "created"} successfully`
-      );
 
       onSuccess();
       onClose();
@@ -152,70 +232,113 @@ export function AssetForm({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-      <div className="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-lg bg-white p-6 dark:bg-slate-900">
+    <div
+      className="classical"
+      style={{
+        position: "fixed",
+        inset: 0,
+        background: "rgba(32,31,29,0.32)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        zIndex: 50,
+      }}
+      onClick={onClose}
+    >
+      <div
+        style={{
+          background: "var(--color-bg)",
+          width: 480,
+          maxWidth: "calc(100vw - 32px)",
+          maxHeight: "90vh",
+          overflow: "auto",
+          borderRadius: "var(--radius-md)",
+          boxShadow: "var(--shadow-lg)",
+          padding: "28px 30px",
+        }}
+        onClick={(e) => e.stopPropagation()}
+      >
         {/* Header */}
-        <div className="mb-6 flex items-center justify-between">
-          <h2 className="text-xl font-bold dark:text-white">
-            {isEditing ? "Edit Asset" : "Add Asset"}
-          </h2>
-          <button
-            onClick={onClose}
-            className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
-          >
-            <X className="h-5 w-5" />
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 18 }}>
+          <h2 style={{ fontSize: 22 }}>{isEditing ? "Edit Asset" : "Add Asset"}</h2>
+          <button className="btn btn-icon" onClick={onClose} aria-label="Close">
+            <X size={16} strokeWidth={1.8} />
           </button>
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit}>
           {/* Name */}
-          <div>
-            <label className="block text-sm font-medium dark:text-gray-200">
-              Asset Name *
-            </label>
+          <div style={fieldWrapStyle}>
+            <label style={labelStyle}>Asset Name *</label>
             <input
               type="text"
               name="name"
               value={formData.name}
               onChange={handleChange}
               placeholder="e.g., Water Heater"
-              className="mt-1 w-full rounded border border-gray-300 px-3 py-2 dark:border-gray-600 dark:bg-slate-800 dark:text-white"
+              style={{ width: "100%" }}
             />
-            {errors.name && (
-              <p className="mt-1 text-sm text-red-500">{errors.name}</p>
-            )}
+            {errors.name && <p style={errorStyle}>{errors.name}</p>}
           </div>
 
           {/* Space */}
-          <div>
-            <label className="block text-sm font-medium dark:text-gray-200">
-              Space *
-            </label>
-            <select
-              name="spaceId"
-              value={formData.spaceId}
-              onChange={handleChange}
-              className="mt-1 w-full rounded border border-gray-300 px-3 py-2 dark:border-gray-600 dark:bg-slate-800 dark:text-white"
-            >
-              {spaces.map((space) => (
-                <option key={space.id} value={space.id}>
-                  {space.name}
-                </option>
-              ))}
-            </select>
+          <div style={fieldWrapStyle}>
+            <label style={labelStyle}>{isEditing ? "Space *" : "Space(s) *"}</label>
+            {isEditing ? (
+              <select
+                name="spaceId"
+                value={selectedSpaceIds[0] || ""}
+                onChange={(e) => setSelectedSpaceIds([e.target.value])}
+                style={{ width: "100%" }}
+              >
+                {spaces.map((space) => (
+                  <option key={space.id} value={space.id}>
+                    {space.name}
+                  </option>
+                ))}
+              </select>
+            ) : (
+              <>
+                <div
+                  style={{
+                    maxHeight: 160,
+                    overflowY: "auto",
+                    border: "1px solid var(--color-divider)",
+                    borderRadius: "var(--radius-md)",
+                    padding: 8,
+                  }}
+                >
+                  {spaces.map((space) => (
+                    <label
+                      key={space.id}
+                      style={{ display: "flex", alignItems: "center", gap: 8, padding: "4px 0", fontSize: 13 }}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={selectedSpaceIds.includes(space.id)}
+                        onChange={() => toggleSpace(space.id)}
+                      />
+                      {space.name}
+                    </label>
+                  ))}
+                </div>
+                <p style={helpStyle}>
+                  Select multiple spaces to add this item to each of them at once.
+                </p>
+              </>
+            )}
+            {errors.spaceId && <p style={errorStyle}>{errors.spaceId}</p>}
           </div>
 
           {/* System */}
-          <div>
-            <label className="block text-sm font-medium dark:text-gray-200">
-              System
-            </label>
+          <div style={fieldWrapStyle}>
+            <label style={labelStyle}>System</label>
             <select
               name="systemId"
               value={formData.systemId || ""}
               onChange={handleChange}
-              className="mt-1 w-full rounded border border-gray-300 px-3 py-2 dark:border-gray-600 dark:bg-slate-800 dark:text-white"
+              style={{ width: "100%" }}
             >
               <option value="">None</option>
               {systems.map((system) => (
@@ -226,56 +349,95 @@ export function AssetForm({
             </select>
           </div>
 
+          {/* Trade */}
+          <div style={fieldWrapStyle}>
+            <label style={labelStyle}>Trade</label>
+            <select
+              name="tradeId"
+              value={formData.tradeId || ""}
+              onChange={handleChange}
+              style={{ width: "100%" }}
+            >
+              <option value="">None</option>
+              {trades.map((trade) => (
+                <option key={trade.id} value={trade.id}>
+                  {trade.name}
+                </option>
+              ))}
+            </select>
+            <p style={helpStyle}>
+              Determines which bidding contractors see this item in their project scope.
+            </p>
+          </div>
+
           {/* Manufacturer */}
-          <div>
-            <label className="block text-sm font-medium dark:text-gray-200">
-              Manufacturer
-            </label>
+          <div style={fieldWrapStyle}>
+            <label style={labelStyle}>Manufacturer</label>
             <input
               type="text"
               name="manufacturer"
               value={formData.manufacturer || ""}
               onChange={handleChange}
               placeholder="e.g., Rheem"
-              className="mt-1 w-full rounded border border-gray-300 px-3 py-2 dark:border-gray-600 dark:bg-slate-800 dark:text-white"
+              style={{ width: "100%" }}
             />
           </div>
 
           {/* Model */}
-          <div>
-            <label className="block text-sm font-medium dark:text-gray-200">
-              Model
-            </label>
+          <div style={fieldWrapStyle}>
+            <label style={labelStyle}>Model</label>
             <input
               type="text"
               name="model"
               value={formData.model || ""}
               onChange={handleChange}
               placeholder="e.g., Professional Classic"
-              className="mt-1 w-full rounded border border-gray-300 px-3 py-2 dark:border-gray-600 dark:bg-slate-800 dark:text-white"
+              style={{ width: "100%" }}
             />
           </div>
 
           {/* SKU */}
-          <div>
-            <label className="block text-sm font-medium dark:text-gray-200">
-              SKU
-            </label>
+          <div style={fieldWrapStyle}>
+            <label style={labelStyle}>SKU</label>
             <input
               type="text"
               name="sku"
               value={formData.sku || ""}
               onChange={handleChange}
               placeholder="Part number"
-              className="mt-1 w-full rounded border border-gray-300 px-3 py-2 dark:border-gray-600 dark:bg-slate-800 dark:text-white"
+              style={{ width: "100%" }}
+            />
+          </div>
+
+          {/* Size */}
+          <div style={fieldWrapStyle}>
+            <label style={labelStyle}>Size / Dimensions</label>
+            <input
+              type="text"
+              name="size"
+              value={formData.size || ""}
+              onChange={handleChange}
+              placeholder={`e.g., 3'-0" x 6'-8", 36" wide`}
+              style={{ width: "100%" }}
+            />
+          </div>
+
+          {/* Finish */}
+          <div style={fieldWrapStyle}>
+            <label style={labelStyle}>Finish / Selection</label>
+            <input
+              type="text"
+              name="finish"
+              value={formData.finish || ""}
+              onChange={handleChange}
+              placeholder="e.g., Panel Ready, Matte White, Polished Nickel"
+              style={{ width: "100%" }}
             />
           </div>
 
           {/* Cost */}
-          <div>
-            <label className="block text-sm font-medium dark:text-gray-200">
-              Cost ($)
-            </label>
+          <div style={fieldWrapStyle}>
+            <label style={labelStyle}>Cost ($)</label>
             <input
               type="number"
               name="cost"
@@ -284,44 +446,38 @@ export function AssetForm({
               placeholder="0.00"
               step="0.01"
               min="0"
-              className="mt-1 w-full rounded border border-gray-300 px-3 py-2 dark:border-gray-600 dark:bg-slate-800 dark:text-white"
+              style={{ width: "100%" }}
             />
           </div>
 
           {/* Vendor */}
-          <div>
-            <label className="block text-sm font-medium dark:text-gray-200">
-              Vendor
-            </label>
+          <div style={fieldWrapStyle}>
+            <label style={labelStyle}>Vendor</label>
             <input
               type="text"
               name="vendor"
               value={formData.vendor || ""}
               onChange={handleChange}
               placeholder="e.g., Home Depot"
-              className="mt-1 w-full rounded border border-gray-300 px-3 py-2 dark:border-gray-600 dark:bg-slate-800 dark:text-white"
+              style={{ width: "100%" }}
             />
           </div>
 
           {/* Purchase Date */}
-          <div>
-            <label className="block text-sm font-medium dark:text-gray-200">
-              Purchase Date
-            </label>
+          <div style={fieldWrapStyle}>
+            <label style={labelStyle}>Purchase Date</label>
             <input
               type="date"
               name="purchaseDate"
               value={formData.purchaseDate || ""}
               onChange={handleChange}
-              className="mt-1 w-full rounded border border-gray-300 px-3 py-2 dark:border-gray-600 dark:bg-slate-800 dark:text-white"
+              style={{ width: "100%" }}
             />
           </div>
 
           {/* Warranty Months */}
-          <div>
-            <label className="block text-sm font-medium dark:text-gray-200">
-              Warranty (months)
-            </label>
+          <div style={fieldWrapStyle}>
+            <label style={labelStyle}>Warranty (months)</label>
             <input
               type="number"
               name="warrantyMonths"
@@ -329,20 +485,18 @@ export function AssetForm({
               onChange={handleChange}
               placeholder="e.g., 36"
               min="0"
-              className="mt-1 w-full rounded border border-gray-300 px-3 py-2 dark:border-gray-600 dark:bg-slate-800 dark:text-white"
+              style={{ width: "100%" }}
             />
           </div>
 
           {/* Status */}
-          <div>
-            <label className="block text-sm font-medium dark:text-gray-200">
-              Status
-            </label>
+          <div style={fieldWrapStyle}>
+            <label style={labelStyle}>Status</label>
             <select
               name="status"
               value={formData.status}
               onChange={handleChange}
-              className="mt-1 w-full rounded border border-gray-300 px-3 py-2 dark:border-gray-600 dark:bg-slate-800 dark:text-white"
+              style={{ width: "100%" }}
             >
               {STATUS_OPTIONS.map((option) => (
                 <option key={option} value={option}>
@@ -353,37 +507,30 @@ export function AssetForm({
           </div>
 
           {/* Notes */}
-          <div>
-            <label className="block text-sm font-medium dark:text-gray-200">
-              Notes
-            </label>
+          <div style={fieldWrapStyle}>
+            <label style={labelStyle}>Notes (install location, wiring/prewire needs, etc.)</label>
             <textarea
               name="notes"
               value={formData.notes || ""}
               onChange={handleChange}
-              placeholder="Add any additional notes"
+              placeholder={`e.g., "Recessed ceiling speaker, covered patio north side, needs low-voltage run from AV closet"`}
               rows={2}
-              className="mt-1 w-full rounded border border-gray-300 px-3 py-2 dark:border-gray-600 dark:bg-slate-800 dark:text-white"
+              style={{ width: "100%" }}
             />
+            <p style={helpStyle}>
+              Visible to contractors bidding this item's trade — use it for exactly where something goes and what it needs (extra wiring, prewire, circuits, etc).
+            </p>
           </div>
 
           {/* Actions */}
-          <div className="mt-6 flex gap-2">
-            <button
-              type="button"
-              onClick={onClose}
-              className="flex-1 rounded border border-gray-300 px-4 py-2 font-medium dark:border-gray-600 dark:text-gray-200"
-            >
+          <div style={{ display: "flex", gap: 10, marginTop: 20 }}>
+            <button type="button" className="btn" style={{ flex: 1 }} onClick={onClose}>
               Cancel
             </button>
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="flex flex-1 items-center justify-center gap-2 rounded bg-blue-500 px-4 py-2 font-medium text-white hover:bg-blue-600 disabled:opacity-50"
-            >
+            <button type="submit" className="btn btn-primary" style={{ flex: 1 }} disabled={isSubmitting}>
               {isSubmitting ? (
                 <>
-                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <Loader2 size={16} className="animate-spin" />
                   {isEditing ? "Updating..." : "Creating..."}
                 </>
               ) : (

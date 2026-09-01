@@ -1,9 +1,14 @@
 export const dynamic = "force-dynamic";
+import { getOrCreateHouseProject } from "@/lib/houseProject";
+import { PortalHeader } from "@/app/components/portal/PortalHeader";
 import { SpaceListWithForms } from "../../components/SpaceListWithForms";
 
-export default function SpacesPage() {
+export default async function SpacesPage() {
+  const house = await getOrCreateHouseProject();
+
   return (
-    <div className="space-y-6">
+    <div>
+      <PortalHeader projectName={house.name} pageTitle="Spaces" phase={house.phase} />
       <SpaceListWithForms />
     </div>
   );

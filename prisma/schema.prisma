@@ -67,6 +67,7 @@ model Asset {
   model         String?
   sku           String?
   finish        String?   // Chrome, Polished Nickel, etc
+  size          String?   // Dimensions / selection size, e.g. 3'-0" x 6'-8", 36" wide
   
   // Financial
   cost          Float?
@@ -85,12 +86,14 @@ model Asset {
   space         Space     @relation(fields: [spaceId], references: [id], onDelete: Cascade)
   systemId      String?
   system        System?   @relation(fields: [systemId], references: [id], onDelete: SetNull)
+  tradeId       String?
+  trade         Trade?    @relation(fields: [tradeId], references: [id], onDelete: SetNull)
 
   // Data
   barcode       String?
   qrCode        String?   // Will generate this
   status        String    @default("pending") // pending, ordered, installed, operational
-  notes         String?   
+  notes         String?   // Install location, wiring/prewire needs, etc (e.g. "recessed ceiling speaker, patio north side, needs low-voltage run from AV closet")
 
   // Relations
   specifications Specification[]
@@ -177,6 +180,9 @@ model Task {
   systemId      String?
   system        System?   @relation(fields: [systemId], references: [id], onDelete: SetNull)
 
+  tradeId       String?
+  trade         Trade?    @relation(fields: [tradeId], references: [id], onDelete: SetNull)
+
   // Assignment (either an internal team member OR a contractor, not both)
   assignedToUserId        String?
   assignedToUser          User?       @relation("TaskAssignedToUser", fields: [assignedToUserId], references: [id], onDelete: SetNull)
@@ -261,6 +267,8 @@ model Document {
   changeOrder   ChangeOrder? @relation(fields: [changeOrderId], references: [id], onDelete: SetNull)
 
   description   String?
+
+  planSets      PlanSet[] // source PDF for a floor-plan takeoff extraction
 
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
@@ -451,6 +459,10 @@ model Project {
   endDate       DateTime?
   status        String    @default("active") // active, closed, archived
 
+  // Site Info (Owner Dashboard / Contractor Portal "Project" tab)
+  gateCode      String?
+  phase         String?   // current construction phase label, e.g. "Framing & Rough-In"
+
   // Project Contents
   spaces        Space[]
 
@@ -460,11 +472,49 @@ model Project {
   contracts     Contract[]  // Contracts for this project
   messages      Message[]   // Q&A messages
   trades        ProjectTrade[] // Required trades for this project
+  planSets      PlanSet[]   // Uploaded floor-plan sets for AI takeoff extraction
+  timelineSteps ProjectTimelineStep[]
+  contacts      ProjectContact[]
 
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
   @@map("projects")
+}
+
+// SITE INFO: Construction timeline milestones shown in the Owner Dashboard /
+// Contractor Portal "Project" tab. `dateLabel` is free text because entries
+// mix real dates ("Sep 2026") with status words ("Complete", "In progress").
+model ProjectTimelineStep {
+  id            String    @id @default(cuid())
+  projectId     String
+  project       Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  label         String
+  dateLabel     String
+  order         Int       @default(0)
+
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@map("project_timeline_steps")
+}
+
+// SITE INFO: GC/homeowner/PM contacts shown alongside Site Info.
+model ProjectContact {
+  id            String    @id @default(cuid())
+  projectId     String
+  project       Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  name          String
+  role          String
+  phone         String
+  order         Int       @default(0)
+
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@map("project_contacts")
 }
 
 // TRADES: Trade specialties
@@ -476,11 +526,86 @@ model Trade {
   // Relations
   contractors   ContractorTrade[]
   projects      ProjectTrade[]
+  assets        Asset[]
+  tasks         Task[]
+  takeoffItems  TakeoffItem[]
 
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
   @@map("trades")
+}
+
+// FLOOR-PLAN TAKEOFFS: an uploaded plan set (PDF), rendered page-by-page and
+// run through AI extraction to stage material/quantity takeoff items for
+// review before a project goes out to bid.
+model PlanSet {
+  id            String    @id @default(cuid())
+  name          String    // e.g. "7/22/26 Permit Set"
+
+  projectId     String?
+  project       Project?  @relation(fields: [projectId], references: [id], onDelete: SetNull)
+
+  documentId    String?   // the uploaded source PDF
+  document      Document? @relation(fields: [documentId], references: [id], onDelete: SetNull)
+
+  status        String    @default("rendering") // rendering, extracting, ready, failed
+
+  pages         PlanPage[]
+  items         TakeoffItem[]
+
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@map("plan_sets")
+}
+
+// One rendered page image from a PlanSet's source PDF.
+model PlanPage {
+  id            String    @id @default(cuid())
+
+  planSetId     String
+  planSet       PlanSet   @relation(fields: [planSetId], references: [id], onDelete: Cascade)
+
+  pageNumber    Int
+  imageUrl      String    // rendered PNG, stored in Vercel Blob
+  status        String    @default("pending") // pending, processed, skipped, failed
+
+  items         TakeoffItem[]
+
+  createdAt     DateTime  @default(now())
+
+  @@unique([planSetId, pageNumber])
+  @@map("plan_pages")
+}
+
+// A single AI-extracted (or manually added) takeoff line item, staged for
+// owner review before it's trusted as real project scope.
+model TakeoffItem {
+  id            String    @id @default(cuid())
+
+  planSetId     String
+  planSet       PlanSet   @relation(fields: [planSetId], references: [id], onDelete: Cascade)
+
+  planPageId    String?
+  planPage      PlanPage? @relation(fields: [planPageId], references: [id], onDelete: SetNull)
+
+  tradeId       String?
+  trade         Trade?    @relation(fields: [tradeId], references: [id], onDelete: SetNull)
+
+  description   String    // "Door 03 - Living Room, 3'-0 x 6'-8, folding glass"
+  quantity      Float?
+  unit          String?   // each, sq ft, linear ft
+
+  confidence    String    // high, medium, low, manual_required, needs_info
+  sourceNote    String?   // AI citation or clarifying question
+
+  status        String    @default("pending") // pending, confirmed, rejected
+
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@map("takeoff_items")
 }
 
 // CONTRACTOR TRADES: Junction table for contractor specialties
@@ -584,6 +709,8 @@ model Bid {
   // Bid Details
   amount        Float
   notes         String?
+  includesInstallation Boolean? // whether this bid amount includes installation labor
+  installEstimate      String?  // free-text time estimate, e.g. "2 days", "16-20 hrs"
   status        String    @default("pending") // pending, approved, rejected, withdrawn
   submittedAt   DateTime?
 

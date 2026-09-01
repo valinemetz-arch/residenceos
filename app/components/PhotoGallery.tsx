@@ -41,7 +41,7 @@ export function PhotoGallery({ photos, onDelete }: PhotoGalleryProps) {
 
   if (photos.length === 0) {
     return (
-      <p className="text-sm text-gray-500 dark:text-gray-400">
+      <p className="text-sm text-[#5A5A5A] dark:text-[#A8A8A8]">
         No photos yet
       </p>
     );
@@ -52,7 +52,7 @@ export function PhotoGallery({ photos, onDelete }: PhotoGalleryProps) {
       {photos.map((photo) => (
         <div
           key={photo.id}
-          className="group relative rounded-lg border border-gray-200 overflow-hidden dark:border-gray-700"
+          className="group relative rounded-lg border border-[#D4D9CE] overflow-hidden dark:border-[#1F1F1F]"
         >
           <img
             src={photo.url}
@@ -68,7 +68,7 @@ export function PhotoGallery({ photos, onDelete }: PhotoGalleryProps) {
             <button
               onClick={() => handleDelete(photo.id)}
               disabled={deletingId === photo.id}
-              className="self-end rounded bg-red-600 p-1.5 hover:bg-red-700 disabled:opacity-50"
+              className="self-end rounded bg-brand-error p-1.5 hover:opacity-90 disabled:opacity-50"
             >
               {deletingId === photo.id ? (
                 <Loader2 className="h-4 w-4 animate-spin text-white" />

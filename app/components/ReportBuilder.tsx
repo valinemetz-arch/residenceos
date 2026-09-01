@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Loader2, Download, AlertCircle, CheckCircle2, Clock } from "lucide-react";
+import Link from "next/link";
+import { Loader2, Download, AlertCircle, CheckCircle2, Clock, Upload } from "lucide-react";
 import { toast } from "@/lib/toast";
 import { formatCurrency } from "@/lib/utils";
 
@@ -18,6 +19,29 @@ interface ReportData {
   punchListBySpace: Record<string, any[]>;
   taskTimeline: any[];
 }
+
+const REPORT_TABS = [
+  { id: "summary", label: "Budget Summary" },
+  { id: "systems", label: "By System" },
+  { id: "categories", label: "By Category" },
+  { id: "spaces", label: "By Space" },
+  { id: "punchlist", label: "Punch List" },
+  { id: "timeline", label: "Timeline" },
+  { id: "takeoff", label: "Material Takeoff" },
+];
+
+const STATUS_LABEL: Record<string, string> = {
+  pending: "Pending",
+  in_progress: "In Progress",
+  blocked: "Blocked",
+  completed: "Completed",
+};
+const STATUS_CLASS: Record<string, string> = {
+  pending: "tag tag-outline",
+  in_progress: "tag tag-accent",
+  blocked: "tag tag-accent",
+  completed: "tag tag-neutral",
+};
 
 export function ReportBuilder() {
   const [reportData, setReportData] = useState<ReportData | null>(null);
@@ -201,8 +225,8 @@ export function ReportBuilder() {
 
   if (!reportData) {
     return (
-      <div className="rounded-lg border border-gray-200 bg-gray-50 p-8 text-center dark:border-gray-700 dark:bg-slate-800">
-        <p className="text-gray-600 dark:text-gray-300">No data available</p>
+      <div className="card" style={{ textAlign: "center", padding: 32 }}>
+        <p className="card-meta">No data available</p>
       </div>
     );
   }
@@ -210,108 +234,76 @@ export function ReportBuilder() {
   return (
     <div className="space-y-6">
       {/* Report Tabs */}
-      <div className="flex gap-2 border-b border-gray-200 dark:border-gray-700 overflow-x-auto">
-        {[
-          { id: "summary", label: "Budget Summary" },
-          { id: "systems", label: "By System" },
-          { id: "categories", label: "By Category" },
-          { id: "spaces", label: "By Space" },
-          { id: "punchlist", label: "Punch List" },
-          { id: "timeline", label: "Timeline" },
-          { id: "takeoff", label: "Material Takeoff" },
-        ].map((tab) => (
-          <button
-            key={tab.id}
-            onClick={() => setSelectedReport(tab.id)}
-            className={`px-4 py-2 font-medium border-b-2 transition-colors ${
-              selectedReport === tab.id
-                ? "border-blue-500 text-blue-600 dark:text-blue-400"
-                : "border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200"
-            }`}
-          >
-            {tab.label}
-          </button>
-        ))}
+      <div>
+        <div className="flex gap-2 flex-wrap no-print">
+          {REPORT_TABS.map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setSelectedReport(tab.id)}
+              className="btn"
+              style={
+                selectedReport === tab.id
+                  ? { borderColor: "var(--color-accent)", color: "var(--color-accent-700)" }
+                  : undefined
+              }
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+        <div className="hr" style={{ marginTop: 14 }} />
       </div>
 
       {/* Budget Summary Report */}
       {selectedReport === "summary" && (
         <div className="space-y-4">
-          <div className="flex justify-end gap-2 mb-4">
+          <div className="flex justify-end gap-2">
             <button
               onClick={() =>
                 downloadJSON(reportData.budgetSummary, "budget-summary")
               }
-              className="text-sm flex items-center gap-1 text-blue-600 hover:text-blue-700 dark:text-blue-400 px-3 py-2 rounded border border-blue-300 dark:border-blue-700"
+              className="btn"
             >
               <Download className="h-4 w-4" />
               Export JSON
             </button>
           </div>
           <div className="grid md:grid-cols-3 gap-4">
-            <div className="rounded-lg border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-slate-900">
-              <p className="text-sm text-gray-600 dark:text-gray-400">
-                Total Budgeted
-              </p>
-              <p className="mt-2 text-3xl font-bold text-blue-600 dark:text-blue-400">
+            <div className="card" style={{ padding: "18px 20px" }}>
+              <div className="card-kicker">Total Budgeted</div>
+              <div className="card-title" style={{ fontSize: 28, marginTop: 4 }}>
                 {formatCurrency(reportData.budgetSummary.totalBudgeted)}
-              </p>
+              </div>
             </div>
-            <div className="rounded-lg border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-slate-900">
-              <p className="text-sm text-gray-600 dark:text-gray-400">
-                Total Actual Cost
-              </p>
-              <p className="mt-2 text-3xl font-bold text-orange-600 dark:text-orange-400">
+            <div className="card" style={{ padding: "18px 20px" }}>
+              <div className="card-kicker">Total Actual Cost</div>
+              <div className="card-title" style={{ fontSize: 28, marginTop: 4 }}>
                 {formatCurrency(reportData.budgetSummary.totalActual)}
-              </p>
+              </div>
             </div>
-            <div
-              className={`rounded-lg border p-6 ${
-                reportData.budgetSummary.remaining >= 0
-                  ? "border-green-200 bg-green-50 dark:border-green-900 dark:bg-green-900/20"
-                  : "border-red-200 bg-red-50 dark:border-red-900 dark:bg-red-900/20"
-              }`}
-            >
-              <p
-                className={`text-sm ${
-                  reportData.budgetSummary.remaining >= 0
-                    ? "text-green-600 dark:text-green-400"
-                    : "text-red-600 dark:text-red-400"
-                }`}
-              >
-                Remaining Budget
-              </p>
-              <p
-                className={`mt-2 text-3xl font-bold ${
-                  reportData.budgetSummary.remaining >= 0
-                    ? "text-green-700 dark:text-green-300"
-                    : "text-red-700 dark:text-red-300"
-                }`}
-              >
-                {formatCurrency(reportData.budgetSummary.remaining)}
-              </p>
+            <div className="card" style={{ padding: "18px 20px" }}>
+              <div className="card-kicker">
+                {reportData.budgetSummary.remaining >= 0 ? "Remaining Budget" : "Over Budget"}
+              </div>
+              <div className="card-title" style={{ fontSize: 28, marginTop: 4 }}>
+                {formatCurrency(Math.abs(reportData.budgetSummary.remaining))}
+              </div>
             </div>
           </div>
 
-          <div className="rounded-lg border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-slate-900">
-            <h3 className="font-semibold mb-4 dark:text-white">
-              Budget Breakdown
-            </h3>
-            <div className="space-y-2 text-sm">
-              <div className="flex justify-between">
-                <span className="text-gray-600 dark:text-gray-400">
-                  Total Budget Items:
-                </span>
-                <span className="font-medium dark:text-white">
-                  {reportData.budgetSummary.totalBudgeted > 0
-                    ? (
-                        reportData.budgetSummary.totalActual /
-                        reportData.budgetSummary.totalBudgeted
-                      ).toFixed(1) + "%"
-                    : "0%"}
-                  spent
-                </span>
-              </div>
+          <div className="card">
+            <h3 style={{ marginBottom: 16 }}>Budget Breakdown</h3>
+            <div className="flex justify-between" style={{ fontSize: 14 }}>
+              <span className="card-meta">Total Budget Items:</span>
+              <span style={{ fontWeight: 600 }}>
+                {reportData.budgetSummary.totalBudgeted > 0
+                  ? (
+                      reportData.budgetSummary.totalActual /
+                      reportData.budgetSummary.totalBudgeted
+                    ).toFixed(1) + "%"
+                  : "0%"}
+                spent
+              </span>
             </div>
           </div>
         </div>
@@ -320,45 +312,46 @@ export function ReportBuilder() {
       {/* By System Report */}
       {selectedReport === "systems" && (
         <div className="space-y-4">
-          <div className="flex justify-end gap-2 mb-4">
+          <div className="flex justify-end gap-2">
             <button
               onClick={() =>
                 downloadJSON(reportData.assetsBySystem, "assets-by-system")
               }
-              className="text-sm flex items-center gap-1 text-blue-600 hover:text-blue-700 dark:text-blue-400 px-3 py-2 rounded border border-blue-300 dark:border-blue-700"
+              className="btn"
             >
               <Download className="h-4 w-4" />
               Export JSON
             </button>
           </div>
           {Object.entries(reportData.assetsBySystem).map(([system, assets]) => (
-            <div
-              key={system}
-              className="rounded-lg border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-slate-900"
-            >
-              <h3 className="font-semibold mb-4 dark:text-white">
+            <div key={system} className="card">
+              <h3 style={{ marginBottom: 16 }}>
                 {system} ({(assets as any[]).length} items)
               </h3>
-              <div className="space-y-2 text-sm">
-                {(assets as any[]).length > 0 ? (
-                  (assets as any[]).map((asset) => (
-                    <div
-                      key={asset.id}
-                      className="flex justify-between text-gray-600 dark:text-gray-400"
-                    >
-                      <span>
-                        {asset.name}
-                        {asset.manufacturer && ` - ${asset.manufacturer}`}
-                      </span>
-                      <span className="font-medium dark:text-white">
-                        {asset.cost ? formatCurrency(asset.cost) : "—"}
-                      </span>
-                    </div>
-                  ))
-                ) : (
-                  <p className="text-gray-500">No assets in this system</p>
-                )}
-              </div>
+              {(assets as any[]).length > 0 ? (
+                <table className="table">
+                  <thead>
+                    <tr>
+                      <th>Item</th>
+                      <th>Manufacturer</th>
+                      <th style={{ textAlign: "right" }}>Cost</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {(assets as any[]).map((asset) => (
+                      <tr key={asset.id}>
+                        <td>{asset.name}</td>
+                        <td>{asset.manufacturer || "—"}</td>
+                        <td style={{ textAlign: "right" }}>
+                          {asset.cost ? formatCurrency(asset.cost) : "—"}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              ) : (
+                <p className="card-meta">No assets in this system</p>
+              )}
             </div>
           ))}
         </div>
@@ -370,12 +363,9 @@ export function ReportBuilder() {
           {Object.entries(reportData.assetsByType)
             .filter(([, assets]) => (assets as any[]).length > 0)
             .map(([category, assets]) => (
-              <div
-                key={category}
-                className="rounded-lg border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-slate-900"
-              >
-                <div className="flex justify-between items-center mb-4">
-                  <h3 className="font-semibold dark:text-white">
+              <div key={category} className="card">
+                <div className="flex justify-between items-center" style={{ marginBottom: 16 }}>
+                  <h3>
                     {category} ({(assets as any[]).length})
                   </h3>
                   <button
@@ -385,25 +375,31 @@ export function ReportBuilder() {
                         category.replace(/\s+/g, "-")
                       )
                     }
-                    className="text-sm flex items-center gap-1 text-blue-600 hover:text-blue-700 dark:text-blue-400"
+                    className="btn btn-icon"
+                    aria-label={`Export ${category}`}
                   >
                     <Download className="h-4 w-4" />
                     Export
                   </button>
                 </div>
-                <div className="space-y-2 text-sm">
-                  {(assets as any[]).map((asset) => (
-                    <div
-                      key={asset.id}
-                      className="flex justify-between text-gray-600 dark:text-gray-400"
-                    >
-                      <span>{asset.name}</span>
-                      <span className="font-medium dark:text-white">
-                        {asset.cost ? formatCurrency(asset.cost) : "—"}
-                      </span>
-                    </div>
-                  ))}
-                </div>
+                <table className="table">
+                  <thead>
+                    <tr>
+                      <th>Item</th>
+                      <th style={{ textAlign: "right" }}>Cost</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {(assets as any[]).map((asset) => (
+                      <tr key={asset.id}>
+                        <td>{asset.name}</td>
+                        <td style={{ textAlign: "right" }}>
+                          {asset.cost ? formatCurrency(asset.cost) : "—"}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
             ))}
         </div>
@@ -412,47 +408,49 @@ export function ReportBuilder() {
       {/* By Space Report */}
       {selectedReport === "spaces" && (
         <div className="space-y-4">
-          <div className="flex justify-end gap-2 mb-4">
+          <div className="flex justify-end gap-2">
             <button
               onClick={() =>
                 downloadJSON(reportData.spaces, "assets-by-space")
               }
-              className="text-sm flex items-center gap-1 text-blue-600 hover:text-blue-700 dark:text-blue-400 px-3 py-2 rounded border border-blue-300 dark:border-blue-700"
+              className="btn"
             >
               <Download className="h-4 w-4" />
               Export JSON
             </button>
           </div>
           {Object.entries(reportData.spaces).map(([space, data]) => (
-            <div
-              key={space}
-              className="rounded-lg border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-slate-900"
-            >
-              <h3 className="font-semibold mb-4 dark:text-white">
+            <div key={space} className="card">
+              <h3 style={{ marginBottom: 16 }}>
                 {space}
                 {data.squareFootage > 0 && (
-                  <span className="text-sm font-normal text-gray-600 dark:text-gray-400 ml-2">
+                  <span className="card-meta" style={{ fontWeight: 400, marginLeft: 8 }}>
                     ({data.squareFootage.toLocaleString()} sq ft)
                   </span>
                 )}
               </h3>
-              <div className="space-y-2 text-sm">
-                {data.assets.length > 0 ? (
-                  data.assets.map((asset: any) => (
-                    <div
-                      key={asset.id}
-                      className="flex justify-between text-gray-600 dark:text-gray-400"
-                    >
-                      <span>{asset.name}</span>
-                      <span className="font-medium dark:text-white">
-                        {asset.cost ? formatCurrency(asset.cost) : "—"}
-                      </span>
-                    </div>
-                  ))
-                ) : (
-                  <p className="text-gray-500">No assets in this space</p>
-                )}
-              </div>
+              {data.assets.length > 0 ? (
+                <table className="table">
+                  <thead>
+                    <tr>
+                      <th>Item</th>
+                      <th style={{ textAlign: "right" }}>Cost</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {data.assets.map((asset: any) => (
+                      <tr key={asset.id}>
+                        <td>{asset.name}</td>
+                        <td style={{ textAlign: "right" }}>
+                          {asset.cost ? formatCurrency(asset.cost) : "—"}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              ) : (
+                <p className="card-meta">No assets in this space</p>
+              )}
             </div>
           ))}
         </div>
@@ -461,12 +459,12 @@ export function ReportBuilder() {
       {/* Punch List Report */}
       {selectedReport === "punchlist" && (
         <div className="space-y-4">
-          <div className="flex justify-end gap-2 mb-4">
+          <div className="flex justify-end gap-2">
             <button
               onClick={() =>
                 downloadJSON(reportData.punchListBySpace, "punch-list")
               }
-              className="text-sm flex items-center gap-1 text-blue-600 hover:text-blue-700 dark:text-blue-400 px-3 py-2 rounded border border-blue-300 dark:border-blue-700"
+              className="btn"
             >
               <Download className="h-4 w-4" />
               Export JSON
@@ -480,60 +478,57 @@ export function ReportBuilder() {
                 );
                 if (incompleteTasks.length === 0) return null;
                 return (
-                  <div
-                    key={space}
-                    className="rounded-lg border border-orange-200 bg-orange-50 p-6 dark:border-orange-900 dark:bg-orange-900/20"
-                  >
-                    <h3 className="font-semibold mb-4 text-orange-900 dark:text-orange-200">
-                      {space} ({incompleteTasks.length} items)
+                  <div key={space} className="card">
+                    <h3 style={{ marginBottom: 16 }}>
+                      {space}{" "}
+                      <span className="tag tag-accent" style={{ marginLeft: 6 }}>
+                        {incompleteTasks.length} items
+                      </span>
                     </h3>
-                    <div className="space-y-2 text-sm">
-                      {incompleteTasks.map((task: any) => (
-                        <div
-                          key={task.id}
-                          className="flex items-start justify-between p-3 bg-white dark:bg-slate-800 rounded border border-orange-100 dark:border-orange-900"
-                        >
-                          <div className="flex items-start gap-3 flex-1">
-                            {task.status === "pending" && (
-                              <AlertCircle className="h-4 w-4 mt-0.5 text-orange-600 dark:text-orange-400 flex-shrink-0" />
-                            )}
-                            {task.status === "in_progress" && (
-                              <Clock className="h-4 w-4 mt-0.5 text-blue-600 dark:text-blue-400 flex-shrink-0" />
-                            )}
-                            <div className="flex-1">
-                              <p className="font-medium text-gray-900 dark:text-white">
-                                {task.title}
-                              </p>
-                              {task.dueDate && (
-                                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                                  Due:{" "}
-                                  {new Date(task.dueDate).toLocaleDateString()}
-                                </p>
-                              )}
-                            </div>
-                          </div>
-                          <span
-                            className={`text-xs px-2 py-1 rounded font-medium whitespace-nowrap ml-2 ${
-                              task.status === "pending"
-                                ? "bg-orange-200 text-orange-800 dark:bg-orange-900 dark:text-orange-200"
-                                : "bg-blue-200 text-blue-800 dark:bg-blue-900 dark:text-blue-200"
-                            }`}
-                          >
-                            {task.status === "pending" ? "Pending" : "In Progress"}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
+                    <table className="table">
+                      <thead>
+                        <tr>
+                          <th>Task</th>
+                          <th>Due</th>
+                          <th>Status</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {incompleteTasks.map((task: any) => (
+                          <tr key={task.id}>
+                            <td>
+                              <div className="flex items-start gap-2">
+                                {task.status === "pending" && (
+                                  <AlertCircle className="h-4 w-4 mt-0.5" style={{ flexShrink: 0, color: "var(--color-accent-700)" }} />
+                                )}
+                                {task.status === "in_progress" && (
+                                  <Clock className="h-4 w-4 mt-0.5" style={{ flexShrink: 0, color: "var(--color-accent-700)" }} />
+                                )}
+                                <span>{task.title}</span>
+                              </div>
+                            </td>
+                            <td>
+                              {task.dueDate
+                                ? new Date(task.dueDate).toLocaleDateString()
+                                : "—"}
+                            </td>
+                            <td>
+                              <span className={STATUS_CLASS[task.status] || "tag tag-outline"}>
+                                {STATUS_LABEL[task.status] || task.status}
+                              </span>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
                   </div>
                 );
               }
             )
           ) : (
-            <div className="rounded-lg border border-green-200 bg-green-50 p-8 text-center dark:border-green-900 dark:bg-green-900/20">
-              <CheckCircle2 className="h-8 w-8 mx-auto text-green-600 dark:text-green-400 mb-2" />
-              <p className="text-green-800 dark:text-green-200 font-medium">
-                All tasks complete! ✓
-              </p>
+            <div className="card" style={{ textAlign: "center", padding: 32 }}>
+              <CheckCircle2 className="h-8 w-8" style={{ margin: "0 auto 8px", color: "var(--color-accent-700)" }} />
+              <p style={{ fontWeight: 600 }}>All tasks complete!</p>
             </div>
           )}
         </div>
@@ -549,61 +544,50 @@ export function ReportBuilder() {
                   onClick={() =>
                     downloadJSON(reportData.taskTimeline, "task-timeline")
                   }
-                  className="text-sm flex items-center gap-1 text-blue-600 hover:text-blue-700 dark:text-blue-400 px-3 py-2 rounded border border-blue-300 dark:border-blue-700"
+                  className="btn"
                 >
                   <Download className="h-4 w-4" />
                   Export JSON
                 </button>
               </div>
-              <div className="rounded-lg border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-slate-900">
-                <h3 className="font-semibold mb-4 dark:text-white">
+              <div className="card">
+                <h3 style={{ marginBottom: 16 }}>
                   Task Timeline ({reportData.taskTimeline.length})
                 </h3>
-              <div className="space-y-3">
-                {reportData.taskTimeline.map((task: any, idx: number) => (
-                  <div
-                    key={task.id}
-                    className="flex items-center gap-4 pb-3 border-b border-gray-100 dark:border-slate-700 last:border-b-0"
-                  >
-                    <div className="flex-shrink-0 w-24">
-                      <p className="text-sm font-medium text-blue-600 dark:text-blue-400">
-                        {new Date(task.dueDate).toLocaleDateString(undefined, {
-                          month: "short",
-                          day: "numeric",
-                        })}
-                      </p>
-                    </div>
-                    <div className="flex-1">
-                      <p className="text-sm font-medium text-gray-900 dark:text-white">
-                        {task.title}
-                      </p>
-                      {task.space && (
-                        <p className="text-xs text-gray-500 dark:text-gray-400">
-                          {task.space.name}
-                        </p>
-                      )}
-                    </div>
-                    <div className="flex-shrink-0">
-                      {task.status === "completed" && (
-                        <CheckCircle2 className="h-5 w-5 text-green-600 dark:text-green-400" />
-                      )}
-                      {task.status === "in_progress" && (
-                        <Clock className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-                      )}
-                      {task.status === "pending" && (
-                        <AlertCircle className="h-5 w-5 text-orange-600 dark:text-orange-400" />
-                      )}
-                    </div>
-                  </div>
-                ))}
+                <table className="table">
+                  <thead>
+                    <tr>
+                      <th>Due</th>
+                      <th>Task</th>
+                      <th>Space</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {reportData.taskTimeline.map((task: any) => (
+                      <tr key={task.id}>
+                        <td>
+                          {new Date(task.dueDate).toLocaleDateString(undefined, {
+                            month: "short",
+                            day: "numeric",
+                          })}
+                        </td>
+                        <td>{task.title}</td>
+                        <td>{task.space?.name || "—"}</td>
+                        <td>
+                          <span className={STATUS_CLASS[task.status] || "tag tag-outline"}>
+                            {STATUS_LABEL[task.status] || task.status}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
-            </div>
             </>
           ) : (
-            <div className="rounded-lg border border-gray-200 bg-gray-50 p-8 text-center dark:border-gray-700 dark:bg-slate-800">
-              <p className="text-gray-600 dark:text-gray-300">
-                No scheduled tasks yet
-              </p>
+            <div className="card" style={{ textAlign: "center", padding: 32 }}>
+              <p className="card-meta">No scheduled tasks yet</p>
             </div>
           )}
         </div>
@@ -612,44 +596,32 @@ export function ReportBuilder() {
       {/* Material Takeoff Report */}
       {selectedReport === "takeoff" && (
         <div className="space-y-4">
-          <div className="flex justify-end gap-2 mb-4">
+          <div className="flex justify-end gap-2">
             <button
               onClick={() =>
                 downloadJSON(reportData.assetsByType, "material-takeoff")
               }
-              className="text-sm flex items-center gap-1 text-blue-600 hover:text-blue-700 dark:text-blue-400 px-3 py-2 rounded border border-blue-300 dark:border-blue-700"
+              className="btn"
             >
               <Download className="h-4 w-4" />
               Export JSON
             </button>
           </div>
-          <div className="rounded-lg border border-blue-200 bg-blue-50 p-6 dark:border-blue-900 dark:bg-blue-900/20">
-            <h3 className="font-semibold text-blue-900 dark:text-blue-200 mb-2">
-              Material Takeoff
-            </h3>
-            <p className="text-sm text-blue-700 dark:text-blue-300 mb-4">
-              Plan uploads coming soon! Upload your floor plans and we'll automatically extract square footage, material quantities, and generate comprehensive takeoff schedules.
+          <div className="card">
+            <h3 style={{ marginBottom: 8 }}>Material Takeoff from Floor Plans</h3>
+            <p className="card-meta" style={{ marginBottom: 16 }}>
+              Upload a plan set PDF and AI extracts countable/labeled takeoff items (door schedule, window schedule, appliances, fixtures, etc) per trade, flagging anything it can&apos;t confidently determine for you to confirm before it goes out to bid.
             </p>
-            <div className="bg-white dark:bg-slate-900 rounded p-4 space-y-2">
-              <p className="text-sm font-medium text-gray-900 dark:text-white">
-                Planned features:
-              </p>
-              <ul className="text-sm text-gray-600 dark:text-gray-400 space-y-1 ml-4 list-disc">
-                <li>AI vision analysis of floor plans</li>
-                <li>Automatic room square footage extraction</li>
-                <li>Material quantity calculations</li>
-                <li>Flooring, tile, stone, paint takeoff schedules</li>
-                <li>Export to contractor specs</li>
-              </ul>
-            </div>
+            <Link href="/app/takeoffs" className="btn btn-primary" style={{ display: "inline-flex", width: "fit-content" }}>
+              <Upload className="h-4 w-4" />
+              Upload Floor Plan
+            </Link>
           </div>
 
           {/* Show current material categories for reference */}
-          <div className="rounded-lg border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-slate-900">
-            <h3 className="font-semibold mb-4 dark:text-white">
-              Assets by Category (for manual takeoff)
-            </h3>
-            <div className="space-y-3 max-h-96 overflow-y-auto">
+          <div className="card">
+            <h3 style={{ marginBottom: 16 }}>Assets by Category (for manual takeoff)</h3>
+            <div className="space-y-4" style={{ maxHeight: 384, overflowY: "auto" }}>
               {[
                 "Flooring",
                 "Stone/Countertops",
@@ -660,20 +632,30 @@ export function ReportBuilder() {
                 const catAssets = reportData.assetsByType[category] || [];
                 if (catAssets.length === 0) return null;
                 return (
-                  <div key={category} className="border-t border-gray-100 dark:border-slate-700 pt-3 first:border-t-0 first:pt-0">
-                    <p className="text-sm font-medium text-gray-900 dark:text-white mb-2">
+                  <div
+                    key={category}
+                    style={{ borderTop: "1px solid var(--color-divider)", paddingTop: 12 }}
+                    className="first:border-t-0 first:pt-0"
+                  >
+                    <p style={{ fontWeight: 600, fontSize: 14, marginBottom: 8 }}>
                       {category} ({catAssets.length})
                     </p>
-                    <div className="space-y-1 text-xs text-gray-600 dark:text-gray-400 ml-3">
-                      {catAssets.map((asset: any) => (
-                        <div key={asset.id} className="flex justify-between">
-                          <span>{asset.name}</span>
-                          <span className="text-gray-500">
-                            {asset.space?.name || "—"}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
+                    <table className="table">
+                      <thead>
+                        <tr>
+                          <th>Item</th>
+                          <th>Space</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {catAssets.map((asset: any) => (
+                          <tr key={asset.id}>
+                            <td>{asset.name}</td>
+                            <td>{asset.space?.name || "—"}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
                   </div>
                 );
               })}

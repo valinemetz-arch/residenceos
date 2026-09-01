@@ -1,9 +1,14 @@
 export const dynamic = "force-dynamic";
+import { getOrCreateHouseProject } from "@/lib/houseProject";
+import { PortalHeader } from "@/app/components/portal/PortalHeader";
 import { TaskListWithForms } from "../../components/TaskListWithForms";
 
-export default function TasksPage() {
+export default async function TasksPage() {
+  const house = await getOrCreateHouseProject();
+
   return (
-    <div className="space-y-6">
+    <div>
+      <PortalHeader projectName={house.name} pageTitle="Tasks" phase={house.phase} />
       <TaskListWithForms />
     </div>
   );

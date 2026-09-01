@@ -9,6 +9,7 @@ export async function GET() {
       include: {
         space: { select: { id: true, name: true } },
         system: { select: { id: true, name: true } },
+        trade: { select: { id: true, name: true } },
         _count: {
           select: { photos: true, documents: true },
         },
@@ -35,6 +36,7 @@ export async function POST(req: Request) {
         model: body.model || null,
         sku: body.sku || null,
         finish: body.finish || null,
+        size: body.size || null,
         cost: body.cost || null,
         vendor: body.vendor || null,
         purchaseDate: body.purchaseDate ? new Date(body.purchaseDate) : null,
@@ -42,6 +44,7 @@ export async function POST(req: Request) {
         warrantyMonths: body.warrantyMonths || null,
         spaceId: body.spaceId,
         systemId: body.systemId || null,
+        tradeId: body.tradeId || null,
         status: body.status || "pending",
         notes: body.notes || null,
         qrCode: null,
@@ -49,6 +52,7 @@ export async function POST(req: Request) {
       include: {
         space: true,
         system: true,
+        trade: true,
       },
     });
 

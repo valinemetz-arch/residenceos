@@ -109,26 +109,45 @@ export function SystemForm({ system, onClose, onSuccess }: SystemFormProps) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-      <div className="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-lg bg-white p-6 dark:bg-slate-900">
+    <div
+      className="classical"
+      style={{
+        position: "fixed",
+        inset: 0,
+        background: "rgba(32,31,29,0.32)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        zIndex: 50,
+      }}
+      onClick={onClose}
+    >
+      <div
+        style={{
+          background: "var(--color-bg)",
+          width: 480,
+          maxWidth: "calc(100vw - 32px)",
+          maxHeight: "90vh",
+          overflow: "auto",
+          borderRadius: "var(--radius-md)",
+          boxShadow: "var(--shadow-lg)",
+          padding: "28px 30px",
+        }}
+        onClick={(e) => e.stopPropagation()}
+      >
         {/* Header */}
-        <div className="mb-6 flex items-center justify-between">
-          <h2 className="text-xl font-bold dark:text-white">
-            {isEditing ? "Edit System" : "Add System"}
-          </h2>
-          <button
-            onClick={onClose}
-            className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
-          >
-            <X className="h-5 w-5" />
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 18 }}>
+          <h2 style={{ fontSize: 22 }}>{isEditing ? "Edit System" : "Add System"}</h2>
+          <button className="btn btn-icon" onClick={onClose} aria-label="Close">
+            <X size={16} strokeWidth={1.8} />
           </button>
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 16 }}>
           {/* Name */}
           <div>
-            <label className="block text-sm font-medium dark:text-gray-200">
+            <label style={{ display: "block", fontSize: 13, fontWeight: 600, marginBottom: 6 }}>
               System Name *
             </label>
             <input
@@ -137,23 +156,23 @@ export function SystemForm({ system, onClose, onSuccess }: SystemFormProps) {
               value={formData.name}
               onChange={handleChange}
               placeholder="e.g., HVAC, Electrical, Plumbing"
-              className="mt-1 w-full rounded border border-gray-300 px-3 py-2 dark:border-gray-600 dark:bg-slate-800 dark:text-white"
+              style={{ width: "100%" }}
             />
             {errors.name && (
-              <p className="mt-1 text-sm text-red-500">{errors.name}</p>
+              <p style={{ marginTop: 4, fontSize: 13, color: "var(--color-accent-700)" }}>{errors.name}</p>
             )}
           </div>
 
           {/* System Type */}
           <div>
-            <label className="block text-sm font-medium dark:text-gray-200">
+            <label style={{ display: "block", fontSize: 13, fontWeight: 600, marginBottom: 6 }}>
               System Type
             </label>
             <select
               name="systemType"
               value={formData.systemType || ""}
               onChange={handleChange}
-              className="mt-1 w-full rounded border border-gray-300 px-3 py-2 dark:border-gray-600 dark:bg-slate-800 dark:text-white"
+              style={{ width: "100%" }}
             >
               <option value="">Select a type</option>
               {SYSTEM_TYPES.map((type) => (
@@ -166,7 +185,7 @@ export function SystemForm({ system, onClose, onSuccess }: SystemFormProps) {
 
           {/* Description */}
           <div>
-            <label className="block text-sm font-medium dark:text-gray-200">
+            <label style={{ display: "block", fontSize: 13, fontWeight: 600, marginBottom: 6 }}>
               Description
             </label>
             <textarea
@@ -175,33 +194,23 @@ export function SystemForm({ system, onClose, onSuccess }: SystemFormProps) {
               onChange={handleChange}
               placeholder="Add notes about this system, specifications, or maintenance requirements"
               rows={3}
-              className="mt-1 w-full rounded border border-gray-300 px-3 py-2 dark:border-gray-600 dark:bg-slate-800 dark:text-white"
+              style={{ width: "100%", resize: "vertical" }}
             />
           </div>
 
           {/* Actions */}
-          <div className="mt-6 flex gap-2">
-            <button
-              type="button"
-              onClick={onClose}
-              className="flex-1 rounded border border-gray-300 px-4 py-2 font-medium dark:border-gray-600 dark:text-gray-200"
-            >
+          <div style={{ display: "flex", gap: 10, marginTop: 8 }}>
+            <button type="button" className="btn" style={{ flex: 1 }} onClick={onClose}>
               Cancel
             </button>
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="flex flex-1 items-center justify-center gap-2 rounded bg-blue-500 px-4 py-2 font-medium text-white hover:bg-blue-600 disabled:opacity-50"
-            >
+            <button type="submit" className="btn btn-primary" style={{ flex: 1 }} disabled={isSubmitting}>
               {isSubmitting ? (
                 <>
-                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <Loader2 size={14} className="animate-spin" />
                   {isEditing ? "Updating..." : "Creating..."}
                 </>
               ) : (
-                <>
-                  {isEditing ? "Update System" : "Create System"}
-                </>
+                <>{isEditing ? "Update System" : "Create System"}</>
               )}
             </button>
           </div>

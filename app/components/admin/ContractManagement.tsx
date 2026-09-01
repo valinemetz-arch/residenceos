@@ -11,6 +11,8 @@ interface Bid {
   amount: number;
   status: string;
   submittedAt: string;
+  includesInstallation: boolean | null;
+  installEstimate: string | null;
   project: {
     id: string;
     name: string;
@@ -135,9 +137,9 @@ export default function ContractManagement() {
     <div className="space-y-8">
       {/* Contracts to Send */}
       {bidsWithoutContracts.length > 0 && (
-        <div className="bg-white dark:bg-slate-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
+        <div className="bg-white dark:bg-[#2D2D2D] rounded-lg border border-[#D4D9CE] dark:border-[#1F1F1F] p-6">
           <div className="flex items-center gap-2 mb-4">
-            <AlertCircle className="h-5 w-5 text-orange-500" />
+            <AlertCircle className="h-5 w-5 text-brand-warning" />
             <h2 className="text-xl font-bold dark:text-white">
               Contracts to Send ({bidsWithoutContracts.length})
             </h2>
@@ -147,23 +149,31 @@ export default function ContractManagement() {
             {bidsWithoutContracts.map((bid) => (
               <div
                 key={bid.id}
-                className="flex justify-between items-center p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-800 transition"
+                className="flex justify-between items-center p-4 border border-[#D4D9CE] dark:border-[#1F1F1F] rounded-lg hover:bg-brand-cream dark:hover:bg-brand-charcoal transition"
               >
                 <div className="flex-1">
                   <h3 className="font-semibold dark:text-white">
                     {bid.contractor.companyName}
                   </h3>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                  <p className="text-sm text-[#5A5A5A] dark:text-[#A8A8A8]">
                     {bid.project.name} - ${bid.amount.toLocaleString()}
                   </p>
-                  <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">
+                  <p className="text-xs text-[#5A5A5A] dark:text-[#A8A8A8] mt-1">
                     {bid.contractor.email}
+                  </p>
+                  <p className="text-xs text-[#5A5A5A] dark:text-[#A8A8A8] mt-1">
+                    {bid.includesInstallation === false
+                      ? "Excludes installation"
+                      : bid.includesInstallation === true
+                      ? "Includes installation"
+                      : "Installation not specified"}
+                    {bid.installEstimate ? ` · Est. install time: ${bid.installEstimate}` : ""}
                   </p>
                 </div>
 
                 <button
                   onClick={() => handleSendContractClick(bid)}
-                  className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium"
+                  className="flex items-center gap-2 px-4 py-2 bg-brand-primary hover:bg-brand-primary-dark text-white rounded-lg transition font-medium"
                   disabled={sendingContractId === bid.id}
                 >
                   {sendingContractId === bid.id ? (
@@ -181,7 +191,7 @@ export default function ContractManagement() {
 
       {/* Sent Contracts */}
       {bidsWithContracts.length > 0 && (
-        <div className="bg-white dark:bg-slate-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
+        <div className="bg-white dark:bg-[#2D2D2D] rounded-lg border border-[#D4D9CE] dark:border-[#1F1F1F] p-6">
           <h2 className="text-xl font-bold dark:text-white mb-4">
             Contracts Sent ({bidsWithContracts.length})
           </h2>
@@ -189,20 +199,23 @@ export default function ContractManagement() {
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-gray-200 dark:border-gray-700">
-                  <th className="px-4 py-3 text-left font-semibold dark:text-gray-300">
+                <tr className="border-b border-[#D4D9CE] dark:border-[#1F1F1F]">
+                  <th className="px-4 py-3 text-left font-semibold dark:text-[#A8A8A8]">
                     Contractor
                   </th>
-                  <th className="px-4 py-3 text-left font-semibold dark:text-gray-300">
+                  <th className="px-4 py-3 text-left font-semibold dark:text-[#A8A8A8]">
                     Project
                   </th>
-                  <th className="px-4 py-3 text-right font-semibold dark:text-gray-300">
+                  <th className="px-4 py-3 text-right font-semibold dark:text-[#A8A8A8]">
                     Amount
                   </th>
-                  <th className="px-4 py-3 text-center font-semibold dark:text-gray-300">
+                  <th className="px-4 py-3 text-left font-semibold dark:text-[#A8A8A8]">
+                    Installation
+                  </th>
+                  <th className="px-4 py-3 text-center font-semibold dark:text-[#A8A8A8]">
                     Contract Status
                   </th>
-                  <th className="px-4 py-3 text-left font-semibold dark:text-gray-300">
+                  <th className="px-4 py-3 text-left font-semibold dark:text-[#A8A8A8]">
                     Sent Date
                   </th>
                 </tr>
@@ -211,24 +224,32 @@ export default function ContractManagement() {
                 {bidsWithContracts.map((bid) => (
                   <tr
                     key={bid.id}
-                    className="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-slate-800"
+                    className="border-b border-[#D4D9CE] dark:border-[#1F1F1F] hover:bg-brand-cream dark:hover:bg-brand-charcoal"
                   >
-                    <td className="px-4 py-3 dark:text-gray-300">
+                    <td className="px-4 py-3 dark:text-[#A8A8A8]">
                       {bid.contractor.companyName}
                     </td>
-                    <td className="px-4 py-3 dark:text-gray-300">
+                    <td className="px-4 py-3 dark:text-[#A8A8A8]">
                       {bid.project.name}
                     </td>
                     <td className="px-4 py-3 text-right font-semibold dark:text-white">
                       ${bid.amount.toLocaleString()}
+                    </td>
+                    <td className="px-4 py-3 text-sm dark:text-[#A8A8A8]">
+                      {bid.includesInstallation === false
+                        ? "Excluded"
+                        : bid.includesInstallation === true
+                        ? "Included"
+                        : "Not specified"}
+                      {bid.installEstimate ? ` (${bid.installEstimate})` : ""}
                     </td>
                     <td className="px-4 py-3 text-center">
                       <span
                         className={`px-3 py-1 rounded-full text-xs font-medium inline-flex items-center gap-1 ${
                           bid.contract?.status === "signed" ||
                           bid.contract?.status === "completed"
-                            ? "bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300"
-                            : "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-300"
+                            ? "bg-brand-success/10 text-brand-success dark:bg-brand-success/25 dark:text-brand-success"
+                            : "bg-brand-warning/10 text-brand-warning dark:bg-brand-warning/25 dark:text-brand-warning"
                         }`}
                       >
                         {bid.contract?.status === "signed" ||
@@ -238,7 +259,7 @@ export default function ContractManagement() {
                         {bid.contract?.status || "pending"}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">
+                    <td className="px-4 py-3 text-sm text-[#5A5A5A] dark:text-[#A8A8A8]">
                       {bid.contract?.sentAt
                         ? new Date(bid.contract.sentAt).toLocaleDateString()
                         : "-"}
@@ -252,7 +273,7 @@ export default function ContractManagement() {
       )}
 
       {approvedBids.length === 0 && (
-        <div className="text-center py-12 text-gray-600 dark:text-gray-400">
+        <div className="text-center py-12 text-[#5A5A5A] dark:text-[#A8A8A8]">
           <Send className="h-12 w-12 mx-auto mb-4 opacity-30" />
           <p>No approved bids. Approve bids to send contracts.</p>
         </div>
@@ -261,32 +282,32 @@ export default function ContractManagement() {
       {/* Send Contract Modal */}
       {modalData && (
         <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
-          <div className="bg-white dark:bg-slate-900 rounded-lg shadow-xl max-w-md w-full mx-4 p-6">
+          <div className="bg-white dark:bg-[#2D2D2D] rounded-lg shadow-xl max-w-md w-full mx-4 p-6">
             <h2 className="text-2xl font-bold dark:text-white mb-4">
               Send Contract
             </h2>
 
             <div className="space-y-4 mb-6">
               <div>
-                <label className="block text-sm font-medium dark:text-gray-300 mb-2">
+                <label className="block text-sm font-medium dark:text-[#A8A8A8] mb-2">
                   Contractor
                 </label>
-                <p className="text-gray-600 dark:text-gray-400">
+                <p className="text-[#5A5A5A] dark:text-[#A8A8A8]">
                   {modalData.bid.contractor.companyName}
                 </p>
               </div>
 
               <div>
-                <label className="block text-sm font-medium dark:text-gray-300 mb-2">
+                <label className="block text-sm font-medium dark:text-[#A8A8A8] mb-2">
                   Project
                 </label>
-                <p className="text-gray-600 dark:text-gray-400">
+                <p className="text-[#5A5A5A] dark:text-[#A8A8A8]">
                   {modalData.projectDetails.projectName}
                 </p>
               </div>
 
               <div>
-                <label className="block text-sm font-medium dark:text-gray-300 mb-2">
+                <label className="block text-sm font-medium dark:text-[#A8A8A8] mb-2">
                   Trade/Service
                 </label>
                 <input
@@ -301,15 +322,15 @@ export default function ContractManagement() {
                       },
                     })
                   }
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-slate-800 dark:text-white"
+                  className="w-full px-3 py-2 border border-[#D4D9CE] dark:border-[#1F1F1F] rounded-lg dark:bg-brand-charcoal dark:text-white"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium dark:text-gray-300 mb-2">
+                <label className="block text-sm font-medium dark:text-[#A8A8A8] mb-2">
                   Contract Amount
                 </label>
-                <p className="text-gray-600 dark:text-gray-400">
+                <p className="text-[#5A5A5A] dark:text-[#A8A8A8]">
                   ${modalData.projectDetails.contractAmount.toLocaleString()}
                 </p>
               </div>
@@ -318,14 +339,14 @@ export default function ContractManagement() {
             <div className="flex gap-3">
               <button
                 onClick={() => setModalData(null)}
-                className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-800 transition font-medium dark:text-white"
+                className="flex-1 px-4 py-2 border border-[#D4D9CE] dark:border-[#1F1F1F] rounded-lg hover:bg-brand-cream dark:hover:bg-brand-charcoal transition font-medium dark:text-white"
               >
                 Cancel
               </button>
               <button
                 onClick={handleSendContract}
                 disabled={sendingContractId !== null}
-                className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 transition font-medium flex items-center justify-center gap-2"
+                className="flex-1 px-4 py-2 bg-brand-primary hover:bg-brand-primary-dark text-white rounded-lg disabled:bg-brand-gray transition font-medium flex items-center justify-center gap-2"
               >
                 {sendingContractId ? (
                   <Loader2 className="h-4 w-4 animate-spin" />

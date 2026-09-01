@@ -55,13 +55,13 @@ export default function UserListTable({
   function getRoleBadgeColor(role: string): string {
     switch (role) {
       case "owner":
-        return "bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-300";
+        return "bg-brand-secondary/15 dark:bg-brand-secondary/25 text-brand-accent dark:text-brand-secondary";
       case "admin":
-        return "bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300";
+        return "bg-brand-info/10 dark:bg-brand-info/25 text-brand-info dark:text-brand-info";
       case "viewer":
-        return "bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-300";
+        return "bg-brand-gray/15 dark:bg-brand-gray/25 text-brand-dark-gray dark:text-white";
       default:
-        return "bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-300";
+        return "bg-brand-gray/15 dark:bg-brand-gray/25 text-brand-dark-gray dark:text-white";
     }
   }
 
@@ -73,32 +73,32 @@ export default function UserListTable({
   return (
     <div className="space-y-4">
       {error && (
-        <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4 flex gap-3">
-          <AlertCircle className="h-5 w-5 text-red-600 dark:text-red-400 flex-shrink-0" />
-          <p className="text-sm text-red-800 dark:text-red-300">{error}</p>
+        <div className="bg-brand-error/10 dark:bg-brand-error/25 border border-brand-error/30 dark:border-brand-error/40 rounded-lg p-4 flex gap-3">
+          <AlertCircle className="h-5 w-5 text-brand-error flex-shrink-0" />
+          <p className="text-sm text-brand-error">{error}</p>
         </div>
       )}
 
       <div className="overflow-x-auto">
         <table className="w-full">
           <thead>
-            <tr className="border-b border-gray-200 dark:border-gray-700">
-              <th className="px-4 py-3 text-left text-sm font-semibold text-gray-900 dark:text-white">
+            <tr className="border-b border-[#D4D9CE] dark:border-[#1F1F1F]">
+              <th className="px-4 py-3 text-left text-sm font-semibold text-brand-charcoal dark:text-white">
                 Email
               </th>
-              <th className="px-4 py-3 text-left text-sm font-semibold text-gray-900 dark:text-white">
+              <th className="px-4 py-3 text-left text-sm font-semibold text-brand-charcoal dark:text-white">
                 Name
               </th>
-              <th className="px-4 py-3 text-left text-sm font-semibold text-gray-900 dark:text-white">
+              <th className="px-4 py-3 text-left text-sm font-semibold text-brand-charcoal dark:text-white">
                 Role
               </th>
-              <th className="px-4 py-3 text-left text-sm font-semibold text-gray-900 dark:text-white">
+              <th className="px-4 py-3 text-left text-sm font-semibold text-brand-charcoal dark:text-white">
                 Company
               </th>
-              <th className="px-4 py-3 text-left text-sm font-semibold text-gray-900 dark:text-white">
+              <th className="px-4 py-3 text-left text-sm font-semibold text-brand-charcoal dark:text-white">
                 Last Login
               </th>
-              <th className="px-4 py-3 text-right text-sm font-semibold text-gray-900 dark:text-white">
+              <th className="px-4 py-3 text-right text-sm font-semibold text-brand-charcoal dark:text-white">
                 Actions
               </th>
             </tr>
@@ -107,19 +107,19 @@ export default function UserListTable({
             {users.map((user) => (
               <tr
                 key={user.id}
-                className={`border-b border-gray-100 dark:border-gray-800 ${
+                className={`border-b border-[#D4D9CE] dark:border-[#1F1F1F] ${
                   !user.isActive ? "opacity-60" : ""
                 }`}
               >
-                <td className="px-4 py-3 text-sm text-gray-900 dark:text-white">
+                <td className="px-4 py-3 text-sm text-brand-charcoal dark:text-white">
                   {user.email}
                   {!user.isActive && (
-                    <span className="ml-2 text-xs text-gray-500 dark:text-gray-400">
+                    <span className="ml-2 text-xs text-[#5A5A5A] dark:text-[#A8A8A8]">
                       (inactive)
                     </span>
                   )}
                 </td>
-                <td className="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">
+                <td className="px-4 py-3 text-sm text-[#5A5A5A] dark:text-[#A8A8A8]">
                   {user.name || "-"}
                 </td>
                 <td className="px-4 py-3 text-sm">
@@ -131,10 +131,10 @@ export default function UserListTable({
                     {user.role.charAt(0).toUpperCase() + user.role.slice(1)}
                   </span>
                 </td>
-                <td className="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">
+                <td className="px-4 py-3 text-sm text-[#5A5A5A] dark:text-[#A8A8A8]">
                   {user.company || "-"}
                 </td>
-                <td className="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">
+                <td className="px-4 py-3 text-sm text-[#5A5A5A] dark:text-[#A8A8A8]">
                   {formatDate(user.lastLoginAt)}
                 </td>
                 <td className="px-4 py-3 text-right space-x-2">
@@ -142,7 +142,7 @@ export default function UserListTable({
                     <>
                       <button
                         onClick={() => setEditingUser(user)}
-                        className="inline-flex items-center gap-1 px-3 py-1 text-sm font-medium text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded"
+                        className="inline-flex items-center gap-1 px-3 py-1 text-sm font-medium text-brand-primary dark:text-brand-secondary hover:bg-brand-primary/5 dark:hover:bg-brand-secondary/10 rounded"
                         disabled={loading}
                       >
                         <Edit2 className="h-4 w-4" />
@@ -151,7 +151,7 @@ export default function UserListTable({
                       <button
                         onClick={() => handleDelete(user.id)}
                         disabled={loading || deletingId === user.id}
-                        className="inline-flex items-center gap-1 px-3 py-1 text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded disabled:opacity-50"
+                        className="inline-flex items-center gap-1 px-3 py-1 text-sm font-medium text-brand-error hover:bg-brand-error/5 dark:hover:bg-brand-error/10 rounded disabled:opacity-50"
                       >
                         <Trash2 className="h-4 w-4" />
                         Remove
@@ -166,7 +166,7 @@ export default function UserListTable({
       </div>
 
       {users.length === 0 && (
-        <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+        <div className="text-center py-8 text-[#5A5A5A] dark:text-[#A8A8A8]">
           No users found
         </div>
       )}

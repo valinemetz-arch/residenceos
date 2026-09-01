@@ -66,16 +66,37 @@ export function SpaceDetail({
   }, [spaceId]);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-      <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-lg bg-white p-6 dark:bg-slate-900">
+    <div
+      className="classical"
+      style={{
+        position: "fixed",
+        inset: 0,
+        background: "rgba(32,31,29,0.32)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        zIndex: 50,
+      }}
+      onClick={onClose}
+    >
+      <div
+        style={{
+          background: "var(--color-bg)",
+          width: 640,
+          maxWidth: "calc(100vw - 32px)",
+          maxHeight: "85vh",
+          overflow: "auto",
+          borderRadius: "var(--radius-md)",
+          boxShadow: "var(--shadow-lg)",
+          padding: "28px 30px",
+        }}
+        onClick={(e) => e.stopPropagation()}
+      >
         {/* Header */}
-        <div className="mb-6 flex items-center justify-between">
-          <h2 className="text-2xl font-bold dark:text-white">{spaceName}</h2>
-          <button
-            onClick={onClose}
-            className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
-          >
-            <X className="h-6 w-6" />
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 18 }}>
+          <h2 style={{ fontSize: 22 }}>{spaceName}</h2>
+          <button className="btn btn-icon" onClick={onClose} aria-label="Close">
+            <X size={16} strokeWidth={1.8} />
           </button>
         </div>
 
@@ -84,13 +105,11 @@ export function SpaceDetail({
             <Loader2 className="h-6 w-6 animate-spin" />
           </div>
         ) : (
-          <div className="space-y-8">
+          <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
             {/* Photos Section */}
             <div>
-              <h3 className="mb-4 text-lg font-semibold dark:text-white">
-                Photos
-              </h3>
-              <div className="space-y-4">
+              <h3 style={{ marginBottom: 14 }}>Photos</h3>
+              <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
                 <PhotoUpload
                   entityType="space"
                   entityId={spaceId}
@@ -100,12 +119,12 @@ export function SpaceDetail({
               </div>
             </div>
 
+            <div className="hr" />
+
             {/* Documents Section */}
             <div>
-              <h3 className="mb-4 text-lg font-semibold dark:text-white">
-                Documents
-              </h3>
-              <div className="space-y-4">
+              <h3 style={{ marginBottom: 14 }}>Documents</h3>
+              <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
                 <DocumentUpload
                   entityType="space"
                   entityId={spaceId}

@@ -45,12 +45,12 @@ export function AssetList() {
       <h1 className="text-3xl font-bold">Assets</h1>
 
       {assets.length === 0 ? (
-        <p className="text-gray-600 dark:text-gray-400">No assets yet.</p>
+        <p className="text-[#5A5A5A] dark:text-[#A8A8A8]">No assets yet.</p>
       ) : (
-        <div className="bg-white dark:bg-slate-900 rounded-lg shadow-sm border border-gray-200 dark:border-slate-700 overflow-hidden">
+        <div className="bg-white dark:bg-[#2D2D2D] rounded-lg shadow-sm border border-[#D4D9CE] dark:border-[#1F1F1F] overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full">
-              <thead className="bg-gray-50 dark:bg-slate-800 border-b border-gray-200 dark:border-slate-700">
+              <thead className="bg-brand-cream dark:bg-brand-charcoal border-b border-[#D4D9CE] dark:border-[#1F1F1F]">
                 <tr>
                   <th className="px-6 py-3 text-left text-sm font-semibold">Name</th>
                   <th className="px-6 py-3 text-left text-sm font-semibold">Manufacturer</th>
@@ -59,11 +59,11 @@ export function AssetList() {
                   <th className="px-6 py-3 text-left text-sm font-semibold">Status</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-200 dark:divide-slate-700">
+              <tbody className="divide-y divide-[#D4D9CE] dark:divide-[#1F1F1F]">
                 {assets.map((asset) => (
-                  <tr key={asset.id} className="hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors">
+                  <tr key={asset.id} className="hover:bg-[#F5F3F0] dark:hover:bg-[#1F1F1F] transition-colors">
                     <td className="px-6 py-4 font-medium">{asset.name}</td>
-                    <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">
+                    <td className="px-6 py-4 text-sm text-[#5A5A5A] dark:text-[#A8A8A8]">
                       {asset.manufacturer || "—"}
                     </td>
                     <td className="px-6 py-4 text-sm">{asset.space.name}</td>
@@ -73,10 +73,10 @@ export function AssetList() {
                     <td className="px-6 py-4 text-sm">
                       <span className={`px-2 py-1 rounded-full text-xs font-medium ${
                         asset.status === 'installed'
-                          ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
+                          ? 'bg-brand-success/10 text-brand-success dark:bg-brand-success/25 dark:text-brand-success'
                           : asset.status === 'ordered'
-                          ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200'
-                          : 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200'
+                          ? 'bg-brand-info/10 text-brand-info dark:bg-brand-info/25 dark:text-brand-info'
+                          : 'bg-brand-gray/15 text-brand-dark-gray dark:bg-brand-gray/25 dark:text-white'
                       }`}>
                         {asset.status}
                       </span>

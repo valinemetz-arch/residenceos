@@ -91,7 +91,7 @@ export function DocumentList({ documents, onDelete, onAmountParsed }: DocumentLi
 
   if (documents.length === 0) {
     return (
-      <p className="text-sm text-gray-500 dark:text-gray-400">
+      <p className="text-sm text-[#5A5A5A] dark:text-[#A8A8A8]">
         No documents yet
       </p>
     );
@@ -102,20 +102,20 @@ export function DocumentList({ documents, onDelete, onAmountParsed }: DocumentLi
       {documents.map((doc) => (
         <div
           key={doc.id}
-          className="flex items-center gap-3 rounded-lg border border-gray-200 bg-gray-50 p-3 dark:border-gray-700 dark:bg-slate-800"
+          className="flex items-center gap-3 rounded-lg border border-[#D4D9CE] bg-brand-cream p-3 dark:border-[#1F1F1F] dark:bg-brand-charcoal"
         >
-          <FileText className="h-5 w-5 flex-shrink-0 text-gray-400" />
+          <FileText className="h-5 w-5 flex-shrink-0 text-brand-gray" />
           <div className="flex-1 min-w-0">
             <p className="text-sm font-medium truncate dark:text-white">
               {doc.name}
             </p>
-            <div className="flex gap-2 text-xs text-gray-500 dark:text-gray-400">
+            <div className="flex gap-2 text-xs text-[#5A5A5A] dark:text-[#A8A8A8]">
               <span>{doc.type}</span>
               {doc.fileSize && <span>•</span>}
               {doc.fileSize && <span>{formatFileSize(doc.fileSize)}</span>}
             </div>
             {doc.description && (
-              <p className="mt-1 text-xs text-gray-600 dark:text-gray-300 line-clamp-1">
+              <p className="mt-1 text-xs text-[#5A5A5A] dark:text-[#A8A8A8] line-clamp-1">
                 {doc.description}
               </p>
             )}
@@ -125,32 +125,32 @@ export function DocumentList({ documents, onDelete, onAmountParsed }: DocumentLi
               <button
                 onClick={() => handleParseAmount(doc)}
                 disabled={parsingId === doc.id}
-                className="rounded p-2 hover:bg-blue-100 disabled:opacity-50 dark:hover:bg-blue-900/20"
+                className="rounded p-2 hover:bg-brand-primary/5 disabled:opacity-50 dark:hover:bg-brand-secondary/10"
                 title="Extract amount from invoice"
               >
                 {parsingId === doc.id ? (
-                  <Loader2 className="h-4 w-4 animate-spin text-blue-600" />
+                  <Loader2 className="h-4 w-4 animate-spin text-brand-primary dark:text-brand-secondary" />
                 ) : (
-                  <Zap className="h-4 w-4 text-blue-600" />
+                  <Zap className="h-4 w-4 text-brand-primary dark:text-brand-secondary" />
                 )}
               </button>
             )}
             <a
               href={doc.fileUrl}
               download
-              className="rounded p-2 hover:bg-gray-200 dark:hover:bg-slate-700"
+              className="rounded p-2 hover:bg-brand-cream dark:hover:bg-brand-charcoal"
             >
-              <Download className="h-4 w-4 text-gray-600 dark:text-gray-400" />
+              <Download className="h-4 w-4 text-[#5A5A5A] dark:text-[#A8A8A8]" />
             </a>
             <button
               onClick={() => handleDelete(doc.id)}
               disabled={deletingId === doc.id}
-              className="rounded p-2 hover:bg-red-100 disabled:opacity-50 dark:hover:bg-red-900/20"
+              className="rounded p-2 hover:bg-brand-error/10 disabled:opacity-50 dark:hover:bg-brand-error/15"
             >
               {deletingId === doc.id ? (
-                <Loader2 className="h-4 w-4 animate-spin text-red-600" />
+                <Loader2 className="h-4 w-4 animate-spin text-brand-error" />
               ) : (
-                <Trash2 className="h-4 w-4 text-red-600" />
+                <Trash2 className="h-4 w-4 text-brand-error" />
               )}
             </button>
           </div>

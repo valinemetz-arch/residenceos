@@ -226,74 +226,95 @@ export function WarrantyForm({
     }
   };
 
+  const labelStyle: React.CSSProperties = {
+    display: "block",
+    fontSize: 12,
+    fontWeight: 600,
+    textTransform: "uppercase",
+    letterSpacing: "0.04em",
+    color: "var(--color-neutral-700)",
+    marginBottom: 6,
+  };
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-      <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-lg bg-white p-6 dark:bg-slate-900">
+    <div
+      className="classical"
+      style={{
+        position: "fixed",
+        inset: 0,
+        background: "rgba(32,31,29,0.32)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        zIndex: 50,
+      }}
+      onClick={onClose}
+    >
+      <div
+        style={{
+          background: "var(--color-bg)",
+          width: 640,
+          maxWidth: "calc(100vw - 32px)",
+          maxHeight: "90vh",
+          overflow: "auto",
+          borderRadius: "var(--radius-md)",
+          boxShadow: "var(--shadow-lg)",
+          padding: "28px 30px",
+        }}
+        onClick={(e) => e.stopPropagation()}
+      >
         {/* Header */}
-        <div className="mb-6 flex items-center justify-between">
-          <h2 className="text-xl font-bold dark:text-white">
-            {isEditing ? "Edit Warranty" : "Add Warranty"}
-          </h2>
-          <button
-            onClick={onClose}
-            className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
-          >
-            <X className="h-5 w-5" />
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 18 }}>
+          <h2 style={{ fontSize: 22 }}>{isEditing ? "Edit Warranty" : "Add Warranty"}</h2>
+          <button className="btn btn-icon" onClick={onClose} aria-label="Close">
+            <X size={16} strokeWidth={1.8} />
           </button>
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 16 }}>
           {/* Title */}
           <div>
-            <label className="block text-sm font-medium dark:text-gray-200">
-              Warranty Title *
-            </label>
+            <label style={labelStyle}>Warranty Title *</label>
             <input
               type="text"
               name="title"
               value={formData.title}
               onChange={handleChange}
               placeholder="e.g., Kitchen Faucet - 5 Year Warranty"
-              className="mt-1 w-full rounded border border-gray-300 px-3 py-2 dark:border-gray-600 dark:bg-slate-800 dark:text-white"
+              style={{ width: "100%" }}
             />
             {errors.title && (
-              <p className="mt-1 text-sm text-red-500">{errors.title}</p>
+              <p style={{ marginTop: 4, fontSize: 13, color: "var(--color-accent-700)" }}>{errors.title}</p>
             )}
           </div>
 
           {/* Provider */}
           <div>
-            <label className="block text-sm font-medium dark:text-gray-200">
-              Manufacturer/Provider
-            </label>
+            <label style={labelStyle}>Manufacturer/Provider</label>
             <input
               type="text"
               name="provider"
               value={formData.provider || ""}
               onChange={handleChange}
               placeholder="e.g., Kohler, Sub-Zero, etc"
-              className="mt-1 w-full rounded border border-gray-300 px-3 py-2 dark:border-gray-600 dark:bg-slate-800 dark:text-white"
+              style={{ width: "100%" }}
             />
           </div>
 
           {/* Asset/Space Selection */}
-          <div className="grid grid-cols-2 gap-4">
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
             <div>
-              <div className="flex items-center gap-2">
-                <label className="block text-sm font-medium dark:text-gray-200">
-                  Asset
-                </label>
-                {isLoadingAsset && (
-                  <Loader2 className="h-3 w-3 animate-spin text-blue-500" />
-                )}
+              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <label style={labelStyle}>Asset</label>
+                {isLoadingAsset && <Loader2 size={12} className="animate-spin" style={{ color: "var(--color-accent-700)" }} />}
               </div>
               <select
                 name="assetId"
                 value={formData.assetId || ""}
                 onChange={handleChange}
                 disabled={isLoadingAsset}
-                className="mt-1 w-full rounded border border-gray-300 px-3 py-2 dark:border-gray-600 dark:bg-slate-800 dark:text-white disabled:opacity-50"
+                style={{ width: "100%" }}
               >
                 <option value="">Select an asset (auto-populates warranty info)</option>
                 {assets.map((asset) => (
@@ -304,14 +325,12 @@ export function WarrantyForm({
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium dark:text-gray-200">
-                Space
-              </label>
+              <label style={labelStyle}>Space</label>
               <select
                 name="spaceId"
                 value={formData.spaceId || ""}
                 onChange={handleChange}
-                className="mt-1 w-full rounded border border-gray-300 px-3 py-2 dark:border-gray-600 dark:bg-slate-800 dark:text-white"
+                style={{ width: "100%" }}
               >
                 <option value="">Select a space (optional)</option>
                 {spaces.map((space) => (
@@ -324,16 +343,14 @@ export function WarrantyForm({
           </div>
 
           {/* Coverage Details */}
-          <div className="grid grid-cols-2 gap-4">
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
             <div>
-              <label className="block text-sm font-medium dark:text-gray-200">
-                Coverage Scope
-              </label>
+              <label style={labelStyle}>Coverage Scope</label>
               <select
                 name="coverageScope"
                 value={formData.coverageScope || ""}
                 onChange={handleChange}
-                className="mt-1 w-full rounded border border-gray-300 px-3 py-2 dark:border-gray-600 dark:bg-slate-800 dark:text-white"
+                style={{ width: "100%" }}
               >
                 <option value="">Select scope</option>
                 <option value="Full">Full Coverage</option>
@@ -343,145 +360,125 @@ export function WarrantyForm({
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium dark:text-gray-200">
-                Duration (months)
-              </label>
+              <label style={labelStyle}>Duration (months)</label>
               <input
                 type="number"
                 name="months"
                 value={formData.months ?? ""}
                 onChange={handleChange}
                 placeholder="12"
-                className="mt-1 w-full rounded border border-gray-300 px-3 py-2 dark:border-gray-600 dark:bg-slate-800 dark:text-white"
+                style={{ width: "100%" }}
               />
             </div>
           </div>
 
           {/* Dates */}
-          <div className="grid grid-cols-2 gap-4">
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
             <div>
-              <label className="block text-sm font-medium dark:text-gray-200">
-                Start Date *
-              </label>
+              <label style={labelStyle}>Start Date *</label>
               <input
                 type="date"
                 name="startDate"
                 value={formData.startDate}
                 onChange={handleChange}
-                className="mt-1 w-full rounded border border-gray-300 px-3 py-2 dark:border-gray-600 dark:bg-slate-800 dark:text-white"
+                style={{ width: "100%" }}
               />
             </div>
             <div>
-              <label className="block text-sm font-medium dark:text-gray-200">
-                End Date *
-              </label>
+              <label style={labelStyle}>End Date *</label>
               <input
                 type="date"
                 name="endDate"
                 value={formData.endDate}
                 onChange={handleChange}
-                className="mt-1 w-full rounded border border-gray-300 px-3 py-2 dark:border-gray-600 dark:bg-slate-800 dark:text-white"
+                style={{ width: "100%" }}
               />
             </div>
           </div>
 
           {/* Serial Number */}
           <div>
-            <label className="block text-sm font-medium dark:text-gray-200">
-              Serial Number
-            </label>
+            <label style={labelStyle}>Serial Number</label>
             <input
               type="text"
               name="serialNumber"
               value={formData.serialNumber || ""}
               onChange={handleChange}
-              className="mt-1 w-full rounded border border-gray-300 px-3 py-2 dark:border-gray-600 dark:bg-slate-800 dark:text-white"
+              style={{ width: "100%" }}
             />
           </div>
 
           {/* Contact Info */}
-          <div className="grid grid-cols-2 gap-4">
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
             <div>
-              <label className="block text-sm font-medium dark:text-gray-200">
-                Phone
-              </label>
+              <label style={labelStyle}>Phone</label>
               <input
                 type="tel"
                 name="phone"
                 value={formData.phone || ""}
                 onChange={handleChange}
-                className="mt-1 w-full rounded border border-gray-300 px-3 py-2 dark:border-gray-600 dark:bg-slate-800 dark:text-white"
+                style={{ width: "100%" }}
               />
             </div>
             <div>
-              <label className="block text-sm font-medium dark:text-gray-200">
-                Email
-              </label>
+              <label style={labelStyle}>Email</label>
               <input
                 type="email"
                 name="email"
                 value={formData.email || ""}
                 onChange={handleChange}
-                className="mt-1 w-full rounded border border-gray-300 px-3 py-2 dark:border-gray-600 dark:bg-slate-800 dark:text-white"
+                style={{ width: "100%" }}
               />
             </div>
           </div>
 
           {/* Website */}
           <div>
-            <label className="block text-sm font-medium dark:text-gray-200">
-              Website
-            </label>
+            <label style={labelStyle}>Website</label>
             <input
               type="url"
               name="website"
               value={formData.website || ""}
               onChange={handleChange}
               placeholder="https://..."
-              className="mt-1 w-full rounded border border-gray-300 px-3 py-2 dark:border-gray-600 dark:bg-slate-800 dark:text-white"
+              style={{ width: "100%" }}
             />
           </div>
 
           {/* Description */}
           <div>
-            <label className="block text-sm font-medium dark:text-gray-200">
-              Coverage Description
-            </label>
+            <label style={labelStyle}>Coverage Description</label>
             <textarea
               name="description"
               value={formData.description || ""}
               onChange={handleChange}
               placeholder="What's covered, limitations, exclusions, etc."
               rows={3}
-              className="mt-1 w-full rounded border border-gray-300 px-3 py-2 dark:border-gray-600 dark:bg-slate-800 dark:text-white"
+              style={{ width: "100%" }}
             />
           </div>
 
           {/* Claim Process */}
           <div>
-            <label className="block text-sm font-medium dark:text-gray-200">
-              How to File a Claim
-            </label>
+            <label style={labelStyle}>How to File a Claim</label>
             <textarea
               name="claimProcess"
               value={formData.claimProcess || ""}
               onChange={handleChange}
               placeholder="Step-by-step instructions for filing a warranty claim"
               rows={2}
-              className="mt-1 w-full rounded border border-gray-300 px-3 py-2 dark:border-gray-600 dark:bg-slate-800 dark:text-white"
+              style={{ width: "100%" }}
             />
           </div>
 
           {/* Status */}
           <div>
-            <label className="block text-sm font-medium dark:text-gray-200">
-              Status
-            </label>
+            <label style={labelStyle}>Status</label>
             <select
               name="status"
               value={formData.status}
               onChange={handleChange}
-              className="mt-1 w-full rounded border border-gray-300 px-3 py-2 dark:border-gray-600 dark:bg-slate-800 dark:text-white"
+              style={{ width: "100%" }}
             >
               {STATUS_OPTIONS.map((option) => (
                 <option key={option} value={option}>
@@ -492,28 +489,19 @@ export function WarrantyForm({
           </div>
 
           {/* Actions */}
-          <div className="mt-6 flex gap-2">
-            <button
-              type="button"
-              onClick={onClose}
-              className="flex-1 rounded border border-gray-300 px-4 py-2 font-medium dark:border-gray-600 dark:text-gray-200"
-            >
+          <div className="hr" style={{ margin: "4px 0 0" }} />
+          <div style={{ display: "flex", gap: 10 }}>
+            <button type="button" className="btn" style={{ flex: 1 }} onClick={onClose}>
               Cancel
             </button>
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="flex flex-1 items-center justify-center gap-2 rounded bg-blue-500 px-4 py-2 font-medium text-white hover:bg-blue-600 disabled:opacity-50"
-            >
+            <button type="submit" className="btn btn-primary" style={{ flex: 1 }} disabled={isSubmitting}>
               {isSubmitting ? (
                 <>
-                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <Loader2 size={16} className="animate-spin" />
                   {isEditing ? "Updating..." : "Creating..."}
                 </>
               ) : (
-                <>
-                  {isEditing ? "Update Warranty" : "Create Warranty"}
-                </>
+                <>{isEditing ? "Update Warranty" : "Create Warranty"}</>
               )}
             </button>
           </div>

@@ -73,70 +73,96 @@ export default function ContractSigningModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
-      <div className="bg-white dark:bg-slate-900 rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+    <div
+      className="classical"
+      style={{
+        position: "fixed",
+        inset: 0,
+        background: "rgba(32,31,29,0.32)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        zIndex: 50,
+      }}
+    >
+      <div
+        style={{
+          background: "var(--color-bg)",
+          borderRadius: "var(--radius-md)",
+          boxShadow: "var(--shadow-lg)",
+          maxWidth: 560,
+          width: "100%",
+          margin: "0 16px",
+          maxHeight: "90vh",
+          overflowY: "auto",
+        }}
+      >
         {/* Header */}
-        <div className="sticky top-0 flex justify-between items-center p-6 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-slate-900">
+        <div
+          style={{
+            position: "sticky",
+            top: 0,
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "flex-start",
+            padding: "28px 30px 20px",
+            borderBottom: "1px solid var(--color-divider)",
+            background: "var(--color-bg)",
+          }}
+        >
           <div>
-            <h2 className="text-2xl font-bold dark:text-white">
-              Sign Contract
-            </h2>
-            <p className="text-gray-600 dark:text-gray-400 mt-1">
-              {projectName}
-            </p>
+            <h2 style={{ fontSize: 22 }}>Sign Contract</h2>
+            <p className="card-meta" style={{ marginTop: 4 }}>{projectName}</p>
           </div>
           <button
             onClick={onClose}
-            className="p-2 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-lg transition"
+            className="btn btn-icon"
             aria-label="Close"
           >
-            <X className="h-6 w-6 dark:text-gray-400" />
+            <X size={16} strokeWidth={1.8} />
           </button>
         </div>
 
         {/* Content */}
-        <div className="p-6">
+        <div style={{ padding: "20px 30px 28px" }}>
           {isSigned ? (
-            <div className="text-center py-8">
-              <CheckCircle className="h-16 w-16 text-green-500 mx-auto mb-4" />
-              <h3 className="text-xl font-bold dark:text-white mb-2">
+            <div style={{ textAlign: "center", padding: "24px 0" }}>
+              <CheckCircle
+                size={48}
+                strokeWidth={1.5}
+                style={{ color: "var(--color-accent-700)", margin: "0 auto 16px" }}
+              />
+              <h3 style={{ fontSize: 18, marginBottom: 8 }}>
                 Contract Signed Successfully
               </h3>
-              <p className="text-gray-600 dark:text-gray-400 mb-6">
+              <p className="card-meta" style={{ marginBottom: 20 }}>
                 Your contract has been signed and is now part of your records.
               </p>
-              <button
-                onClick={onClose}
-                className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
-              >
+              <button onClick={onClose} className="btn btn-primary">
                 Close
               </button>
             </div>
           ) : (
             <>
               {/* Status Bar */}
-              <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 mb-6">
-                <div className="flex items-center justify-between">
+              <div className="card" style={{ marginBottom: 20 }}>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                   <div>
-                    <p className="text-sm font-medium text-blue-900 dark:text-blue-300">
-                      Contract Status
-                    </p>
-                    <p className="text-lg font-semibold text-blue-900 dark:text-blue-200 mt-1 capitalize">
+                    <div className="card-kicker">Contract Status</div>
+                    <p style={{ fontSize: 16, fontWeight: 600, marginTop: 4, textTransform: "capitalize" }}>
                       {status}
                     </p>
                   </div>
                   {isLoading && (
-                    <Loader2 className="h-5 w-5 animate-spin text-blue-600 dark:text-blue-400" />
+                    <Loader2 size={18} className="animate-spin" style={{ color: "var(--color-accent-700)" }} />
                   )}
                 </div>
               </div>
 
               {/* Instructions */}
-              <div className="bg-gray-50 dark:bg-slate-800/50 rounded-lg p-4 mb-6">
-                <h3 className="font-semibold dark:text-white mb-2">
-                  How to sign:
-                </h3>
-                <ol className="text-sm text-gray-700 dark:text-gray-300 space-y-2 list-decimal list-inside">
+              <div className="card" style={{ marginBottom: 20 }}>
+                <h3 style={{ fontSize: 15, marginBottom: 8 }}>How to sign:</h3>
+                <ol className="card-meta" style={{ paddingLeft: 18, margin: 0, lineHeight: 1.7 }}>
                   <li>Click the "Sign Now" button below</li>
                   <li>A new window will open with the DocuSign interface</li>
                   <li>Review the contract carefully</li>
@@ -146,7 +172,7 @@ export default function ContractSigningModal({
               </div>
 
               {/* iFrame or Redirect Option */}
-              <div className="flex flex-col gap-4">
+              <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
                 <button
                   onClick={() => {
                     setIsLoading(true);
@@ -154,24 +180,24 @@ export default function ContractSigningModal({
                     setIsLoading(false);
                   }}
                   disabled={isLoading || isSigned}
-                  className="flex items-center justify-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 transition font-medium"
+                  className="btn btn-primary"
                 >
                   {isLoading ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <Loader2 size={16} className="animate-spin" />
                   ) : (
-                    <ExternalLink className="h-4 w-4" />
+                    <ExternalLink size={16} strokeWidth={1.8} />
                   )}
                   Sign Now in DocuSign
                 </button>
 
-                <p className="text-sm text-gray-600 dark:text-gray-400 text-center">
+                <p className="card-meta" style={{ textAlign: "center" }}>
                   A new window will open for secure signing
                 </p>
               </div>
 
               {/* Auto-refresh Note */}
-              <div className="mt-6 p-4 bg-gray-100 dark:bg-slate-800 rounded-lg">
-                <p className="text-xs text-gray-600 dark:text-gray-400">
+              <div className="card" style={{ marginTop: 20 }}>
+                <p className="card-meta">
                   This page will automatically update when you complete signing.
                   Keep this window open during the process.
                 </p>

@@ -36,14 +36,14 @@ export default function RoleSelector({
 }: RoleSelectorProps) {
   return (
     <div className="space-y-2">
-      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+      <label className="block text-sm font-medium text-[#5A5A5A] dark:text-[#A8A8A8]">
         {label}
       </label>
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
         disabled={disabled}
-        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-slate-800 text-gray-900 dark:text-white disabled:bg-gray-100 dark:disabled:bg-slate-700 disabled:text-gray-500"
+        className="w-full px-3 py-2 border border-[#D4D9CE] dark:border-[#1F1F1F] rounded-md bg-white dark:bg-[#2D2D2D] text-brand-charcoal dark:text-white disabled:bg-brand-cream dark:disabled:bg-brand-charcoal disabled:text-[#5A5A5A]"
       >
         <option value="">Select a role</option>
         {allowedRoles.map((role) => (
@@ -53,7 +53,7 @@ export default function RoleSelector({
         ))}
       </select>
       {value && ROLE_LABELS[value] && (
-        <p className="text-sm text-gray-600 dark:text-gray-400">
+        <p className="text-sm text-[#5A5A5A] dark:text-[#A8A8A8]">
           {ROLE_LABELS[value].description}
         </p>
       )}

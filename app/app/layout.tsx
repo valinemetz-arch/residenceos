@@ -1,5 +1,4 @@
-import { Navigation } from "@/app/components/Navigation";
-import { Footer } from "@/app/components/Footer";
+import { PortalShell } from "@/app/components/portal/PortalShell";
 
 export default function AppLayout({
   children,
@@ -7,14 +6,8 @@ export default function AppLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="min-h-screen flex flex-col bg-[#FAFAF8] dark:bg-[#2D2D2D] transition-colors">
-      <Navigation />
-      <main className="flex-1 w-full">
-        <div className="max-w-7xl mx-auto py-10 px-6 sm:px-8 lg:px-12">
-          {children}
-        </div>
-      </main>
-      <Footer />
-    </div>
+    <PortalShell role="homeowner" identityName="Nemetz Family">
+      {children}
+    </PortalShell>
   );
 }

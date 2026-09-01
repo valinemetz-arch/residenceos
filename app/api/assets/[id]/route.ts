@@ -7,7 +7,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
     const { id } = await params;
     const asset = await prisma.asset.findUnique({
       where: { id },
-      include: { space: true, system: true, _count: { select: { photos: true, documents: true } } },
+      include: { space: true, system: true, trade: true, _count: { select: { photos: true, documents: true } } },
     });
 
     if (!asset) return NextResponse.json(errorResponse("Asset not found"), { status: 404 });
@@ -29,6 +29,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
     if (body.model !== undefined) data.model = body.model || null;
     if (body.sku !== undefined) data.sku = body.sku || null;
     if (body.finish !== undefined) data.finish = body.finish || null;
+    if (body.size !== undefined) data.size = body.size || null;
     if (body.cost !== undefined) data.cost = body.cost || null;
     if (body.vendor !== undefined) data.vendor = body.vendor || null;
     if (body.purchaseDate !== undefined) data.purchaseDate = body.purchaseDate ? new Date(body.purchaseDate) : null;
@@ -36,13 +37,14 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
     if (body.warrantyMonths !== undefined) data.warrantyMonths = body.warrantyMonths || null;
     if (body.spaceId !== undefined) data.spaceId = body.spaceId;
     if (body.systemId !== undefined) data.systemId = body.systemId || null;
+    if (body.tradeId !== undefined) data.tradeId = body.tradeId || null;
     if (body.status !== undefined) data.status = body.status;
     if (body.notes !== undefined) data.notes = body.notes || null;
 
     const updated = await prisma.asset.update({
       where: { id },
       data,
-      include: { space: true, system: true },
+      include: { space: true, system: true, trade: true },
     });
 
     return NextResponse.json(successResponse(updated, "Asset updated"));
