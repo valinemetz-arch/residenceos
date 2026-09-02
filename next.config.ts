@@ -12,6 +12,18 @@ const nextConfig: NextConfig = {
   // plain js-binding.js require() - bundlers can't place a native asset
   // inside an ESM chunk, so it needs the same treatment.
   serverExternalPackages: ["pdfjs-dist", "@napi-rs/canvas"],
+
+  // pdfjs-dist's "legacy" build still probes for its worker file at
+  // runtime (to fall back to an in-process "fake worker" when it can't
+  // spawn a real one), via a require() buried in its own internals that
+  // Vercel's static file tracer never sees. Without this, the file is
+  // silently dropped from the deployed function bundle and every route
+  // that parses a PDF (bulk-import, extract-schedules, extract-from-bid,
+  // parse-invoice, plan-set page extraction) crashes with "Cannot find
+  // module .../pdf.worker.mjs" the first time it runs on Vercel.
+  outputFileTracingIncludes: {
+    "/*": ["./node_modules/pdfjs-dist/legacy/build/pdf.worker.mjs"],
+  },
 };
 
 export default nextConfig;
