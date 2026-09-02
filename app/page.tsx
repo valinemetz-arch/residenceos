@@ -39,57 +39,52 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#FAFAF8] via-[#F5F3F0] to-[#E9C8B6] dark:from-[#2D2D2D] dark:via-[#1F1F1F] dark:to-[#142605] flex items-center justify-center p-4 relative overflow-hidden">
-      {/* Decorative elements */}
-      <div className="absolute top-0 right-0 w-96 h-96 bg-[#C9A876] dark:bg-[#8B6F47] rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-pulse" />
-      <div className="absolute bottom-0 left-0 w-96 h-96 bg-[#2D5016] dark:bg-[#C9A876] rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-pulse" />
+    <div className="relative min-h-screen flex items-center justify-center overflow-hidden">
+      {/* Background photograph */}
+      <Image
+        src="/images/paseo-hero.jpg"
+        alt="Paseo de Caballo at dusk"
+        fill
+        priority
+        sizes="100vw"
+        style={{ objectFit: "cover" }}
+        className="brightness-[0.55]"
+      />
+      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-black/10" />
+      <div className="absolute inset-0 bg-gradient-to-r from-black/40 via-transparent to-transparent" />
 
       {/* Content */}
-      <div className="w-full max-w-md relative z-10">
-        {/* Logo and Brand Area */}
-        <div className="text-center mb-12">
+      <div className="relative z-10 w-full max-w-md px-4">
+        {/* Login Form Card */}
+        <div className="bg-[#FAFAF8]/97 backdrop-blur-md rounded-xl shadow-2xl border border-white/20 p-10">
           {/* Logo */}
-          <div className="flex justify-center mb-6">
-            <div className="w-24 h-24 relative">
+          <div className="flex justify-center mb-2 -mt-2">
+            <div className="w-full max-w-[280px] relative aspect-[1536/1024]">
               <Image
                 src="/nemetz-residence-logo.png"
-                alt="Paseo de Caballo"
-                width={96}
-                height={96}
+                alt="Nemetz Residence - Paseo de Caballo"
+                fill
+                sizes="280px"
                 priority
+                style={{ objectFit: "contain" }}
               />
             </div>
           </div>
-
-          {/* Brand Name */}
-          <div className="mb-6">
-            <h1 className="font-[Georgia,Garamond,serif] text-5xl font-bold text-[#2D5016] dark:text-[#C9A876] tracking-tight leading-tight">
-              Paseo de Caballo
-            </h1>
-            <p className="text-xs font-medium text-[#8B6F47] dark:text-[#A88860] uppercase tracking-widest mt-4 letter-spacing-wide">
-              Property Management
-            </p>
-          </div>
-
-          {/* Tagline */}
-          <p className="text-[#5A5A5A] dark:text-[#A8A8A8] mt-3 text-sm leading-relaxed letter-spacing-wide">
-            Elegant property management for the refined estate
+          <p className="text-center text-xs font-medium text-[#8B6F47] uppercase tracking-widest mb-8 letter-spacing-wide">
+            Property Management
           </p>
-        </div>
 
-        {/* Login Form Card */}
-        <div className="bg-white dark:bg-[#1F1F1F] rounded-xl shadow-md border border-[#D4D9CE] dark:border-[#2D2D2D] backdrop-blur-sm p-10">
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Email Field */}
             <div>
-              <label className="block text-sm font-semibold text-[#2D5016] dark:text-[#C9A876] mb-3 letter-spacing-wide">
+              <label className="block text-sm font-semibold text-[#2D5016] mb-3 letter-spacing-wide">
                 Email Address
               </label>
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-5 py-3 rounded-lg border border-[#D4D9CE] dark:border-[#2D2D2D] bg-[#FAFAF8] dark:bg-[#2D2D2D] text-[#1F1F1F] dark:text-[#FAFAF8] font-regular transition-all duration-200 focus:outline-none focus:border-[#2D5016] focus:ring-2 focus:ring-[#2D5016]/30 dark:focus:border-[#C9A876] dark:focus:ring-[#C9A876]/30 placeholder-[#8A8A8A] dark:placeholder-[#5A5A5A]"
+                className="w-full px-5 py-3 rounded-lg border border-[#D4D9CE] bg-[#FAFAF8] text-[#1F1F1F] font-regular transition-all duration-200 focus:outline-none focus:border-[#2D5016] focus:ring-2 focus:ring-[#2D5016]/30 placeholder-[#8A8A8A]"
                 placeholder="you@example.com"
                 required
               />
@@ -97,14 +92,14 @@ export default function LoginPage() {
 
             {/* Password Field */}
             <div>
-              <label className="block text-sm font-semibold text-[#2D5016] dark:text-[#C9A876] mb-3 letter-spacing-wide">
+              <label className="block text-sm font-semibold text-[#2D5016] mb-3 letter-spacing-wide">
                 Password
               </label>
               <input
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-5 py-3 rounded-lg border border-[#D4D9CE] dark:border-[#2D2D2D] bg-[#FAFAF8] dark:bg-[#2D2D2D] text-[#1F1F1F] dark:text-[#FAFAF8] font-regular transition-all duration-200 focus:outline-none focus:border-[#2D5016] focus:ring-2 focus:ring-[#2D5016]/30 dark:focus:border-[#C9A876] dark:focus:ring-[#C9A876]/30 placeholder-[#8A8A8A] dark:placeholder-[#5A5A5A]"
+                className="w-full px-5 py-3 rounded-lg border border-[#D4D9CE] bg-[#FAFAF8] text-[#1F1F1F] font-regular transition-all duration-200 focus:outline-none focus:border-[#2D5016] focus:ring-2 focus:ring-[#2D5016]/30 placeholder-[#8A8A8A]"
                 placeholder="••••••••"
                 required
               />
@@ -112,7 +107,7 @@ export default function LoginPage() {
 
             {/* Error Message */}
             {error && (
-              <div className="p-4 bg-[#8B3A3A]/10 dark:bg-[#8B3A3A]/20 border border-[#8B3A3A] text-[#8B3A3A] dark:text-[#E9A4A4] rounded-lg text-sm font-medium">
+              <div className="p-4 bg-[#8B3A3A]/10 border border-[#8B3A3A] text-[#8B3A3A] rounded-lg text-sm font-medium">
                 {error}
               </div>
             )}
@@ -134,39 +129,36 @@ export default function LoginPage() {
             </button>
 
             {/* Remember Me / Forgot Password */}
-            <div className="flex items-center justify-between text-xs text-[#5A5A5A] dark:text-[#A8A8A8]">
-              <label className="flex items-center gap-2 cursor-pointer hover:text-[#2D5016] dark:hover:text-[#C9A876]">
+            <div className="flex items-center justify-between text-xs text-[#5A5A5A]">
+              <label className="flex items-center gap-2 cursor-pointer hover:text-[#2D5016]">
                 <input type="checkbox" className="rounded" />
                 Remember me
               </label>
-              <a
-                href="#"
-                className="hover:text-[#2D5016] dark:hover:text-[#C9A876] transition-colors"
-              >
+              <a href="#" className="hover:text-[#2D5016] transition-colors">
                 Forgot password?
               </a>
             </div>
           </form>
 
           {/* Demo Info */}
-          <div className="mt-8 pt-6 border-t border-[#D4D9CE] dark:border-[#2D2D2D]">
-            <p className="text-xs text-center text-[#5A5A5A] dark:text-[#A8A8A8] letter-spacing-wide">
+          <div className="mt-8 pt-6 border-t border-[#D4D9CE]">
+            <p className="text-xs text-center text-[#5A5A5A] letter-spacing-wide">
               Demo credentials pre-filled
             </p>
-            <p className="text-xs text-center text-[#8A8A8A] dark:text-[#5A5A5A] mt-2 letter-spacing-wide">
+            <p className="text-xs text-center text-[#8A8A8A] mt-2 letter-spacing-wide">
               Click &quot;Sign In&quot; to continue
             </p>
           </div>
         </div>
 
         {/* Footer Text */}
-        <p className="text-center text-xs text-[#5A5A5A] dark:text-[#A8A8A8] mt-8">
+        <p className="text-center text-xs text-white/60 mt-8 drop-shadow-sm">
           By signing in, you agree to our{" "}
-          <a href="#" className="text-[#2D5016] dark:text-[#C9A876] hover:underline">
+          <a href="#" className="text-white/90 hover:underline">
             Terms of Service
           </a>{" "}
           and{" "}
-          <a href="#" className="text-[#2D5016] dark:text-[#C9A876] hover:underline">
+          <a href="#" className="text-white/90 hover:underline">
             Privacy Policy
           </a>
         </p>
