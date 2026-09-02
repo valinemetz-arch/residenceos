@@ -3,7 +3,7 @@ export interface SpaceBase {
   id?: string;
   name: string;
   building: string;
-  floor: number | null;
+  floor: string | null;
   squareFootage: number | null;
   description: string | null;
   status: string;

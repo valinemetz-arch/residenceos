@@ -11,7 +11,7 @@ export default async function MessagesPage() {
     <div className="classical" style={{ display: "flex", flexDirection: "column", height: "calc(100vh - 76px)" }}>
       <PortalHeader projectName={house.name} pageTitle="Messages" phase={house.phase} />
       <div style={{ flex: 1, minHeight: 0 }}>
-        <ProjectMessaging projectId={house.id} viewerType="owner" readOnly />
+        <ProjectMessaging projectId={house.id} viewerType="owner" />
       </div>
     </div>
   );

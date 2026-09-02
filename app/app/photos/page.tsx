@@ -1,34 +1,77 @@
-export const dynamic = "force-dynamic";
+"use client";
 
-import { prisma } from "@/lib/prisma";
-import { getOrCreateHouseProject } from "@/lib/houseProject";
+import { useEffect, useState } from "react";
+import { Loader2 } from "lucide-react";
 import { PortalHeader } from "@/app/components/portal/PortalHeader";
 import { PhotoPlateGrid } from "@/app/components/portal/PhotoPlateGrid";
+import { PhotoUploadButton } from "@/app/components/portal/PhotoUploadButton";
 
-export default async function PhotosPage() {
-  const [house, photos] = await Promise.all([
-    getOrCreateHouseProject(),
-    prisma.photo.findMany({
-      include: { space: { select: { id: true, name: true } } },
-      orderBy: { takeDate: "desc" },
-    }),
-  ]);
+interface Photo {
+  id: string;
+  url: string;
+  caption: string | null;
+  space: { id: string; name: string } | null;
+}
 
-  const groups = new Map<string, typeof photos>();
-  for (const photo of photos) {
-    const key = photo.space?.name ?? "Unassigned";
-    if (!groups.has(key)) groups.set(key, []);
-    groups.get(key)!.push(photo);
-  }
+interface Space {
+  id: string;
+  name: string;
+}
+
+export default function PhotosPage() {
+  const [groups, setGroups] = useState<[string, Photo[]][]>([]);
+  const [spaces, setSpaces] = useState<Space[]>([]);
+  const [houseName, setHouseName] = useState("Nemetz Residence");
+  const [phase, setPhase] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  const load = async () => {
+    const [photosRes, spacesRes, houseRes] = await Promise.all([
+      fetch("/api/photos"),
+      fetch("/api/spaces"),
+      fetch("/api/projects/house"),
+    ]);
+    const [photosData, spacesData, houseData] = await Promise.all([
+      photosRes.json(),
+      spacesRes.json(),
+      houseRes.json(),
+    ]);
+
+    if (photosData.success) {
+      const byGroup = new Map<string, Photo[]>();
+      for (const photo of photosData.data as Photo[]) {
+        const key = photo.space?.name ?? "Unassigned";
+        if (!byGroup.has(key)) byGroup.set(key, []);
+        byGroup.get(key)!.push(photo);
+      }
+      setGroups(Array.from(byGroup.entries()));
+    }
+    if (spacesData.success) setSpaces(spacesData.data);
+    if (houseData.success) {
+      setHouseName(houseData.data.name);
+      setPhase(houseData.data.phase);
+    }
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    load();
+  }, []);
 
   return (
     <div className="classical">
-      <PortalHeader projectName={house.name} pageTitle="Photos" phase={house.phase} />
+      <PortalHeader projectName={houseName} pageTitle="Photos" phase={phase} />
 
-      {groups.size === 0 ? (
+      <PhotoUploadButton spaces={spaces} onUploaded={load} />
+
+      {loading ? (
+        <div className="flex items-center justify-center py-12">
+          <Loader2 className="h-6 w-6 animate-spin" />
+        </div>
+      ) : groups.length === 0 ? (
         <p className="card-meta">No photos yet.</p>
       ) : (
-        Array.from(groups.entries()).map(([spaceName, spacePhotos]) => (
+        groups.map(([spaceName, photos]) => (
           <div key={spaceName} style={{ marginBottom: 26 }}>
             <div
               style={{
@@ -42,7 +85,7 @@ export default async function PhotosPage() {
               {spaceName}
             </div>
             <PhotoPlateGrid
-              photos={spacePhotos.map((p) => ({ id: p.id, url: p.url, caption: p.caption }))}
+              photos={photos.map((p) => ({ id: p.id, url: p.url, caption: p.caption }))}
             />
           </div>
         ))

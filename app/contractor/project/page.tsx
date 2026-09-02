@@ -5,6 +5,7 @@ import { Loader2, Image as ImageIcon } from "lucide-react";
 import { PortalShell } from "@/app/components/portal/PortalShell";
 import { PortalHeader } from "@/app/components/portal/PortalHeader";
 import { DocCategoryList } from "@/app/components/portal/DocCategoryList";
+import { DocumentUploadButton } from "@/app/components/portal/DocumentUploadButton";
 import { useContractorAuth } from "@/app/components/portal/useContractorAuth";
 
 interface Doc {
@@ -15,6 +16,11 @@ interface Doc {
   fileSize: number | null;
   space: { id: string; name: string } | null;
   specification: { id: string; trade: string } | null;
+}
+
+interface Space {
+  id: string;
+  name: string;
 }
 
 interface HouseProject {
@@ -28,22 +34,28 @@ interface HouseProject {
 export default function ContractorProjectPage() {
   const { loading: authLoading, contractor, tradeNames } = useContractorAuth();
   const [documents, setDocuments] = useState<Doc[]>([]);
+  const [spaces, setSpaces] = useState<Space[]>([]);
   const [house, setHouse] = useState<HouseProject | null>(null);
   const [loadingData, setLoadingData] = useState(true);
 
+  const load = async () => {
+    const [docsRes, spacesRes, houseRes] = await Promise.all([
+      fetch("/api/documents"),
+      fetch("/api/spaces"),
+      fetch("/api/projects/house"),
+    ]);
+    const docsData = await docsRes.json();
+    const spacesData = await spacesRes.json();
+    const houseData = await houseRes.json();
+    if (docsData.success) setDocuments(docsData.data);
+    if (spacesData.success) setSpaces(spacesData.data);
+    if (houseData.success) setHouse(houseData.data);
+    setLoadingData(false);
+  };
+
   useEffect(() => {
     if (authLoading || !contractor) return;
-    (async () => {
-      const [docsRes, houseRes] = await Promise.all([
-        fetch("/api/documents"),
-        fetch("/api/projects/house"),
-      ]);
-      const docsData = await docsRes.json();
-      const houseData = await houseRes.json();
-      if (docsData.success) setDocuments(docsData.data);
-      if (houseData.success) setHouse(houseData.data);
-      setLoadingData(false);
-    })();
+    load();
   }, [authLoading, contractor]);
 
   if (authLoading || !contractor) {
@@ -67,6 +79,8 @@ export default function ContractorProjectPage() {
   return (
     <PortalShell role="contractor" identityName={contractor.companyName} trade={tradeNames.join(", ")}>
       <PortalHeader projectName={house?.name ?? "Nemetz Residence"} pageTitle="Project" phase={house?.phase} />
+
+      <DocumentUploadButton spaces={spaces} onUploaded={load} />
 
       {loadingData ? (
         <div className="flex items-center justify-center py-12">

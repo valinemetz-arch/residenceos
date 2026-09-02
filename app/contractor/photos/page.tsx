@@ -5,6 +5,7 @@ import { Loader2 } from "lucide-react";
 import { PortalShell } from "@/app/components/portal/PortalShell";
 import { PortalHeader } from "@/app/components/portal/PortalHeader";
 import { PhotoPlateGrid } from "@/app/components/portal/PhotoPlateGrid";
+import { PhotoUploadButton } from "@/app/components/portal/PhotoUploadButton";
 import { useContractorAuth } from "@/app/components/portal/useContractorAuth";
 
 interface Photo {
@@ -14,38 +15,49 @@ interface Photo {
   space: { id: string; name: string } | null;
 }
 
+interface Space {
+  id: string;
+  name: string;
+}
+
 export default function ContractorPhotosPage() {
   const { loading: authLoading, contractor, tradeNames } = useContractorAuth();
   const [groups, setGroups] = useState<[string, Photo[]][]>([]);
+  const [spaces, setSpaces] = useState<Space[]>([]);
   const [houseName, setHouseName] = useState("Nemetz Residence");
   const [phase, setPhase] = useState<string | null>(null);
   const [loadingPhotos, setLoadingPhotos] = useState(true);
 
+  const load = async () => {
+    const [photosRes, spacesRes, houseRes] = await Promise.all([
+      fetch("/api/photos"),
+      fetch("/api/spaces"),
+      fetch("/api/projects/house"),
+    ]);
+    const photosData = await photosRes.json();
+    const spacesData = await spacesRes.json();
+    const houseData = await houseRes.json();
+
+    if (photosData.success) {
+      const byGroup = new Map<string, Photo[]>();
+      for (const photo of photosData.data as Photo[]) {
+        const key = photo.space?.name ?? "Unassigned";
+        if (!byGroup.has(key)) byGroup.set(key, []);
+        byGroup.get(key)!.push(photo);
+      }
+      setGroups(Array.from(byGroup.entries()));
+    }
+    if (spacesData.success) setSpaces(spacesData.data);
+    if (houseData.success) {
+      setHouseName(houseData.data.name);
+      setPhase(houseData.data.phase);
+    }
+    setLoadingPhotos(false);
+  };
+
   useEffect(() => {
     if (authLoading || !contractor) return;
-    (async () => {
-      const [photosRes, houseRes] = await Promise.all([
-        fetch("/api/photos"),
-        fetch("/api/projects/house"),
-      ]);
-      const photosData = await photosRes.json();
-      const houseData = await houseRes.json();
-
-      if (photosData.success) {
-        const byGroup = new Map<string, Photo[]>();
-        for (const photo of photosData.data as Photo[]) {
-          const key = photo.space?.name ?? "Unassigned";
-          if (!byGroup.has(key)) byGroup.set(key, []);
-          byGroup.get(key)!.push(photo);
-        }
-        setGroups(Array.from(byGroup.entries()));
-      }
-      if (houseData.success) {
-        setHouseName(houseData.data.name);
-        setPhase(houseData.data.phase);
-      }
-      setLoadingPhotos(false);
-    })();
+    load();
   }, [authLoading, contractor]);
 
   if (authLoading || !contractor) {
@@ -59,6 +71,8 @@ export default function ContractorPhotosPage() {
   return (
     <PortalShell role="contractor" identityName={contractor.companyName} trade={tradeNames.join(", ")}>
       <PortalHeader projectName={houseName} pageTitle="Photos" phase={phase} />
+
+      <PhotoUploadButton spaces={spaces} onUploaded={load} />
 
       {loadingPhotos ? (
         <div className="flex items-center justify-center py-12">

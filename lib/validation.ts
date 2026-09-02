@@ -10,6 +10,10 @@ function isNullableNumber(value: unknown) {
   return value === null || typeof value === "number";
 }
 
+function isNullableString(value: unknown) {
+  return value === null || typeof value === "string";
+}
+
 export const validationSchemas = {
   space(data: Record<string, unknown>) {
     const errors: ValidationError = {};
@@ -22,8 +26,8 @@ export const validationSchemas = {
       errors.building = "Building is required.";
     }
 
-    if (!isNullableNumber(data.floor)) {
-      errors.floor = "Floor must be a number or blank.";
+    if (!isNullableString(data.floor)) {
+      errors.floor = "Floor must be text or blank.";
     }
 
     if (!isNullableNumber(data.squareFootage)) {

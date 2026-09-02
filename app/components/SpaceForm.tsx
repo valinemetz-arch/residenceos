@@ -192,11 +192,11 @@ export function SpaceForm({ space, onClose, onSuccess }: SpaceFormProps) {
           <div>
             <label style={labelStyle}>Floor</label>
             <input
-              type="number"
+              type="text"
               name="floor"
               value={formData.floor ?? ""}
               onChange={handleChange}
-              placeholder="e.g., 1"
+              placeholder="e.g., 1st, 2nd, Basement"
               className="w-full"
             />
           </div>
