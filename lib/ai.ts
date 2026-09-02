@@ -1,5 +1,9 @@
 import Anthropic from "@anthropic-ai/sdk";
 
+// Centralized so every AI-extraction route upgrades together instead of
+// each carrying its own copy of a model id that will eventually be retired.
+export const CLAUDE_MODEL = "claude-sonnet-5";
+
 export function getAnthropicClient(): Anthropic {
   const apiKey =
     process.env.ANTHROPIC_API_KEY ||

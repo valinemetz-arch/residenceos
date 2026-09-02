@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
+import { CLAUDE_MODEL } from "@/lib/ai";
 // pdfjs-dist's default build assumes a browser Worker and, when it can't
 // spawn one in a Node serverless function, falls back to a "fake worker"
 // that tries to require pdf.worker.mjs as a module — a file Vercel's build
@@ -94,7 +95,7 @@ export async function POST(request: NextRequest) {
 
       // Send text to Claude for parsing
       const response = await client.messages.create({
-        model: "claude-3-5-sonnet-20241022",
+        model: CLAUDE_MODEL,
         max_tokens: 1024,
         messages: [
           {
@@ -163,7 +164,7 @@ Only return the JSON object, nothing else.`,
 
       // Send to Claude for invoice parsing
       const response = await client.messages.create({
-        model: "claude-3-5-sonnet-20241022",
+        model: CLAUDE_MODEL,
         max_tokens: 1024,
         messages: [
           {

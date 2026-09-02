@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
+import { CLAUDE_MODEL } from "@/lib/ai";
 import * as fs from "fs";
 import * as path from "path";
 import * as os from "os";
@@ -169,7 +170,7 @@ export async function POST(request: NextRequest) {
 
           // Send to Claude for analysis
           const response = await client.messages.create({
-            model: "claude-3-5-sonnet-20241022",
+            model: CLAUDE_MODEL,
             max_tokens: 4000,
             messages: [
               {
@@ -237,7 +238,7 @@ If no items are found, return empty items array.`,
 
           // Send to Claude for analysis
           const response = await client.messages.create({
-            model: "claude-3-5-sonnet-20241022",
+            model: CLAUDE_MODEL,
             max_tokens: 4000,
             messages: [
               {
