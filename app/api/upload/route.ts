@@ -80,7 +80,7 @@ export async function POST(request: NextRequest) {
     ].join("/");
 
     const blob = await put(pathname, file, {
-      access: "private",
+      access: "public",
       addRandomSuffix: true,
       contentType: file.type || undefined,
     });
