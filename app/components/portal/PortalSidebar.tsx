@@ -18,6 +18,8 @@ import {
   Gavel,
   FileCheck,
   UserCog,
+  BookOpen,
+  Users,
   type LucideIcon,
 } from "lucide-react";
 
@@ -37,6 +39,8 @@ const HOMEOWNER_PRIMARY: NavItem[] = [
 ];
 
 const HOMEOWNER_SECONDARY: NavItem[] = [
+  { href: "/app/reference", label: "Field Reference", icon: BookOpen },
+  { href: "/app/trade-access", label: "Trade Access", icon: Users },
   { href: "/app/spaces", label: "Spaces", icon: LayoutGrid },
   { href: "/app/assets", label: "Assets", icon: Package },
   { href: "/app/budget", label: "Budget", icon: DollarSign },
@@ -47,6 +51,7 @@ const HOMEOWNER_SECONDARY: NavItem[] = [
 
 const CONTRACTOR_PRIMARY: NavItem[] = [
   { href: "/contractor", label: "Overview", icon: LayoutDashboard, exact: true },
+  { href: "/contractor/reference", label: "Field Reference", icon: BookOpen },
   { href: "/contractor/tasks", label: "Tasks", icon: ClipboardList },
   { href: "/contractor/photos", label: "Photos", icon: ImageIcon },
   { href: "/contractor/project", label: "Project", icon: FolderOpen },

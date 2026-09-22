@@ -52,6 +52,8 @@ model Space {
   budgetItems   BudgetItem[]
   documents     Document[]
   warranties    Warranty[] @relation("SpaceWarranties")
+  suggestedDocPages DocumentPage[] @relation("DocPageSuggestedSpace")
+  confirmedDocPages DocumentPage[] @relation("DocPageConfirmedSpace")
 
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
@@ -266,14 +268,61 @@ model Document {
   changeOrderId String?
   changeOrder   ChangeOrder? @relation(fields: [changeOrderId], references: [id], onDelete: SetNull)
 
+  // Field Reference: who can see this uploaded item - a whole Trade (group
+  // of contractors, via tradeId), one specific Contractor (via the existing
+  // contractorId above), or every contractor regardless of trade
+  // (visibleToAll). Independent of Space, which is "where", not "who".
+  tradeId       String?
+  trade         Trade?    @relation("DocumentTrade", fields: [tradeId], references: [id], onDelete: SetNull)
+  visibleToAll  Boolean   @default(false)
+
   description   String?
 
   planSets      PlanSet[] // source PDF for a floor-plan takeoff extraction
+  pages         DocumentPage[] // per-page split + AI space/trade tagging, for Field Reference
 
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
   @@map("documents")
+}
+
+// FIELD REFERENCE: one rendered page from a multi-page spec/interior-elevation
+// PDF, split page-by-page (same pipeline as PlanSet/PlanPage) and tagged with
+// the Space + Trade it depicts so a contractor or the homeowner/GC can pull up
+// "Primary Bathroom" or "Plumbing" and see exactly the right sheet. AI
+// suggests a tag per page; an admin confirms (or corrects) it before the page
+// is surfaced on the Field Reference page.
+model DocumentPage {
+  id            String    @id @default(cuid())
+
+  documentId    String
+  document      Document  @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  pageNumber    Int
+  imageUrl      String    // rendered PNG, stored in Vercel Blob
+  status        String    @default("pending") // pending, tagged, failed
+
+  // AI-suggested tags (set once the page has been auto-tagged)
+  suggestedSpaceId String?
+  suggestedSpace    Space?  @relation("DocPageSuggestedSpace", fields: [suggestedSpaceId], references: [id], onDelete: SetNull)
+  suggestedTradeId String?
+  suggestedTrade    Trade?  @relation("DocPageSuggestedTrade", fields: [suggestedTradeId], references: [id], onDelete: SetNull)
+  suggestedNote     String? // brief AI rationale, e.g. "Primary Bathroom, Elevation C - shower valve + tile"
+
+  // Confirmed tags - only pages with a confirmed trade or space show up on
+  // the Field Reference page. Starts null even if a suggestion exists.
+  confirmedSpaceId String?
+  confirmedSpace    Space?  @relation("DocPageConfirmedSpace", fields: [confirmedSpaceId], references: [id], onDelete: SetNull)
+  confirmedTradeId String?
+  confirmedTrade    Trade?  @relation("DocPageConfirmedTrade", fields: [confirmedTradeId], references: [id], onDelete: SetNull)
+  confirmed         Boolean @default(false)
+
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@unique([documentId, pageNumber])
+  @@map("document_pages")
 }
 
 // KNOWLEDGE: Photos (Project Gallery)
@@ -529,11 +578,36 @@ model Trade {
   assets        Asset[]
   tasks         Task[]
   takeoffItems  TakeoffItem[]
+  documents     Document[] @relation("DocumentTrade")
+  suggestedDocPages DocumentPage[] @relation("DocPageSuggestedTrade")
+  confirmedDocPages DocumentPage[] @relation("DocPageConfirmedTrade")
+  resourceAccess TradeResourceAccess[]
 
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
   @@map("trades")
+}
+
+// FIELD REFERENCE ACCESS: an additive "also visible to this trade" grant,
+// layered on top of a resource's primary trade tag (Asset.tradeId,
+// Document.tradeId, DocumentPage.confirmedTradeId). Lets the owner hand-pick
+// extra assets/specs a trade should see beyond what auto-tagging already
+// covers, from the Trade Access admin page, without disturbing the primary
+// tag that page/asset/document editing sets elsewhere.
+model TradeResourceAccess {
+  id            String    @id @default(cuid())
+
+  tradeId       String
+  trade         Trade     @relation(fields: [tradeId], references: [id], onDelete: Cascade)
+
+  resourceType  String    // "asset" | "document" | "documentPage"
+  resourceId    String
+
+  createdAt     DateTime  @default(now())
+
+  @@unique([tradeId, resourceType, resourceId])
+  @@map("trade_resource_access")
 }
 
 // FLOOR-PLAN TAKEOFFS: an uploaded plan set (PDF), rendered page-by-page and

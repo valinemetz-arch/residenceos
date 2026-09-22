@@ -69,6 +69,8 @@ export async function POST(req: NextRequest) {
         contractId: body.contractId || null,
         contractorId: body.contractorId || null,
         changeOrderId: body.changeOrderId || null,
+        tradeId: body.tradeId || null,
+        visibleToAll: !!body.visibleToAll,
       },
     });
 
