@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { Loader2, ArrowLeft, CheckCircle2, XCircle, ListChecks } from "lucide-react";
+import { Loader2, ArrowLeft, CheckCircle2, XCircle, ListChecks, Maximize2, X } from "lucide-react";
 import { toast } from "@/lib/toast";
 
 interface Trade {
@@ -24,6 +24,7 @@ interface TakeoffItem {
 interface PlanPage {
   id: string;
   pageNumber: number;
+  imageUrl: string;
   status: string;
 }
 
@@ -61,6 +62,7 @@ export default function TakeoffDetailPage() {
   const [extracting, setExtracting] = useState(false);
   const [progress, setProgress] = useState({ processed: 0, total: 0 });
   const [checkingReadiness, setCheckingReadiness] = useState(false);
+  const [zoomedPage, setZoomedPage] = useState<PlanPage | null>(null);
   const cancelRef = useRef(false);
 
   const runExtractionLoop = async () => {
@@ -179,6 +181,42 @@ export default function TakeoffDetailPage() {
         <h1 style={{ fontSize: 25 }}>{planSet.name}</h1>
       </div>
 
+      {planSet.pages.length > 0 && (
+        <div className="card" style={{ marginBottom: 20 }}>
+          <h3 style={{ marginBottom: 14 }}>Preview</h3>
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))",
+              gap: 14,
+            }}
+          >
+            {planSet.pages.map((page) => (
+              <button
+                key={page.id}
+                onClick={() => setZoomedPage(page)}
+                className="group relative overflow-hidden"
+                style={{
+                  border: "1px solid var(--color-divider)",
+                  borderRadius: "var(--radius-md)",
+                  padding: 0,
+                  background: "transparent",
+                  cursor: "pointer",
+                }}
+              >
+                <img src={page.imageUrl} alt={`Page ${page.pageNumber}`} className="w-full bg-white object-contain" />
+                <div className="absolute inset-0 hidden items-center justify-center bg-black/40 group-hover:flex">
+                  <Maximize2 className="h-6 w-6 text-white" />
+                </div>
+                <p className="absolute bottom-0 left-0 right-0 bg-black/60 px-2 py-1 text-left text-xs text-white">
+                  Page {page.pageNumber}
+                </p>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
       {extracting && (
         <div className="card" style={{ marginBottom: 20 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
@@ -272,6 +310,27 @@ export default function TakeoffDetailPage() {
           </div>
         </div>
       ))}
+
+      {zoomedPage && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4"
+          onClick={() => setZoomedPage(null)}
+        >
+          <button
+            onClick={() => setZoomedPage(null)}
+            className="btn btn-icon"
+            style={{ position: "absolute", top: 16, right: 16, color: "white" }}
+          >
+            <X className="h-8 w-8" />
+          </button>
+          <img
+            src={zoomedPage.imageUrl}
+            alt={`Page ${zoomedPage.pageNumber}`}
+            className="max-h-full max-w-full object-contain"
+            onClick={(e) => e.stopPropagation()}
+          />
+        </div>
+      )}
     </div>
   );
 }

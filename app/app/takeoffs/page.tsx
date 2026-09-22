@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { upload } from "@vercel/blob/client";
-import { Loader2, Upload, FileText } from "lucide-react";
+import { Loader2, Upload, FileText, X } from "lucide-react";
 import { toast } from "@/lib/toast";
 
 interface Project {
@@ -36,6 +36,16 @@ export default function TakeoffsPage() {
   const [name, setName] = useState("");
   const [projectId, setProjectId] = useState("");
   const [file, setFile] = useState<File | null>(null);
+
+  // Local preview of the chosen PDF before it's uploaded anywhere - just a
+  // blob: URL over the in-memory File, rendered with the browser's built-in
+  // PDF viewer. Nothing leaves the browser until "Upload" is clicked.
+  const previewUrl = useMemo(() => (file ? URL.createObjectURL(file) : null), [file]);
+  useEffect(() => {
+    return () => {
+      if (previewUrl) URL.revokeObjectURL(previewUrl);
+    };
+  }, [previewUrl]);
 
   useEffect(() => {
     const loadData = async () => {
@@ -129,6 +139,32 @@ export default function TakeoffsPage() {
             </label>
             <input type="file" accept="application/pdf" onChange={(e) => setFile(e.target.files?.[0] || null)} />
           </div>
+
+          {previewUrl && (
+            <div>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 6 }}>
+                <label className="card-meta">Preview</label>
+                <button
+                  type="button"
+                  onClick={() => setFile(null)}
+                  className="btn btn-icon"
+                  aria-label="Clear selected file"
+                >
+                  <X size={14} strokeWidth={1.8} />
+                </button>
+              </div>
+              <embed
+                src={previewUrl}
+                type="application/pdf"
+                style={{
+                  width: "100%",
+                  height: 480,
+                  border: "1px solid var(--color-divider)",
+                  borderRadius: "var(--radius-md)",
+                }}
+              />
+            </div>
+          )}
           <div>
             <label className="card-meta" style={{ display: "block", marginBottom: 4 }}>
               Name

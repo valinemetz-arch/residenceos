@@ -7,9 +7,9 @@ config({ path: ".env.local", override: true });
 export default defineConfig({
   schema: "prisma/schema.prisma",
   migrations: {
-    path: "prisma/migrations",
+    path: "prisma/migrations-sqlite",
   },
   datasource: {
-    url: process.env.DATABASE_URL,
+    url: "file:./prisma/dev.db",
   },
 });
