@@ -1,5 +1,5 @@
 import "dotenv/config";
-import { defineConfig } from "prisma/config";
+import { defineConfig, env } from "prisma/config";
 import { config } from "dotenv";
 
 config({ path: ".env.local", override: true });
@@ -7,9 +7,9 @@ config({ path: ".env.local", override: true });
 export default defineConfig({
   schema: "prisma/schema.prisma",
   migrations: {
-    path: "prisma/migrations-sqlite",
+    path: "prisma/migrations",
   },
   datasource: {
-    url: "file:./prisma/dev.db",
+    url: env("DATABASE_URL"),
   },
 });
