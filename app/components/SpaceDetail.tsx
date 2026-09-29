@@ -1,12 +1,46 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { X, Loader2 } from "lucide-react";
 import { PhotoUpload } from "./PhotoUpload";
 import { PhotoGallery } from "./PhotoGallery";
 import { DocumentUpload } from "./DocumentUpload";
 import { DocumentList } from "./DocumentList";
 import { toast } from "@/lib/toast";
+import { formatCurrency } from "@/lib/utils";
+
+const UNCATEGORIZED = "Uncategorized";
+const UNASSIGNED_TRADE = "Unassigned";
+
+const STATUS_LABEL: Record<string, string> = {
+  pending: "Pending",
+  ordered: "Ordered",
+  "in-stock": "In Stock",
+  active: "Active",
+  archived: "Archived",
+};
+
+const STATUS_CLASS: Record<string, string> = {
+  pending: "tag tag-outline",
+  ordered: "tag tag-accent",
+  "in-stock": "tag tag-accent",
+  active: "tag tag-neutral",
+  archived: "tag tag-outline",
+};
+
+interface Asset {
+  id: string;
+  name: string;
+  manufacturer: string | null;
+  model: string | null;
+  size: string | null;
+  finish: string | null;
+  cost: number | null;
+  status: string;
+  system: { id: string; name: string } | null;
+  trade: { id: string; name: string } | null;
+}
 
 interface Photo {
   id: string;
@@ -39,21 +73,25 @@ export function SpaceDetail({
 }: SpaceDetailProps) {
   const [photos, setPhotos] = useState<Photo[]>([]);
   const [documents, setDocuments] = useState<Document[]>([]);
+  const [assets, setAssets] = useState<Asset[]>([]);
   const [loading, setLoading] = useState(true);
 
   const loadFiles = async () => {
     try {
       setLoading(true);
-      const [photosRes, docsRes] = await Promise.all([
+      const [photosRes, docsRes, spaceRes] = await Promise.all([
         fetch(`/api/spaces/${spaceId}/photos`),
         fetch(`/api/spaces/${spaceId}/documents`),
+        fetch(`/api/spaces/${spaceId}`),
       ]);
 
       const photosData = await photosRes.json();
       const docsData = await docsRes.json();
+      const spaceData = await spaceRes.json();
 
       if (photosData.success) setPhotos(photosData.data);
       if (docsData.success) setDocuments(docsData.data);
+      if (spaceData.success) setAssets(spaceData.data.assets || []);
     } catch (error) {
       toast.error("Error", "Failed to load files");
     } finally {
@@ -106,6 +144,69 @@ export function SpaceDetail({
           </div>
         ) : (
           <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
+            {/* Assets Section */}
+            <div>
+              <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", marginBottom: 14 }}>
+                <h3 style={{ margin: 0 }}>Assets</h3>
+                <Link href="/app/assets" className="card-meta" style={{ textDecoration: "underline" }}>
+                  View all assets
+                </Link>
+              </div>
+              {assets.length === 0 ? (
+                <p className="card-meta">No assets assigned to this space yet.</p>
+              ) : (
+                <table className="table">
+                  <thead>
+                    <tr>
+                      <th>Name</th>
+                      <th>Category</th>
+                      <th>Manufacturer / Model</th>
+                      <th>Size</th>
+                      <th>Selection</th>
+                      <th>Trade</th>
+                      <th>Cost</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {assets.map((asset) => (
+                      <tr key={asset.id}>
+                        <td style={{ fontWeight: 600 }}>{asset.name}</td>
+                        <td>
+                          {asset.system?.name || (
+                            <span style={{ fontStyle: "italic", color: "var(--color-neutral-600)" }}>
+                              {UNCATEGORIZED}
+                            </span>
+                          )}
+                        </td>
+                        <td>
+                          {asset.manufacturer || "—"}
+                          {asset.model ? ` / ${asset.model}` : ""}
+                        </td>
+                        <td>{asset.size || "—"}</td>
+                        <td>{asset.finish || "—"}</td>
+                        <td>
+                          {asset.trade?.name || (
+                            <span style={{ fontStyle: "italic", color: "var(--color-neutral-600)" }}>
+                              {UNASSIGNED_TRADE}
+                            </span>
+                          )}
+                        </td>
+                        <td>{asset.cost ? formatCurrency(asset.cost) : "—"}</td>
+                        <td>
+                          <span className={STATUS_CLASS[asset.status] || "tag tag-outline"}>
+                            {STATUS_LABEL[asset.status] || asset.status}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+            </div>
+
+            <div className="hr" />
+
             {/* Photos Section */}
             <div>
               <h3 style={{ marginBottom: 14 }}>Photos</h3>

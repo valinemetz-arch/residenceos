@@ -12,7 +12,21 @@ export async function GET(
     const space = await prisma.space.findUnique({
       where: { id },
       include: {
-        assets: { select: { id: true, name: true } },
+        assets: {
+          select: {
+            id: true,
+            name: true,
+            manufacturer: true,
+            model: true,
+            size: true,
+            finish: true,
+            cost: true,
+            status: true,
+            system: { select: { id: true, name: true } },
+            trade: { select: { id: true, name: true } },
+          },
+          orderBy: { name: "asc" },
+        },
         systems: { select: { id: true, name: true } },
         _count: {
           select: { assets: true, tasks: true, photos: true },

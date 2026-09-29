@@ -163,7 +163,7 @@ export function SpaceListWithForms() {
                   style={{ flex: 1 }}
                 >
                   <FileText size={14} strokeWidth={1.8} />
-                  Files
+                  Details
                 </button>
                 <button
                   onClick={() => handleEditClick(space)}
