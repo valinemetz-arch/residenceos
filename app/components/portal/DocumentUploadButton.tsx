@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
+import { upload } from "@vercel/blob/client";
 import { Upload, Loader2, X } from "lucide-react";
 import { toast } from "@/lib/toast";
 
@@ -20,6 +21,12 @@ const CATEGORIES: { value: string; label: string; needsSpace?: boolean }[] = [
   { value: "takeoff", label: "Takeoff" },
   { value: "rendering", label: "Rendering", needsSpace: true },
 ];
+
+const MAX_FILE_SIZE = 200 * 1024 * 1024;
+
+function sanitizePathSegment(value: string) {
+  return value.replace(/[^a-zA-Z0-9._-]/g, "_");
+}
 
 // A general-purpose document uploader for the Project tab's Floorplans /
 // Specifications / Takeoffs / Renderings categories.
@@ -47,14 +54,19 @@ export function DocumentUploadButton({ spaces, onUploaded }: DocumentUploadButto
     setUploading(true);
     try {
       for (const file of Array.from(files)) {
-        const formData = new FormData();
-        formData.append("file", file);
-        formData.append("entityType", "document");
-        formData.append("entityId", type);
+        if (file.size > MAX_FILE_SIZE) {
+          throw new Error(`${file.name} exceeds the 200MB limit`);
+        }
 
-        const uploadRes = await fetch("/api/upload", { method: "POST", body: formData });
-        const uploadData = await uploadRes.json();
-        if (!uploadRes.ok) throw new Error(uploadData.error || "Upload failed");
+        const blob = await upload(
+          `uploads/document/${sanitizePathSegment(type)}/${Date.now()}-${sanitizePathSegment(file.name)}`,
+          file,
+          {
+            access: "public",
+            handleUploadUrl: "/api/upload/client",
+            multipart: true,
+          }
+        );
 
         const docRes = await fetch("/api/documents", {
           method: "POST",
@@ -62,15 +74,23 @@ export function DocumentUploadButton({ spaces, onUploaded }: DocumentUploadButto
           body: JSON.stringify({
             name: file.name,
             type,
-            fileUrl: uploadData.fileUrl,
-            fileName: uploadData.filename,
-            fileSize: uploadData.fileSize,
-            fileType: uploadData.fileType,
+            fileUrl: blob.url,
+            fileName: blob.pathname.split("/").pop() || file.name,
+            fileSize: file.size,
+            fileType: file.type,
             spaceId: spaceId || null,
           }),
         });
-        const docData = await docRes.json();
-        if (!docRes.ok) throw new Error(docData.message || "Failed to save document");
+        const responseText = await docRes.text();
+        let docData: { message?: string } = {};
+        try {
+          docData = JSON.parse(responseText);
+        } catch {
+          // Preserve infrastructure errors that return plain text or HTML.
+        }
+        if (!docRes.ok) {
+          throw new Error(docData.message || responseText || "Failed to save document");
+        }
       }
 
       toast.success("Uploaded", `${files.length} file(s) added`);
