@@ -58,9 +58,20 @@ const napiCanvasFactory = {
 // Renders every page of a PDF to a PNG image, for feeding to a vision model
 // (pdfjs's text-layer extraction alone is blind to anything conveyed
 // graphically - wall layout, door/window symbols, room shapes).
+//
+// Large-format architectural sheets (ARCH D/E, 24x36" or bigger) can be
+// 2500-3000pt on the long side. At a flat scale=2 that's a 5000-6000px
+// canvas per page - for a 40+ page full submittal set, rendering those
+// synchronously in one serverless invocation risks exceeding both the
+// function's memory limit and (with no page-count cap) its time limit.
+// maxDimension caps the rendered resolution for oversized sheets; it's
+// still comfortably enough detail for AI takeoff extraction to read
+// dimensions and notes, while keeping per-page memory/CPU bounded
+// regardless of the source sheet size.
 export async function renderPdfToPngPages(
   pdfBuffer: Buffer,
-  scale = 2
+  scale = 2,
+  maxDimension = 3000
 ): Promise<RenderedPage[]> {
   // pdfjs-dist rejects Node's Buffer even though it's a Uint8Array subclass;
   // convert explicitly to a plain Uint8Array.
@@ -73,7 +84,10 @@ export async function renderPdfToPngPages(
 
   for (let pageNumber = 1; pageNumber <= pdf.numPages; pageNumber++) {
     const page = await pdf.getPage(pageNumber);
-    const viewport = page.getViewport({ scale });
+    const baseViewport = page.getViewport({ scale: 1 });
+    const longSide = Math.max(baseViewport.width, baseViewport.height);
+    const effectiveScale = longSide * scale > maxDimension ? maxDimension / longSide : scale;
+    const viewport = page.getViewport({ scale: effectiveScale });
 
     const width = Math.ceil(viewport.width);
     const height = Math.ceil(viewport.height);

@@ -4,6 +4,12 @@ import { prisma } from "@/lib/prisma";
 import { successResponse, errorResponse } from "@/lib/api";
 import { renderPdfToPngPages } from "@/lib/pdf-render";
 
+// Rendering every page of a large plan set (full architectural submittals
+// can run 40+ pages at full-size sheet dimensions) in one request can take
+// well past Vercel's default function timeout. Raise it here; actual cap is
+// plan-dependent (Hobby: 60s max, Pro/Enterprise: higher).
+export const maxDuration = 300;
+
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);

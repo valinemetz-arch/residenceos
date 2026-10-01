@@ -4,6 +4,10 @@ import { prisma } from "@/lib/prisma";
 import { successResponse, errorResponse } from "@/lib/api";
 import { renderPdfToPngPages } from "@/lib/pdf-render";
 
+// Same reasoning as app/api/plan-sets/route.ts - rendering every page of a
+// large PDF in one request can exceed Vercel's default function timeout.
+export const maxDuration = 300;
+
 // POST /api/documents/[id]/split-pages - splits an already-uploaded spec /
 // interior-elevation PDF (a Document row that already has a fileUrl) into
 // one rendered PNG per page, staged as DocumentPage rows for AI tagging
