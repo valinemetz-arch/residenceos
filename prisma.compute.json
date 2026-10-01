@@ -1,0 +1,11 @@
+{
+  "region": "us-west-1",
+  "app": {
+    "name": "residenceos",
+    "framework": "nextjs",
+    "httpPort": 3000,
+    "build": {
+      "command": "npm run build"
+    }
+  }
+}
