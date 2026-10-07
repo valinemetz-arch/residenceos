@@ -62,7 +62,7 @@ export function DocumentUploadButton({ spaces, onUploaded }: DocumentUploadButto
           `uploads/document/${sanitizePathSegment(type)}/${Date.now()}-${sanitizePathSegment(file.name)}`,
           file,
           {
-            access: "public",
+            access: "private",
             handleUploadUrl: "/api/upload/client",
             multipart: true,
           }

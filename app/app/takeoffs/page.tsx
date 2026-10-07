@@ -84,7 +84,7 @@ export default function TakeoffsPage() {
       // often tens of MB, well past Vercel's 4.5MB Function body limit, so
       // the file never passes through our own server here.
       const blob = await upload(`plan-sets/source/${Date.now()}-${file.name}`, file, {
-        access: "public",
+        access: "private",
         handleUploadUrl: "/api/plan-sets/upload-token",
         multipart: true,
       });
@@ -100,8 +100,15 @@ export default function TakeoffsPage() {
           projectId: projectId || undefined,
         }),
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message || "Upload failed");
+      const responseText = await res.text();
+      let data: { success?: boolean; message?: string; data?: { id: string; pages?: unknown[] } } = {};
+      try {
+        data = JSON.parse(responseText);
+      } catch {
+        // Vercel infrastructure errors can be plain text rather than JSON.
+      }
+      if (!res.ok) throw new Error(data.message || responseText || "Upload failed");
+      if (!data.data) throw new Error("Upload completed without a plan set response");
 
       toast.success("Plan set uploaded", `Rendered ${data.data.pages?.length ?? 0} page(s)`);
       router.push(`/app/takeoffs/${data.data.id}`);

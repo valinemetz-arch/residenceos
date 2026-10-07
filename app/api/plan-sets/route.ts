@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { put } from "@vercel/blob";
+import { get, put } from "@vercel/blob";
 import { prisma } from "@/lib/prisma";
 import { successResponse, errorResponse } from "@/lib/api";
 import { renderPdfToPngPages } from "@/lib/pdf-render";
@@ -52,14 +52,14 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const pdfRes = await fetch(blobUrl);
-    if (!pdfRes.ok) {
+    const pdfBlob = await get(blobUrl, { access: "private" });
+    if (!pdfBlob || pdfBlob.statusCode !== 200) {
       return NextResponse.json(
         errorResponse("Failed to retrieve uploaded PDF from storage"),
         { status: 500 }
       );
     }
-    const pdfBuffer = Buffer.from(await pdfRes.arrayBuffer());
+    const pdfBuffer = Buffer.from(await new Response(pdfBlob.stream).arrayBuffer());
 
     const document = await prisma.document.create({
       data: {
@@ -101,7 +101,7 @@ export async function POST(req: NextRequest) {
       const pageBlob = await put(
         `plan-sets/${planSet.id}/page-${page.pageNumber}.png`,
         page.pngBuffer,
-        { access: "public", addRandomSuffix: true, contentType: "image/png" }
+        { access: "private", addRandomSuffix: true, contentType: "image/png" }
       );
 
       await prisma.planPage.create({

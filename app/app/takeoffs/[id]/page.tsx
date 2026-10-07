@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { Loader2, ArrowLeft, CheckCircle2, XCircle, ListChecks, Maximize2, X } from "lucide-react";
+import { getAccessibleBlobUrl } from "@/lib/blob-url";
 import { toast } from "@/lib/toast";
 
 interface Trade {
@@ -204,7 +205,7 @@ export default function TakeoffDetailPage() {
                   cursor: "pointer",
                 }}
               >
-                <img src={page.imageUrl} alt={`Page ${page.pageNumber}`} className="w-full bg-white object-contain" />
+                <img src={getAccessibleBlobUrl(page.imageUrl)} alt={`Page ${page.pageNumber}`} className="w-full bg-white object-contain" />
                 <div className="absolute inset-0 hidden items-center justify-center bg-black/40 group-hover:flex">
                   <Maximize2 className="h-6 w-6 text-white" />
                 </div>
@@ -324,7 +325,7 @@ export default function TakeoffDetailPage() {
             <X className="h-8 w-8" />
           </button>
           <img
-            src={zoomedPage.imageUrl}
+            src={getAccessibleBlobUrl(zoomedPage.imageUrl)}
             alt={`Page ${zoomedPage.pageNumber}`}
             className="max-h-full max-w-full object-contain"
             onClick={(e) => e.stopPropagation()}

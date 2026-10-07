@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { get } from "@vercel/blob";
 import { prisma } from "@/lib/prisma";
 import { successResponse, errorResponse } from "@/lib/api";
 import { getAnthropicClient, parseJsonResponse } from "@/lib/ai";
@@ -68,8 +69,11 @@ export async function POST(
     );
 
     try {
-      const imageRes = await fetch(nextPage.imageUrl);
-      const imageBuffer = Buffer.from(await imageRes.arrayBuffer());
+      const imageBlob = await get(nextPage.imageUrl, { access: "private" });
+      if (!imageBlob || imageBlob.statusCode !== 200) {
+        throw new Error("Failed to retrieve plan page from storage");
+      }
+      const imageBuffer = Buffer.from(await new Response(imageBlob.stream).arrayBuffer());
       const imageBase64 = imageBuffer.toString("base64");
 
       const client = getAnthropicClient();

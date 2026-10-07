@@ -1,4 +1,5 @@
 import { FileText, Download } from "lucide-react";
+import { getAccessibleBlobUrl } from "@/lib/blob-url";
 import { formatFileSize } from "@/lib/utils";
 
 export interface CategoryDoc {
@@ -28,7 +29,7 @@ export function DocCategoryList({ label, docs }: { label: string; docs: Category
         {docs.map((doc) => (
           <a
             key={doc.id}
-            href={doc.fileUrl}
+            href={getAccessibleBlobUrl(doc.fileUrl)}
             download
             className="card wp-row-tap"
             style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 16px", textDecoration: "none" }}

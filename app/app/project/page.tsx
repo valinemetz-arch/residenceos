@@ -5,6 +5,7 @@ import { Loader2, Image as ImageIcon } from "lucide-react";
 import { PortalHeader } from "@/app/components/portal/PortalHeader";
 import { DocCategoryList } from "@/app/components/portal/DocCategoryList";
 import { DocumentUploadButton } from "@/app/components/portal/DocumentUploadButton";
+import { getAccessibleBlobUrl } from "@/lib/blob-url";
 
 interface Doc {
   id: string;
@@ -91,7 +92,7 @@ export default function ProjectPage() {
                     <div key={r.id}>
                       <div className="plate" style={{ aspectRatio: "4/3", padding: 0, overflow: "hidden" }}>
                         {r.fileUrl ? (
-                          <img src={r.fileUrl} alt={r.name} />
+                          <img src={getAccessibleBlobUrl(r.fileUrl)} alt={r.name} />
                         ) : (
                           <div
                             style={{
